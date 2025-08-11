@@ -1,9 +1,9 @@
 {
   "name": "telegram-moderator",
   "private": true,
+  "packageManager": "pnpm@10.14.0",
   "engines": {
-    "node": ">=16.0.0",
-    "pnpm": ">=6.0.0"
+    "node": "22.x"
   },
   "scripts": {
     "dev": "turbo run dev --parallel",
@@ -21,15 +21,7 @@
     "lint": "turbo run lint"
   },
   "devDependencies": {
-    "axios": "^1.11.0",
     "concurrently": "^8.2.2",
-    "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "supertest": "^7.1.4",
     "turbo": "^2.0.0"
-  },
-  "dependencies": {
-    "sqlite": "5.1.1",
-    "sqlite3": "5.1.7"
   }
 }
