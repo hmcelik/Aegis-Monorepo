@@ -1,0 +1,14 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "dev": { "cache": false },
+    "ngrok": { "cache": false },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**", ".next/**"]
+    },
+    "start": { "cache": false },
+    "test": { "dependsOn": ["^build"], "outputs": [] },
+    "lint": { "outputs": [] }
+  }
+}

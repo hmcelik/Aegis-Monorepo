@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "apps/api/src/server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "apps/api/src/server.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "TRUST_PROXY": "true"
+  },
+  "functions": {
+    "apps/api/src/server.js": {
+      "maxDuration": 30
+    }
+  }
+}

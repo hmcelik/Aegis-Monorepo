@@ -1,0 +1,32 @@
+{
+  "name": "telegram-moderator",
+  "private": true,
+  "packageManager": "pnpm@10.14.0",
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "dev:api": "turbo run dev --filter=@telegram-moderator/api",
+    "dev:bot": "turbo run dev --filter=@telegram-moderator/bot",
+    "dev:web": "turbo run dev --filter=mini-app-dashboard",
+    "dev:ngrok": "turbo run ngrok --filter=@telegram-moderator/bot",
+    "dev:api-with-ngrok": "concurrently \"turbo run dev --filter=@telegram-moderator/api\" \"turbo run ngrok --filter=@telegram-moderator/bot\"",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "test": "turbo run test",
+    "test:api": "turbo run test --filter=@telegram-moderator/api",
+    "test:bot": "turbo run test --filter=@telegram-moderator/bot",
+    "test:web": "turbo run test --filter=mini-app-dashboard",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "axios": "^1.11.0",
+    "concurrently": "^8.2.2",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "supertest": "^7.1.4",
+    "turbo": "^2.0.0"
+  },
+  "dependencies": {
+    "sqlite": "5.1.1",
+    "sqlite3": "5.1.7"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@telegram-moderator/bot",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Telegram moderator bot worker",
+  "type": "module",
+  "engines": { "node": ">=22.0.0" },
+  "packageManager": "pnpm@10.14.0",
+  "scripts": {
+    "dev": "nodemon --watch src --ext js,json src/index.js",
+    "start": "node src/index.js",
+    "build": "echo \"(js project) no build step\"",
+    "test": "vitest",
+    "lint": "echo \"no linter configured\"",
+    "ngrok": "ngrok http --url=minnow-good-mostly.ngrok-free.app 3000"
+  },
+  "dependencies": {
+    "@telegram-moderator/shared": "workspace:*",
+    "axios": "^1.10.0",
+    "dotenv": "^17.2.0",
+    "node-telegram-bot-api": "^0.66.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "vitest": "^3.2.4"
+  }
+}
