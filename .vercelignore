@@ -1,6 +1,11 @@
 # Dependencies
 node_modules
 
+# Package managers - force npm usage on Vercel
+pnpm-workspace.yaml
+pnpm-lock.yaml
+*.pnpm-debug.log
+
 # Build artifacts
 .turbo
 dist
@@ -47,7 +52,7 @@ apps/bot
 apps/api
 apps/dev-server
 
-# Package manager
+# Package manager debug logs
 pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*

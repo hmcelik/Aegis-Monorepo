@@ -1,0 +1,12 @@
+{
+  "name": "aegis-monorepo-web",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd apps/web && npm run build",
+    "start": "cd apps/web && npm run preview"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
