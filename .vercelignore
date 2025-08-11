@@ -1,0 +1,54 @@
+# Dependencies
+node_modules
+
+# Build artifacts
+.turbo
+dist
+build
+
+# Development files
+.env
+.env.local
+.env.development
+.env.production
+
+# Test files
+__tests__
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+test-setup.js
+vitest.config.js
+
+# Documentation
+*.md
+!README.md
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Bot and API apps (not needed for web deployment)
+apps/bot
+apps/api
+apps/dev-server
+
+# Package manager
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+npm-debug.log*

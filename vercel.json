@@ -1,24 +1,13 @@
 {
   "version": 2,
-  "builds": [
+  "buildCommand": "pnpm install --frozen-lockfile && cd apps/web && pnpm build",
+  "outputDirectory": "apps/web/dist",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "framework": null,
+  "rewrites": [
     {
-      "src": "apps/api/src/server.js",
-      "use": "@vercel/node"
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
     }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "apps/api/src/server.js"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production",
-    "TRUST_PROXY": "true"
-  },
-  "functions": {
-    "apps/api/src/server.js": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }
