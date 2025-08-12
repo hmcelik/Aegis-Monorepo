@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import app from 'apps/api/src/server.js';
-import { initializeDatabase, setDb } from 'packages/shared/services/database.js';
+import { initializeDatabase, setDb } from '@telegram-moderator/shared/services/database.js';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 

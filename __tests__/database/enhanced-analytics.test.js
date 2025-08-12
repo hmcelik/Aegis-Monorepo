@@ -5,7 +5,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { open } from 'sqlite';
 import sqlite3 from 'sqlite3';
-import * as db from 'packages/shared/services/database.js';
+import * as db from '@telegram-moderator/shared/services/database.js';
 
 describe('Enhanced Database Analytics', () => {
     let testDb;

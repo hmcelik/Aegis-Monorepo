@@ -4,13 +4,13 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { handleMessage } from 'apps/bot/src/handlers/messageHandler.js';
-import * as db from 'packages/shared/services/database.js';
+import * as db from '@telegram-moderator/shared/services/database.js';
 import * as nlp from 'packages/shared/services/nlp.js';
 import * as telegram from 'packages/shared/services/telegram.js';
 import * as config from 'packages/shared/config/index.js';
 
 // Mock all external dependencies
-vi.mock('packages/shared/services/database.js');
+vi.mock('@telegram-moderator/shared/services/database.js');
 vi.mock('packages/shared/services/nlp.js');
 vi.mock('packages/shared/services/telegram.js');
 vi.mock('packages/shared/config/index.js');

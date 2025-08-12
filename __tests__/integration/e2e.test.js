@@ -24,7 +24,7 @@ vi.mock('packages/shared/config/index.js', () => ({
 }));
 
 // ✅ Mock database service (named + default)
-vi.mock('packages/shared/services/database.js', () => {
+vi.mock('@telegram-moderator/shared/services/database.js', () => {
   const mockDb = {
     upsertUser: vi.fn(),
     getStrikes: vi.fn().mockResolvedValue({ count: 0 }),
@@ -51,7 +51,7 @@ describe('End-to-End API and Bot Integration Test', () => {
 
   beforeEach(async () => {
     configService = await import('packages/shared/config/index.js');
-    db = (await import('packages/shared/services/database.js')).default;
+    db = (await import('@telegram-moderator/shared/services/database.js')).default;
 
     // ✅ Get the named export correctly
     handleMessage = (await import('apps/bot/src/handlers/messageHandler.js')).handleMessage;

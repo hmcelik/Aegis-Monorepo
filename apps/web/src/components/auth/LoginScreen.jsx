@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react';
+// src/components/auth/LoginScreen.jsx
+import React, { useState } from 'react';
 import { Bot, Shield, Users, BarChart3, Settings, Zap } from 'lucide-react';
+import { Toaster } from 'react-hot-toast';
 import TelegramLoginWidget from './TelegramLoginWidget';
+import { TELEGRAM_BOT_USERNAME } from '../../services/api';
 
 const LoginScreen = ({ onTelegramLogin, onDemoMode }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -8,42 +11,23 @@ const LoginScreen = ({ onTelegramLogin, onDemoMode }) => {
   const handleDemoClick = async () => {
     setIsLoading(true);
     try {
-      await onDemoMode();
+      await onDemoMode?.();
     } finally {
       setIsLoading(false);
     }
   };
 
   const features = [
-    {
-      icon: <Shield className="h-6 w-6" />,
-      title: "AI-Powered Moderation",
-      description: "Advanced spam and content detection using machine learning"
-    },
-    {
-      icon: <Users className="h-6 w-6" />,
-      title: "User Management",
-      description: "Comprehensive strike system with automatic penalties"
-    },
-    {
-      icon: <BarChart3 className="h-6 w-6" />,
-      title: "Detailed Analytics",
-      description: "Real-time statistics and moderation insights"
-    },
-    {
-      icon: <Settings className="h-6 w-6" />,
-      title: "Flexible Configuration",
-      description: "Customize thresholds and moderation rules per group"
-    },
-    {
-      icon: <Zap className="h-6 w-6" />,
-      title: "Real-time Actions",
-      description: "Instant moderation with audit logging"
-    }
+    { icon: <Shield className="h-6 w-6" />, title: "AI-Powered Moderation", description: "Advanced spam and content detection using machine learning" },
+    { icon: <Users className="h-6 w-6" />, title: "User Management", description: "Comprehensive strike system with automatic penalties" },
+    { icon: <BarChart3 className="h-6 w-6" />, title: "Detailed Analytics", description: "Real-time statistics and moderation insights" },
+    { icon: <Settings className="h-6 w-6" />, title: "Flexible Configuration", description: "Customize thresholds and moderation rules per group" },
+    { icon: <Zap className="h-6 w-6" />, title: "Real-time Actions", description: "Instant moderation with audit logging" }
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <Toaster />
       <div className="flex flex-col lg:flex-row min-h-screen">
         {/* Left Panel - Hero Section */}
         <div className="flex-1 flex flex-col justify-center px-8 sm:px-12 lg:px-16 py-12">
@@ -54,12 +38,8 @@ const LoginScreen = ({ onTelegramLogin, onDemoMode }) => {
                 <Bot className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  Aegis Bot
-                </h1>
-                <p className="text-lg text-blue-600 font-medium">
-                  Telegram Moderation Dashboard
-                </p>
+                <h1 className="text-3xl font-bold text-gray-900">Aegis Bot</h1>
+                <p className="text-lg text-blue-600 font-medium">Telegram Moderation Dashboard</p>
               </div>
             </div>
 
@@ -67,9 +47,9 @@ const LoginScreen = ({ onTelegramLogin, onDemoMode }) => {
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
               Intelligent Group Moderation Made Simple
             </h2>
-            
+
             <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-              Protect your Telegram communities with AI-powered moderation, 
+              Protect your Telegram communities with AI-powered moderation,
               comprehensive analytics, and flexible rule management.
             </p>
 
@@ -83,12 +63,8 @@ const LoginScreen = ({ onTelegramLogin, onDemoMode }) => {
                     </div>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">
-                      {feature.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm">
-                      {feature.description}
-                    </p>
+                    <h3 className="font-semibold text-gray-900 mb-1">{feature.title}</h3>
+                    <p className="text-gray-600 text-sm">{feature.description}</p>
                   </div>
                 </div>
               ))}
@@ -117,12 +93,8 @@ const LoginScreen = ({ onTelegramLogin, onDemoMode }) => {
           <div className="max-w-md mx-auto w-full">
             {/* Login Header */}
             <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                Welcome Back
-              </h3>
-              <p className="text-gray-600">
-                Sign in to access your moderation dashboard
-              </p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h3>
+              <p className="text-gray-600">Sign in to access your moderation dashboard</p>
             </div>
 
             {/* Login Methods */}
@@ -133,17 +105,23 @@ const LoginScreen = ({ onTelegramLogin, onDemoMode }) => {
                   <div className="bg-white bg-opacity-20 rounded-full p-3 inline-block mb-3">
                     <Bot className="h-6 w-6 text-white" />
                   </div>
-                  <h4 className="text-white font-semibold mb-2">
-                    Sign in with Telegram
-                  </h4>
+                  <h4 className="text-white font-semibold mb-2">Sign in with Telegram</h4>
                   <p className="text-blue-100 text-sm mb-4">
                     Use your Telegram account for secure authentication
                   </p>
                 </div>
-                
+
                 <div className="bg-white rounded-lg p-4">
-                  <TelegramLoginWidget onAuth={onTelegramLogin} />
+                  {/* pass the configured bot username explicitly */}
+                  <TelegramLoginWidget
+                    onAuth={onTelegramLogin}
+                    botUsername={TELEGRAM_BOT_USERNAME}
+                  />
                 </div>
+
+                <p className="mt-3 text-xs text-blue-100">
+                  Using bot: <span className="font-semibold">@{TELEGRAM_BOT_USERNAME}</span>
+                </p>
               </div>
 
               {/* Divider */}
@@ -162,14 +140,10 @@ const LoginScreen = ({ onTelegramLogin, onDemoMode }) => {
                   <div className="bg-gray-200 rounded-full p-3 inline-block mb-3">
                     <BarChart3 className="h-6 w-6 text-gray-600" />
                   </div>
-                  <h4 className="text-gray-900 font-semibold mb-2">
-                    Try Demo Mode
-                  </h4>
-                  <p className="text-gray-600 text-sm mb-4">
-                    Explore all features with sample data
-                  </p>
+                  <h4 className="text-gray-900 font-semibold mb-2">Try Demo Mode</h4>
+                  <p className="text-gray-600 text-sm mb-4">Explore all features with sample data</p>
                 </div>
-                
+
                 <button
                   onClick={handleDemoClick}
                   disabled={isLoading}
@@ -181,7 +155,7 @@ const LoginScreen = ({ onTelegramLogin, onDemoMode }) => {
                 >
                   {isLoading ? (
                     <div className="flex items-center justify-center space-x-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
                       <span>Loading Demo...</span>
                     </div>
                   ) : (
@@ -195,9 +169,7 @@ const LoginScreen = ({ onTelegramLogin, onDemoMode }) => {
                 <div className="flex items-start space-x-3">
                   <Shield className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
                   <div>
-                    <h5 className="font-medium text-green-900 mb-1">
-                      Secure & Private
-                    </h5>
+                    <h5 className="font-medium text-green-900 mb-1">Secure & Private</h5>
                     <p className="text-sm text-green-700">
                       We use Telegram's secure authentication. Your credentials are never stored on our servers.
                     </p>

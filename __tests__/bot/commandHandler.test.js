@@ -12,7 +12,7 @@ vi.mock('packages/shared/services/telegram.js', () => ({
   getChatMember: vi.fn(),
 }));
 
-vi.mock('packages/shared/services/database.js', () => ({
+vi.mock('@telegram-moderator/shared/services/database.js', () => ({
   upsertUser: vi.fn(),
   findUserByUsernameInDb: vi.fn(),
   getStrikes: vi.fn(),
@@ -33,7 +33,7 @@ vi.mock('packages/shared/config/index.js', () => ({
 
 // Import mocks for easy reference
 import * as telegram from 'packages/shared/services/telegram.js';
-import * as db from 'packages/shared/services/database.js';
+import * as db from '@telegram-moderator/shared/services/database.js';
 
 describe('Command Handler', () => {
     // Mock Data

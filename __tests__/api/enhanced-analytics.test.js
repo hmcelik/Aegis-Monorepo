@@ -6,10 +6,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import app from 'apps/api/src/server.js';
-import * as db from 'packages/shared/services/database.js';
+import * as db from '@telegram-moderator/shared/services/database.js';
 
 // Mock the database and telegram services
-vi.mock('packages/shared/services/database.js', () => ({
+vi.mock('@telegram-moderator/shared/services/database.js', () => ({
     initializeDatabase: vi.fn(),
     getDb: vi.fn(),
     isUserGroupAdmin: vi.fn(),

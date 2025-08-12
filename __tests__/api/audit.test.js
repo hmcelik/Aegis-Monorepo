@@ -2,10 +2,10 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import groupRoutes from 'apps/api/src/routes/groups.js';
-import * as db from 'packages/shared/services/database.js';
+import * as db from '@telegram-moderator/shared/services/database.js';
 
 // Mock the database
-vi.mock('packages/shared/services/database.js');
+vi.mock('@telegram-moderator/shared/services/database.js');
 
 // Mock the middleware
 vi.mock('apps/api/src/middleware/checkJwt.js', () => ({
