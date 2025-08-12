@@ -5,7 +5,7 @@
       "src": "apps/web/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "installCommand": "corepack enable && corepack prepare pnpm@10.14.0 --activate && pnpm -w install --frozen-lockfile",
+        "installCommand": "corepack enable && corepack prepare pnpm@10.14.0 --activate && pnpm -C .. install --frozen-lockfile",
         "buildCommand": "pnpm build",
         "outputDirectory": "dist"
       }
