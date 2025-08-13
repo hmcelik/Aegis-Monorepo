@@ -8,7 +8,7 @@ import { mockApiService } from './mockData';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://minnow-good-mostly.ngrok-free.app/api/v1';
 
 // Telegram bot configuration
-const TELEGRAM_BOT_USERNAME = 'ankarali_test_bot'; // Your bot username
+const TELEGRAM_BOT_USERNAME = 'AegisModerationBot'; // Your bot username
 const ENABLE_TELEGRAM_LOGIN = true; // Enabled for external website access
 
 const api = axios.create({

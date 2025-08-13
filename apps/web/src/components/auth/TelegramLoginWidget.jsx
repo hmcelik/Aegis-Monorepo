@@ -2,14 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { API_BASE_URL } from '../../services/api';
 
-const TelegramLoginWidget = ({ onAuth, botUsername = 'ankarali_test_bot' }) => {
+const TelegramLoginWidget = ({ onAuth, botUsername = 'AegisModerationBot' }) => {
   const elementRef = useRef(null);
   const [loadingState, setLoadingState] = useState('initializing');
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     if (!botUsername) {
-      console.warn('Using default bot: ankarali_test_bot');
+      console.warn('Using default bot: AegisModerationBot');
     }
 
     setLoadingState('loading');
@@ -90,7 +90,7 @@ const TelegramLoginWidget = ({ onAuth, botUsername = 'ankarali_test_bot' }) => {
     };
   }, [onAuth, botUsername]);
 
-  // Bot username is now configured as 'ankarali_test_bot' by default
+  // Bot username is now configured as 'AegisModerationBot' by default
 
   // Show loading states
   const renderLoadingState = () => {
