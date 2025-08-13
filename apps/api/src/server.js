@@ -50,6 +50,7 @@ const corsOptions = {
             'https://web.telegram.org',
             'https://t.me',
             'https://aegis-monorepo.vercel.app',
+            'https://telegram-moderator-dashboard.vercel.app/',
             process.env.ALLOWED_ORIGIN || 'http://localhost:3000',
             'http://localhost:8080', // For local development server
             'http://localhost:5173', // For Vite development server
