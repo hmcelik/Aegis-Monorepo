@@ -939,12 +939,6 @@
       "extension": ".md"
     },
     {
-      "path": "repo.tree.json",
-      "name": "repo.tree.json",
-      "type": "file",
-      "extension": ".json"
-    },
-    {
       "path": "repotree.json",
       "name": "repotree.json",
       "type": "file",
