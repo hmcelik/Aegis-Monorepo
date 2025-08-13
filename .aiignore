@@ -1,0 +1,14 @@
+# .aiignore
+.git
+node_modules
+dist
+build
+out
+coverage
+.cache
+.turbo
+.next
+.vscode
+.DS_Store
+*.log
+*.map

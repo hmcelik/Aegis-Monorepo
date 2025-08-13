@@ -1,0 +1,1123 @@
+{
+  "path": ".",
+  "name": ".",
+  "children": [
+    {
+      "path": ".aiignore",
+      "name": ".aiignore",
+      "type": "file",
+      "extension": ""
+    },
+    {
+      "path": ".env",
+      "name": ".env",
+      "type": "file",
+      "extension": ""
+    },
+    {
+      "path": ".env.development",
+      "name": ".env.development",
+      "type": "file",
+      "extension": ".development"
+    },
+    {
+      "path": ".env.example",
+      "name": ".env.example",
+      "type": "file",
+      "extension": ".example"
+    },
+    {
+      "path": ".nvmrc",
+      "name": ".nvmrc",
+      "type": "file",
+      "extension": ""
+    },
+    {
+      "path": ".vercelignore",
+      "name": ".vercelignore",
+      "type": "file",
+      "extension": ""
+    },
+    {
+      "path": "apps",
+      "name": "apps",
+      "children": [
+        {
+          "path": "apps\\api",
+          "name": "api",
+          "children": [
+            {
+              "path": "apps\\api\\API_DOCUMENTATION.md",
+              "name": "API_DOCUMENTATION.md",
+              "type": "file",
+              "extension": ".md"
+            },
+            {
+              "path": "apps\\api\\combined.log",
+              "name": "combined.log",
+              "type": "file",
+              "extension": ".log"
+            },
+            {
+              "path": "apps\\api\\error.log",
+              "name": "error.log",
+              "type": "file",
+              "extension": ".log"
+            },
+            {
+              "path": "apps\\api\\moderator.db",
+              "name": "moderator.db",
+              "type": "file",
+              "extension": ".db"
+            },
+            {
+              "path": "apps\\api\\moderator.db-shm",
+              "name": "moderator.db-shm",
+              "type": "file",
+              "extension": ".db-shm"
+            },
+            {
+              "path": "apps\\api\\moderator.db-wal",
+              "name": "moderator.db-wal",
+              "type": "file",
+              "extension": ".db-wal"
+            },
+            {
+              "path": "apps\\api\\package.json",
+              "name": "package.json",
+              "type": "file",
+              "extension": ".json"
+            },
+            {
+              "path": "apps\\api\\src",
+              "name": "src",
+              "children": [
+                {
+                  "path": "apps\\api\\src\\controllers",
+                  "name": "controllers",
+                  "children": [
+                    {
+                      "path": "apps\\api\\src\\controllers\\auditController.js",
+                      "name": "auditController.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\controllers\\authController.js",
+                      "name": "authController.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\controllers\\groupController.js",
+                      "name": "groupController.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\controllers\\logsController.js",
+                      "name": "logsController.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\controllers\\nlpController.js",
+                      "name": "nlpController.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\controllers\\strikeController.js",
+                      "name": "strikeController.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\controllers\\systemController.js",
+                      "name": "systemController.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\controllers\\unifiedGroupController.js",
+                      "name": "unifiedGroupController.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\controllers\\webAppController.js",
+                      "name": "webAppController.js",
+                      "type": "file",
+                      "extension": ".js"
+                    }
+                  ],
+                  "type": "directory"
+                },
+                {
+                  "path": "apps\\api\\src\\middleware",
+                  "name": "middleware",
+                  "children": [
+                    {
+                      "path": "apps\\api\\src\\middleware\\checkGroupAdmin.js",
+                      "name": "checkGroupAdmin.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\middleware\\checkJwt.js",
+                      "name": "checkJwt.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\middleware\\unifiedAuth.js",
+                      "name": "unifiedAuth.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\middleware\\verifyTelegramAuth.js",
+                      "name": "verifyTelegramAuth.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\middleware\\verifyTelegramWebApp.js",
+                      "name": "verifyTelegramWebApp.js",
+                      "type": "file",
+                      "extension": ".js"
+                    }
+                  ],
+                  "type": "directory"
+                },
+                {
+                  "path": "apps\\api\\src\\routes",
+                  "name": "routes",
+                  "children": [
+                    {
+                      "path": "apps\\api\\src\\routes\\auth.js",
+                      "name": "auth.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\routes\\groups.js",
+                      "name": "groups.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\routes\\logs.js",
+                      "name": "logs.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\routes\\nlp.js",
+                      "name": "nlp.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\routes\\strikes.js",
+                      "name": "strikes.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\routes\\system.js",
+                      "name": "system.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\routes\\unifiedGroups.js",
+                      "name": "unifiedGroups.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\routes\\webapp.js",
+                      "name": "webapp.js",
+                      "type": "file",
+                      "extension": ".js"
+                    }
+                  ],
+                  "type": "directory"
+                },
+                {
+                  "path": "apps\\api\\src\\server.js",
+                  "name": "server.js",
+                  "type": "file",
+                  "extension": ".js"
+                },
+                {
+                  "path": "apps\\api\\src\\services",
+                  "name": "services",
+                  "children": [
+                    {
+                      "path": "apps\\api\\src\\services\\tokenService.js",
+                      "name": "tokenService.js",
+                      "type": "file",
+                      "extension": ".js"
+                    }
+                  ],
+                  "type": "directory"
+                },
+                {
+                  "path": "apps\\api\\src\\utils",
+                  "name": "utils",
+                  "children": [
+                    {
+                      "path": "apps\\api\\src\\utils\\apiError.js",
+                      "name": "apiError.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\utils\\errorHelpers.js",
+                      "name": "errorHelpers.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\utils\\errorResponder.js",
+                      "name": "errorResponder.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\api\\src\\utils\\errorTypes.js",
+                      "name": "errorTypes.js",
+                      "type": "file",
+                      "extension": ".js"
+                    }
+                  ],
+                  "type": "directory"
+                }
+              ],
+              "type": "directory"
+            },
+            {
+              "path": "apps\\api\\test-setup.js",
+              "name": "test-setup.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "apps\\api\\vitest.config.js",
+              "name": "vitest.config.js",
+              "type": "file",
+              "extension": ".js"
+            }
+          ],
+          "type": "directory"
+        },
+        {
+          "path": "apps\\bot",
+          "name": "bot",
+          "children": [
+            {
+              "path": "apps\\bot\\BOT_COMMANDS.md",
+              "name": "BOT_COMMANDS.md",
+              "type": "file",
+              "extension": ".md"
+            },
+            {
+              "path": "apps\\bot\\combined.log",
+              "name": "combined.log",
+              "type": "file",
+              "extension": ".log"
+            },
+            {
+              "path": "apps\\bot\\error.log",
+              "name": "error.log",
+              "type": "file",
+              "extension": ".log"
+            },
+            {
+              "path": "apps\\bot\\moderator.db",
+              "name": "moderator.db",
+              "type": "file",
+              "extension": ".db"
+            },
+            {
+              "path": "apps\\bot\\moderator.db-shm",
+              "name": "moderator.db-shm",
+              "type": "file",
+              "extension": ".db-shm"
+            },
+            {
+              "path": "apps\\bot\\moderator.db-wal",
+              "name": "moderator.db-wal",
+              "type": "file",
+              "extension": ".db-wal"
+            },
+            {
+              "path": "apps\\bot\\package.json",
+              "name": "package.json",
+              "type": "file",
+              "extension": ".json"
+            },
+            {
+              "path": "apps\\bot\\src",
+              "name": "src",
+              "children": [
+                {
+                  "path": "apps\\bot\\src\\handlers",
+                  "name": "handlers",
+                  "children": [
+                    {
+                      "path": "apps\\bot\\src\\handlers\\callbackHandler.js",
+                      "name": "callbackHandler.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\bot\\src\\handlers\\commandHandler.js",
+                      "name": "commandHandler.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\bot\\src\\handlers\\messageHandler.js",
+                      "name": "messageHandler.js",
+                      "type": "file",
+                      "extension": ".js"
+                    }
+                  ],
+                  "type": "directory"
+                },
+                {
+                  "path": "apps\\bot\\src\\index.js",
+                  "name": "index.js",
+                  "type": "file",
+                  "extension": ".js"
+                },
+                {
+                  "path": "apps\\bot\\src\\keyboards",
+                  "name": "keyboards",
+                  "children": [
+                    {
+                      "path": "apps\\bot\\src\\keyboards\\aiSensitivityMenu.js",
+                      "name": "aiSensitivityMenu.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\bot\\src\\keyboards\\keywordMenu.js",
+                      "name": "keywordMenu.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\bot\\src\\keyboards\\mainMenu.js",
+                      "name": "mainMenu.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\bot\\src\\keyboards\\miscMenu.js",
+                      "name": "miscMenu.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\bot\\src\\keyboards\\moderatorMenu.js",
+                      "name": "moderatorMenu.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\bot\\src\\keyboards\\penaltyLevelsMenu.js",
+                      "name": "penaltyLevelsMenu.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\bot\\src\\keyboards\\profanityMenu.js",
+                      "name": "profanityMenu.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\bot\\src\\keyboards\\whitelistMenu.js",
+                      "name": "whitelistMenu.js",
+                      "type": "file",
+                      "extension": ".js"
+                    }
+                  ],
+                  "type": "directory"
+                }
+              ],
+              "type": "directory"
+            },
+            {
+              "path": "apps\\bot\\test-setup.js",
+              "name": "test-setup.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "apps\\bot\\vitest.config.js",
+              "name": "vitest.config.js",
+              "type": "file",
+              "extension": ".js"
+            }
+          ],
+          "type": "directory"
+        },
+        {
+          "path": "apps\\web",
+          "name": "web",
+          "children": [
+            {
+              "path": "apps\\web\\.env",
+              "name": ".env",
+              "type": "file",
+              "extension": ""
+            },
+            {
+              "path": "apps\\web\\.env.example",
+              "name": ".env.example",
+              "type": "file",
+              "extension": ".example"
+            },
+            {
+              "path": "apps\\web\\.env.production",
+              "name": ".env.production",
+              "type": "file",
+              "extension": ".production"
+            },
+            {
+              "path": "apps\\web\\eslint.config.js",
+              "name": "eslint.config.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "apps\\web\\index.html",
+              "name": "index.html",
+              "type": "file",
+              "extension": ".html"
+            },
+            {
+              "path": "apps\\web\\package.json",
+              "name": "package.json",
+              "type": "file",
+              "extension": ".json"
+            },
+            {
+              "path": "apps\\web\\src",
+              "name": "src",
+              "children": [
+                {
+                  "path": "apps\\web\\src\\App.css",
+                  "name": "App.css",
+                  "type": "file",
+                  "extension": ".css"
+                },
+                {
+                  "path": "apps\\web\\src\\App.jsx",
+                  "name": "App.jsx",
+                  "type": "file",
+                  "extension": ".jsx"
+                },
+                {
+                  "path": "apps\\web\\src\\components",
+                  "name": "components",
+                  "children": [
+                    {
+                      "path": "apps\\web\\src\\components\\AuditLog.css",
+                      "name": "AuditLog.css",
+                      "type": "file",
+                      "extension": ".css"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\AuditLog.jsx",
+                      "name": "AuditLog.jsx",
+                      "type": "file",
+                      "extension": ".jsx"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\auth",
+                      "name": "auth",
+                      "children": [
+                        {
+                          "path": "apps\\web\\src\\components\\auth\\LoginScreen.jsx",
+                          "name": "LoginScreen.jsx",
+                          "type": "file",
+                          "extension": ".jsx"
+                        },
+                        {
+                          "path": "apps\\web\\src\\components\\auth\\TelegramLoginWidget.jsx",
+                          "name": "TelegramLoginWidget.jsx",
+                          "type": "file",
+                          "extension": ".jsx"
+                        }
+                      ],
+                      "type": "directory"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\common",
+                      "name": "common",
+                      "children": [
+                        {
+                          "path": "apps\\web\\src\\components\\common\\DebugPanel.jsx",
+                          "name": "DebugPanel.jsx",
+                          "type": "file",
+                          "extension": ".jsx"
+                        },
+                        {
+                          "path": "apps\\web\\src\\components\\common\\ErrorBoundary.jsx",
+                          "name": "ErrorBoundary.jsx",
+                          "type": "file",
+                          "extension": ".jsx"
+                        },
+                        {
+                          "path": "apps\\web\\src\\components\\common\\ErrorScreen.jsx",
+                          "name": "ErrorScreen.jsx",
+                          "type": "file",
+                          "extension": ".jsx"
+                        },
+                        {
+                          "path": "apps\\web\\src\\components\\common\\LoadingScreen.jsx",
+                          "name": "LoadingScreen.jsx",
+                          "type": "file",
+                          "extension": ".jsx"
+                        }
+                      ],
+                      "type": "directory"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\Dashboard.jsx",
+                      "name": "Dashboard.jsx",
+                      "type": "file",
+                      "extension": ".jsx"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\Dashboard_new.jsx",
+                      "name": "Dashboard_new.jsx",
+                      "type": "file",
+                      "extension": ".jsx"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\DebugConsole.jsx",
+                      "name": "DebugConsole.jsx",
+                      "type": "file",
+                      "extension": ".jsx"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\GroupManagementDashboard.css",
+                      "name": "GroupManagementDashboard.css",
+                      "type": "file",
+                      "extension": ".css"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\GroupManagementDashboard.jsx",
+                      "name": "GroupManagementDashboard.jsx",
+                      "type": "file",
+                      "extension": ".jsx"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\GroupSelector.jsx",
+                      "name": "GroupSelector.jsx",
+                      "type": "file",
+                      "extension": ".jsx"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\GroupSettings.jsx",
+                      "name": "GroupSettings.jsx",
+                      "type": "file",
+                      "extension": ".jsx"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\GroupSettingsNew.jsx",
+                      "name": "GroupSettingsNew.jsx",
+                      "type": "file",
+                      "extension": ".jsx"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\GroupStats.jsx",
+                      "name": "GroupStats.jsx",
+                      "type": "file",
+                      "extension": ".jsx"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\index.js",
+                      "name": "index.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\ModerationSettings.jsx",
+                      "name": "ModerationSettings.jsx",
+                      "type": "file",
+                      "extension": ".jsx"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\ModerationStats.jsx",
+                      "name": "ModerationStats.jsx",
+                      "type": "file",
+                      "extension": ".jsx"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\StatsDebugger.jsx",
+                      "name": "StatsDebugger.jsx",
+                      "type": "file",
+                      "extension": ".jsx"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\StrikeManagement.css",
+                      "name": "StrikeManagement.css",
+                      "type": "file",
+                      "extension": ".css"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\StrikeManagement.jsx",
+                      "name": "StrikeManagement.jsx",
+                      "type": "file",
+                      "extension": ".jsx"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\SubscriptionPage.css",
+                      "name": "SubscriptionPage.css",
+                      "type": "file",
+                      "extension": ".css"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\SubscriptionPage.jsx",
+                      "name": "SubscriptionPage.jsx",
+                      "type": "file",
+                      "extension": ".jsx"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\SuperAdminTestPage.css",
+                      "name": "SuperAdminTestPage.css",
+                      "type": "file",
+                      "extension": ".css"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\SuperAdminTestPage.jsx",
+                      "name": "SuperAdminTestPage.jsx",
+                      "type": "file",
+                      "extension": ".jsx"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\UXComponents.css",
+                      "name": "UXComponents.css",
+                      "type": "file",
+                      "extension": ".css"
+                    },
+                    {
+                      "path": "apps\\web\\src\\components\\UXComponents.jsx",
+                      "name": "UXComponents.jsx",
+                      "type": "file",
+                      "extension": ".jsx"
+                    }
+                  ],
+                  "type": "directory"
+                },
+                {
+                  "path": "apps\\web\\src\\hooks",
+                  "name": "hooks",
+                  "children": [
+                    {
+                      "path": "apps\\web\\src\\hooks\\index.js",
+                      "name": "index.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\web\\src\\hooks\\useAuth.js",
+                      "name": "useAuth.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\web\\src\\hooks\\useAuthLogic.js",
+                      "name": "useAuthLogic.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\web\\src\\hooks\\useDashboard.js",
+                      "name": "useDashboard.js",
+                      "type": "file",
+                      "extension": ".js"
+                    }
+                  ],
+                  "type": "directory"
+                },
+                {
+                  "path": "apps\\web\\src\\index.css",
+                  "name": "index.css",
+                  "type": "file",
+                  "extension": ".css"
+                },
+                {
+                  "path": "apps\\web\\src\\main.jsx",
+                  "name": "main.jsx",
+                  "type": "file",
+                  "extension": ".jsx"
+                },
+                {
+                  "path": "apps\\web\\src\\services",
+                  "name": "services",
+                  "children": [
+                    {
+                      "path": "apps\\web\\src\\services\\api.js",
+                      "name": "api.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\web\\src\\services\\mockData.js",
+                      "name": "mockData.js",
+                      "type": "file",
+                      "extension": ".js"
+                    },
+                    {
+                      "path": "apps\\web\\src\\services\\telegramAuth.js",
+                      "name": "telegramAuth.js",
+                      "type": "file",
+                      "extension": ".js"
+                    }
+                  ],
+                  "type": "directory"
+                },
+                {
+                  "path": "apps\\web\\src\\style.css",
+                  "name": "style.css",
+                  "type": "file",
+                  "extension": ".css"
+                }
+              ],
+              "type": "directory"
+            },
+            {
+              "path": "apps\\web\\vercel.json",
+              "name": "vercel.json",
+              "type": "file",
+              "extension": ".json"
+            },
+            {
+              "path": "apps\\web\\vite.config.js",
+              "name": "vite.config.js",
+              "type": "file",
+              "extension": ".js"
+            }
+          ],
+          "type": "directory"
+        }
+      ],
+      "type": "directory"
+    },
+    {
+      "path": "DEVELOPMENT_GUIDE.md",
+      "name": "DEVELOPMENT_GUIDE.md",
+      "type": "file",
+      "extension": ".md"
+    },
+    {
+      "path": "Dockerfile",
+      "name": "Dockerfile",
+      "type": "file",
+      "extension": ""
+    },
+    {
+      "path": "nodemon.json",
+      "name": "nodemon.json",
+      "type": "file",
+      "extension": ".json"
+    },
+    {
+      "path": "package.json",
+      "name": "package.json",
+      "type": "file",
+      "extension": ".json"
+    },
+    {
+      "path": "packages",
+      "name": "packages",
+      "children": [
+        {
+          "path": "packages\\config",
+          "name": "config",
+          "children": [],
+          "type": "directory"
+        },
+        {
+          "path": "packages\\shared",
+          "name": "shared",
+          "children": [
+            {
+              "path": "packages\\shared\\config",
+              "name": "config",
+              "children": [
+                {
+                  "path": "packages\\shared\\config\\index.js",
+                  "name": "index.js",
+                  "type": "file",
+                  "extension": ".js"
+                }
+              ],
+              "type": "directory"
+            },
+            {
+              "path": "packages\\shared\\package.json",
+              "name": "package.json",
+              "type": "file",
+              "extension": ".json"
+            },
+            {
+              "path": "packages\\shared\\services",
+              "name": "services",
+              "children": [
+                {
+                  "path": "packages\\shared\\services\\database.js",
+                  "name": "database.js",
+                  "type": "file",
+                  "extension": ".js"
+                },
+                {
+                  "path": "packages\\shared\\services\\logger.js",
+                  "name": "logger.js",
+                  "type": "file",
+                  "extension": ".js"
+                },
+                {
+                  "path": "packages\\shared\\services\\nlp.js",
+                  "name": "nlp.js",
+                  "type": "file",
+                  "extension": ".js"
+                },
+                {
+                  "path": "packages\\shared\\services\\telegram.js",
+                  "name": "telegram.js",
+                  "type": "file",
+                  "extension": ".js"
+                }
+              ],
+              "type": "directory"
+            },
+            {
+              "path": "packages\\shared\\utils",
+              "name": "utils",
+              "children": [
+                {
+                  "path": "packages\\shared\\utils\\enums.js",
+                  "name": "enums.js",
+                  "type": "file",
+                  "extension": ".js"
+                }
+              ],
+              "type": "directory"
+            }
+          ],
+          "type": "directory"
+        }
+      ],
+      "type": "directory"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "name": "pnpm-lock.yaml",
+      "type": "file",
+      "extension": ".yaml"
+    },
+    {
+      "path": "pnpm-workspace.yaml",
+      "name": "pnpm-workspace.yaml",
+      "type": "file",
+      "extension": ".yaml"
+    },
+    {
+      "path": "README.md",
+      "name": "README.md",
+      "type": "file",
+      "extension": ".md"
+    },
+    {
+      "path": "turbo.json",
+      "name": "turbo.json",
+      "type": "file",
+      "extension": ".json"
+    },
+    {
+      "path": "vercel.json",
+      "name": "vercel.json",
+      "type": "file",
+      "extension": ".json"
+    },
+    {
+      "path": "vitest.config.js",
+      "name": "vitest.config.js",
+      "type": "file",
+      "extension": ".js"
+    },
+    {
+      "path": "__tests__",
+      "name": "__tests__",
+      "children": [
+        {
+          "path": "__tests__\\api",
+          "name": "api",
+          "children": [
+            {
+              "path": "__tests__\\api\\audit.test.js",
+              "name": "audit.test.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "__tests__\\api\\auth.test.js",
+              "name": "auth.test.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "__tests__\\api\\enhanced-analytics.test.js",
+              "name": "enhanced-analytics.test.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "__tests__\\api\\enhanced-auth.test.js",
+              "name": "enhanced-auth.test.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "__tests__\\api\\groups.test.js",
+              "name": "groups.test.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "__tests__\\api\\middleware.test.js",
+              "name": "middleware.test.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "__tests__\\api\\nlp.test.js",
+              "name": "nlp.test.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "__tests__\\api\\security.test.js",
+              "name": "security.test.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "__tests__\\api\\strikes.test.js",
+              "name": "strikes.test.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "__tests__\\api\\webapp.test.js",
+              "name": "webapp.test.js",
+              "type": "file",
+              "extension": ".js"
+            }
+          ],
+          "type": "directory"
+        },
+        {
+          "path": "__tests__\\bot",
+          "name": "bot",
+          "children": [
+            {
+              "path": "__tests__\\bot\\callbackHandler.test.js",
+              "name": "callbackHandler.test.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "__tests__\\bot\\commandHandler.test.js",
+              "name": "commandHandler.test.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "__tests__\\bot\\enhanced-message-handler.test.js",
+              "name": "enhanced-message-handler.test.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "__tests__\\bot\\messageHandler.test.js",
+              "name": "messageHandler.test.js",
+              "type": "file",
+              "extension": ".js"
+            }
+          ],
+          "type": "directory"
+        },
+        {
+          "path": "__tests__\\database",
+          "name": "database",
+          "children": [
+            {
+              "path": "__tests__\\database\\enhanced-analytics.test.js",
+              "name": "enhanced-analytics.test.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "__tests__\\database\\performance.test.js",
+              "name": "performance.test.js",
+              "type": "file",
+              "extension": ".js"
+            }
+          ],
+          "type": "directory"
+        },
+        {
+          "path": "__tests__\\database.test.js",
+          "name": "database.test.js",
+          "type": "file",
+          "extension": ".js"
+        },
+        {
+          "path": "__tests__\\integration",
+          "name": "integration",
+          "children": [
+            {
+              "path": "__tests__\\integration\\e2e.test.js",
+              "name": "e2e.test.js",
+              "type": "file",
+              "extension": ".js"
+            }
+          ],
+          "type": "directory"
+        },
+        {
+          "path": "__tests__\\services",
+          "name": "services",
+          "children": [
+            {
+              "path": "__tests__\\services\\config.test.js",
+              "name": "config.test.js",
+              "type": "file",
+              "extension": ".js"
+            },
+            {
+              "path": "__tests__\\services\\nlp.test.js",
+              "name": "nlp.test.js",
+              "type": "file",
+              "extension": ".js"
+            }
+          ],
+          "type": "directory"
+        }
+      ],
+      "type": "directory"
+    }
+  ],
+  "type": "directory"
+}

@@ -1,3 +1,4 @@
+// ErrorBoundary.jsx
 import React from 'react';
 
 const STORAGE_KEY = 'aegis-debug-logs';
@@ -5,42 +6,49 @@ const MAX_LOGS = 500;
 
 function stringifyArgs(args) {
   try {
-    return args.map(a => {
-      if (a instanceof Error) return `${a.name}: ${a.message}\n${a.stack || ''}`;
-      if (typeof a === 'object') return JSON.stringify(a, null, 2);
-      return String(a);
-    }).join(' ');
-  } catch {
+    return args
+      .map((a) => {
+        if (a instanceof Error) return `${a.name}: ${a.message}\n${a.stack || ''}`;
+        if (typeof a === 'object') return JSON.stringify(a, null, 2);
+        return String(a);
+      })
+      .join(' ');
+  } catch (e) {
     return args.map(String).join(' ');
   }
+}
+
+function loadPersisted() {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function persistLogs(logs) {
+  sessionStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
 }
 
 export default class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    const persisted = (() => {
-      try {
-        const raw = sessionStorage.getItem(STORAGE_KEY);
-        return raw ? JSON.parse(raw) : [];
-      } catch {
-        return [];
-      }
-    })();
 
     this.state = {
       hasError: false,
       error: null,
       errorInfo: null,
-      logs: persisted,        // { ts, level, text }
+      logs: loadPersisted(), // { ts, level, text }
       showTerminal: false,
       autoScroll: true,
     };
 
     this.terminalRef = React.createRef();
-    this.detailsRef = React.createRef();
     this.originalConsole = {};
     this.boundOnError = null;
     this.boundOnRejection = null;
+    this.boundOnBeforeUnload = null;
   }
 
   static getDerivedStateFromError(error) {
@@ -48,52 +56,16 @@ export default class ErrorBoundary extends React.Component {
   }
 
   componentDidMount() {
-    // Monkeypatch console
-    ['log', 'info', 'warn', 'error', 'debug'].forEach(level => {
-      this.originalConsole[level] = console[level];
-      console[level] = (...args) => {
-        try {
-          this.addLog(level, stringifyArgs(args));
-        } catch {}
-        this.originalConsole[level](...args);
-      };
-    });
-
-    // Global errors
-    this.boundOnError = (event) => {
-      const msg = event?.message || 'Unknown script error';
-      const stack = event?.error?.stack || '';
-      this.addLog('error', `[window.onerror] ${msg}\n${stack}`);
-    };
-
-    this.boundOnRejection = (event) => {
-      const reason = event?.reason instanceof Error
-        ? `${event.reason.name}: ${event.reason.message}\n${event.reason.stack || ''}`
-        : JSON.stringify(event?.reason, null, 2);
-      this.addLog('error', `[unhandledrejection]\n${reason}`);
-    };
-
-    window.addEventListener('error', this.boundOnError);
-    window.addEventListener('unhandledrejection', this.boundOnRejection);
-
-    // Keep note on reload
-    window.addEventListener('beforeunload', () => {
-      this.addLog('info', '🔄 Page is reloading - check persisted logs after reload.');
-    });
+    this.patchConsole();
+    this.attachGlobalHandlers();
   }
 
   componentWillUnmount() {
-    // Restore console
-    Object.entries(this.originalConsole).forEach(([level, fn]) => {
-      if (fn) console[level] = fn;
-    });
-
-    if (this.boundOnError) window.removeEventListener('error', this.boundOnError);
-    if (this.boundOnRejection) window.removeEventListener('unhandledrejection', this.boundOnRejection);
+    this.unpatchConsole();
+    this.detachGlobalHandlers();
   }
 
   componentDidCatch(error, errorInfo) {
-    // Log detailed error to terminal
     this.addLog('error', `🚨 React ErrorBoundary caught:\n${error?.stack || String(error)}`);
     if (errorInfo?.componentStack) {
       this.addLog('error', `Component stack:\n${errorInfo.componentStack}`);
@@ -101,47 +73,143 @@ export default class ErrorBoundary extends React.Component {
     this.setState({ errorInfo });
   }
 
-  addLog(level, text) {
-    this.setState(prev => {
-      const next = [...prev.logs, { ts: new Date().toISOString(), level, text }];
-      const trimmed = next.length > MAX_LOGS ? next.slice(next.length - MAX_LOGS) : next;
+  patchConsole() {
+    ['log', 'info', 'warn', 'error', 'debug'].forEach((level) => {
+      const original = console[level];
+      // Guard against double-patching (Strict Mode mounts, then unmounts, then mounts again in dev)
+      if (original && !original.__AegisPatched) {
+        const patched = (...args) => {
+          try {
+            this.addLog(level, stringifyArgs(args));
+          } catch (e) {
+            // last-resort: avoid breaking console
+          }
+          try {
+            original.apply(console, args);
+          } catch {
+            // keep going; never throw from console
+          }
+        };
+        patched.__AegisPatched = true;
+        patched.__original = original;
+        console[level] = patched;
+      }
+      this.originalConsole[level] = original?.__original || original;
+    });
+  }
 
-      // persist
-      try {
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
-      } catch {}
-
-      return { logs: trimmed };
-    }, () => {
-      // auto-scroll
-      if (this.state.autoScroll && this.terminalRef.current) {
-        const el = this.terminalRef.current;
-        el.scrollTop = el.scrollHeight;
+  unpatchConsole() {
+    ['log', 'info', 'warn', 'error', 'debug'].forEach((level) => {
+      const current = console[level];
+      if (current && current.__original) {
+        console[level] = current.__original;
+      } else if (this.originalConsole[level]) {
+        console[level] = this.originalConsole[level];
       }
     });
   }
 
+  attachGlobalHandlers() {
+    this.boundOnError = (event) => {
+      const msg = event?.message || 'Unknown script error';
+      const stack = event?.error?.stack || '';
+      this.addLog('error', `[window.onerror] ${msg}\n${stack}`);
+    };
+
+    this.boundOnRejection = (event) => {
+      let reason;
+      try {
+        reason =
+          event?.reason instanceof Error
+            ? `${event.reason.name}: ${event.reason.message}\n${event.reason.stack || ''}`
+            : JSON.stringify(event?.reason, null, 2);
+      } catch {
+        reason = String(event?.reason);
+      }
+      this.addLog('error', `[unhandledrejection]\n${reason}`);
+    };
+
+    this.boundOnBeforeUnload = () => {
+      // Don't setState here. Persist directly so the note survives reloads.
+      try {
+        persistLogs([
+          ...this.state.logs,
+          { ts: new Date().toISOString(), level: 'info', text: '🔄 Page is reloading - check persisted logs after reload.' },
+        ]);
+      } catch {
+        // ignore; page is closing
+      }
+    };
+
+    window.addEventListener('error', this.boundOnError);
+    window.addEventListener('unhandledrejection', this.boundOnRejection);
+    window.addEventListener('beforeunload', this.boundOnBeforeUnload);
+  }
+
+  detachGlobalHandlers() {
+    if (this.boundOnError) window.removeEventListener('error', this.boundOnError);
+    if (this.boundOnRejection) window.removeEventListener('unhandledrejection', this.boundOnRejection);
+    if (this.boundOnBeforeUnload) window.removeEventListener('beforeunload', this.boundOnBeforeUnload);
+  }
+
+  addLog = (level, text) => {
+    this.setState(
+      (prev) => {
+        const next = [...prev.logs, { ts: new Date().toISOString(), level, text }];
+        const trimmed = next.length > MAX_LOGS ? next.slice(next.length - MAX_LOGS) : next;
+        try {
+          persistLogs(trimmed);
+        } catch {
+          // non-fatal; keep in memory
+        }
+        return { logs: trimmed };
+      },
+      () => {
+        if (this.state.autoScroll && this.terminalRef.current) {
+          const el = this.terminalRef.current;
+          el.scrollTop = el.scrollHeight;
+        }
+      }
+    );
+  };
+
   handleToggleDetails = (e) => {
-    // When "Debug Info" <details> is opened, show terminal
-    this.setState({ showTerminal: e.target.open });
+    // IMPORTANT: use currentTarget (the <details>), not target (could be <summary>)
+    this.setState({ showTerminal: e.currentTarget.open });
   };
 
   copyLogs = async () => {
-    const text = this.state.logs
-      .map(l => `[${l.ts}] ${l.level.toUpperCase()}  ${l.text}`)
-      .join('\n');
+    const text = this.state.logs.map((l) => `[${l.ts}] ${l.level.toUpperCase()}  ${l.text}`).join('\n');
     try {
       await navigator.clipboard.writeText(text);
       this.addLog('info', '📋 Logs copied to clipboard.');
     } catch {
-      this.addLog('warn', '⚠️ Could not copy to clipboard.');
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        this.addLog('info', '📋 Logs copied to clipboard.');
+      } catch {
+        this.addLog('warn', '⚠️ Could not copy to clipboard.');
+      }
     }
   };
 
   clearLogs = () => {
+    try {
+      persistLogs([]);
+    } catch {
+      // ignore
+    }
     this.setState({ logs: [] }, () => {
-      try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
-      try { console.clear(); } catch {}
+      try {
+        console.clear();
+      } catch {
+        // ignore
+      }
       this.addLog('info', '🧹 In-app terminal cleared.');
     });
   };
@@ -151,23 +219,29 @@ export default class ErrorBoundary extends React.Component {
 
     return (
       <div style={{ marginTop: 12 }}>
-        <div style={{
-          display: 'flex',
-          gap: 8,
-          alignItems: 'center',
-          marginBottom: 6,
-          flexWrap: 'wrap'
-        }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: 8,
+            alignItems: 'center',
+            marginBottom: 6,
+            flexWrap: 'wrap',
+          }}
+        >
           <strong>🖥️ Debug Console</strong>
           <button
-            onClick={() => this.setState(s => ({ autoScroll: !s.autoScroll }))}
+            onClick={() => this.setState((s) => ({ autoScroll: !s.autoScroll }))}
             style={btnStyle}
             title="Toggle auto-scroll"
           >
             {this.state.autoScroll ? '⏩ Auto-Scroll: On' : '⏸️ Auto-Scroll: Off'}
           </button>
-          <button onClick={this.copyLogs} style={btnStyle}>📋 Copy</button>
-          <button onClick={this.clearLogs} style={{ ...btnStyle, background: '#6c757d' }}>🧹 Clear</button>
+          <button onClick={this.copyLogs} style={btnStyle}>
+            📋 Copy
+          </button>
+          <button onClick={this.clearLogs} style={{ ...btnStyle, background: '#6c757d' }}>
+            🧹 Clear
+          </button>
         </div>
 
         <div
@@ -175,7 +249,8 @@ export default class ErrorBoundary extends React.Component {
           style={{
             background: '#111',
             color: '#e6e6e6',
-            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+            fontFamily:
+              'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
             fontSize: 12.5,
             borderRadius: 6,
             padding: 10,
@@ -189,10 +264,15 @@ export default class ErrorBoundary extends React.Component {
           ) : (
             this.state.logs.map((l, i) => {
               const color =
-                l.level === 'error' ? '#ff6b6b' :
-                l.level === 'warn'  ? '#ffd166' :
-                l.level === 'info'  ? '#7fd1ff' :
-                l.level === 'debug' ? '#a0a0a0' : '#ddd';
+                l.level === 'error'
+                  ? '#ff6b6b'
+                  : l.level === 'warn'
+                  ? '#ffd166'
+                  : l.level === 'info'
+                  ? '#7fd1ff'
+                  : l.level === 'debug'
+                  ? '#a0a0a0'
+                  : '#ddd';
               return (
                 <div key={`${l.ts}-${i}`} style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                   <span style={{ color: '#888' }}>[{l.ts}]</span>{' '}
@@ -214,29 +294,35 @@ export default class ErrorBoundary extends React.Component {
           <h2>❌ Something went wrong</h2>
           <p>The app encountered an unexpected error.</p>
 
-          <details
-            ref={this.detailsRef}
-            onToggle={this.handleToggleDetails}
-            style={{ margin: '16px 0' }}
-          >
+          <details onToggle={this.handleToggleDetails} style={{ margin: '16px 0' }}>
             <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>🔍 Debug Info</summary>
 
             {/* Error specifics */}
-            <div style={{ backgroundColor: '#fff3cd', padding: 10, marginTop: 10, borderRadius: 6, fontSize: 12 }}>
+            <div
+              style={{
+                backgroundColor: '#fff3cd',
+                padding: 10,
+                marginTop: 10,
+                borderRadius: 6,
+                fontSize: 12,
+              }}
+            >
               <h4 style={{ margin: '2px 0 6px' }}>Error Message:</h4>
-              <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                {this.state.error?.toString()}
-              </pre>
+              <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{this.state.error?.toString()}</pre>
 
               <h4 style={{ margin: '12px 0 6px' }}>Error Stack:</h4>
-              <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 200, overflow: 'auto' }}>
+              <pre
+                style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 200, overflow: 'auto' }}
+              >
                 {this.state.error?.stack}
               </pre>
 
               {this.state.errorInfo?.componentStack && (
                 <>
                   <h4 style={{ margin: '12px 0 6px' }}>Component Stack:</h4>
-                  <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 200, overflow: 'auto' }}>
+                  <pre
+                    style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 200, overflow: 'auto' }}
+                  >
                     {this.state.errorInfo.componentStack}
                   </pre>
                 </>
@@ -248,10 +334,7 @@ export default class ErrorBoundary extends React.Component {
           </details>
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            <button
-              onClick={() => window.location.reload()}
-              style={{ ...btnStyle, background: '#007bff' }}
-            >
+            <button onClick={() => window.location.reload()} style={{ ...btnStyle, background: '#007bff' }}>
               🔄 Reload Page
             </button>
             <button
@@ -265,7 +348,11 @@ export default class ErrorBoundary extends React.Component {
             </button>
             <button
               onClick={() => {
-                try { console.clear(); } catch {}
+                try {
+                  console.clear();
+                } catch {
+                  /* ignore */
+                }
                 this.addLog('info', '🧹 Console cleared (browser devtools).');
               }}
               style={{ ...btnStyle, background: '#6c757d' }}
@@ -277,6 +364,7 @@ export default class ErrorBoundary extends React.Component {
       );
     }
 
+    // Render children normally when there is no error
     return this.props.children;
   }
 }
