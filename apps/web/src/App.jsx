@@ -252,7 +252,7 @@ function App() {
                 <h1 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
                   Telegram Moderator
                 </h1>
-                <p className="text-sm text-slate-500">@AegisModerationBot</p>
+                <p className="text-sm text-slate-500">@ankarali_test_bot</p>
               </div>
             </div>
 

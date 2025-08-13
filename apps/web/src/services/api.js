@@ -4,20 +4,13 @@ import axios from 'axios';
 import { useAuth } from '../hooks/useAuth';
 import { mockApiService } from './mockData';
 
-// Use environment variables (single source of truth)
-export const API_BASE_URL =
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) ||
-  'https://minnow-good-mostly.ngrok-free.app/api/v1';
+// Use environment variable for API URL, fallback to ngrok for development
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://minnow-good-mostly.ngrok-free.app/api/v1';
 
-// Telegram bot configuration (must be WITHOUT '@' for the widget attribute)
-export const TELEGRAM_BOT_USERNAME = (
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_TELEGRAM_BOT_USERNAME) ||
-  'AegisModerationBot'
-).replace(/^@/, '');
+// Telegram bot configuration
+const TELEGRAM_BOT_USERNAME = 'ankarali_test_bot'; // Your bot username
+const ENABLE_TELEGRAM_LOGIN = true; // Enabled for external website access
 
-export const ENABLE_TELEGRAM_LOGIN =
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ENABLE_TELEGRAM_LOGIN) !== 'false';
- 
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15000,
@@ -27,15 +20,30 @@ const api = axios.create({
   },
 });
 
-const isDev = typeof import.meta !== 'undefined' ? !!import.meta.env?.DEV : false;
+// Simple console logging (only in development)
 const log = {
-  info: (msg, data) => { if (isDev) console.log(`ℹ️ ${msg}`, data ?? ''); },
-  success: (msg, data) => { if (isDev) console.log(`✅ ${msg}`, data ?? ''); },
-  warn: (msg, data) => { if (isDev) console.warn(`⚠️ ${msg}`, data ?? ''); },
-  error: (msg, data) => console.error(`❌ ${msg}`, data ?? ''),
-  debug: (msg, data) => { if (isDev) console.debug(`🔍 ${msg}`, data ?? ''); },
+  info: (msg, data) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`ℹ️ ${msg}`, data || '');
+    }
+  },
+  success: (msg, data) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`✅ ${msg}`, data || '');
+    }
+  },
+  warn: (msg, data) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`⚠️ ${msg}`, data || '');
+    }
+  },
+  error: (msg, data) => console.error(`❌ ${msg}`, data || ''), // Always show errors
+  debug: (msg, data) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.debug(`🔍 ${msg}`, data || '');
+    }
+  }
 };
-
 
 // Helper function to get current token
 const getCurrentToken = () => {
@@ -158,8 +166,8 @@ const makeApiCall = async (apiCall, mockCall, endpoint) => {
       message: error.message
     });
     
-    // In dev, only use mock data if explicitly enabled
-    if (isDev && import.meta.env?.VITE_USE_MOCK_API === 'true') {
+    // In development, fallback to mock data
+    if (import.meta.env.VITE_ENVIRONMENT === 'development') {
       log.info(`🔧 Using mock data for: ${endpoint}`);
       return mockCall();
     }
@@ -815,3 +823,4 @@ export const apiService = {
 apiService.webapp = apiService.webApp;
 
 export default apiService;
+export { API_BASE_URL, TELEGRAM_BOT_USERNAME, ENABLE_TELEGRAM_LOGIN };
