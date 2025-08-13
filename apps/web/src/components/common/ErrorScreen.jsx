@@ -1,7 +1,7 @@
 // apps/web/src/components/common/ErrorScreen.jsx
 import React, { useState } from 'react';
 import { API_BASE_URL } from '../../services/api';
-import DebugConsole from './DebugConsole';
+import DebugConsole from '../DebugConsole';
 
 const ErrorScreen = ({
   error,
