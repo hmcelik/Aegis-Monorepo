@@ -1,7 +1,6 @@
 // src/services/api.js - API Service with Environment Variable Configuration
 
 import axios from 'axios';
-import { useAuth } from '../hooks/useAuth';
 import { mockApiService } from './mockData';
 
 // Helper function to safely access environment variables
@@ -52,14 +51,7 @@ const getCurrentToken = () => {
   token = localStorage.getItem('authToken');
   if (token) return token;
   
-  // Try auth store as fallback
-  try {
-    const authState = useAuth.getState();
-    if (authState?.token) return authState.token;
-  } catch (authError) {
-    console.debug('Auth store access failed:', authError);
-  }
-  
+  // No auth store fallback to avoid circular dependency
   return null;
 };
 
