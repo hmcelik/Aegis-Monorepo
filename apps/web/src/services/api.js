@@ -4,19 +4,22 @@ import axios from 'axios';
 import { useAuth } from '../hooks/useAuth';
 import { mockApiService } from './mockData';
 
+// Safe environment variable access for production builds
+const getEnvVar = (key, defaultValue = '') => {
+  try {
+    return import.meta.env?.[key] || defaultValue;
+  } catch {
+    return defaultValue;
+  }
+};
+
 // Use environment variables (single source of truth)
-export const API_BASE_URL =
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) ||
-  'https://minnow-good-mostly.ngrok-free.app/api/v1';
+export const API_BASE_URL = getEnvVar('VITE_API_URL', 'https://minnow-good-mostly.ngrok-free.app/api/v1');
 
 // Telegram bot configuration (must be WITHOUT '@' for the widget attribute)
-export const TELEGRAM_BOT_USERNAME = (
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_TELEGRAM_BOT_USERNAME) ||
-  'AegisModerationBot'
-).replace(/^@/, '');
+export const TELEGRAM_BOT_USERNAME = getEnvVar('VITE_TELEGRAM_BOT_USERNAME', 'AegisModerationBot').replace(/^@/, '');
 
-export const ENABLE_TELEGRAM_LOGIN =
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_ENABLE_TELEGRAM_LOGIN) !== 'false';
+export const ENABLE_TELEGRAM_LOGIN = getEnvVar('VITE_ENABLE_TELEGRAM_LOGIN', 'true') !== 'false';
  
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -27,7 +30,7 @@ const api = axios.create({
   },
 });
 
-const isDev = typeof import.meta !== 'undefined' ? !!import.meta.env?.DEV : false;
+const isDev = getEnvVar('DEV', 'false') === 'true' || getEnvVar('NODE_ENV', 'production') === 'development';
 const log = {
   info: (msg, data) => { if (isDev) console.log(`ℹ️ ${msg}`, data ?? ''); },
   success: (msg, data) => { if (isDev) console.log(`✅ ${msg}`, data ?? ''); },
@@ -159,7 +162,7 @@ const makeApiCall = async (apiCall, mockCall, endpoint) => {
     });
     
     // In dev, only use mock data if explicitly enabled
-    if (isDev && import.meta.env?.VITE_USE_MOCK_API === 'true') {
+    if (isDev && getEnvVar('VITE_USE_MOCK_API', 'false') === 'true') {
       log.info(`🔧 Using mock data for: ${endpoint}`);
       return mockCall();
     }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
-import { apiService } from '../services/api';
+import { apiService, API_BASE_URL } from '../services/api';
 import GroupSelector from './GroupSelector';
 import GroupStats from './GroupStats';
 import GroupSettings from './GroupSettings';
@@ -369,7 +369,7 @@ const GroupManagementDashboard = ({ user }) => {
     console.log('\n🔍 COMPREHENSIVE API DEBUG TEST');
     console.log('===============================');
     console.log('Selected Group ID:', selectedGroup.id);
-    console.log('API Base URL:', import.meta.env.VITE_API_URL || 'https://minnow-good-mostly.ngrok-free.app/api/v1');
+    console.log('API Base URL:', API_BASE_URL);
     
     toast.info('Running API endpoint verification - check console for detailed results');
 
@@ -377,7 +377,7 @@ const GroupManagementDashboard = ({ user }) => {
       // Test 1: Direct API calls bypassing service layer
       console.log('\n🧪 TEST 1: Direct API endpoint calls');
       
-      const baseUrl = import.meta.env.VITE_API_URL || 'https://minnow-good-mostly.ngrok-free.app/api/v1';
+      const baseUrl = API_BASE_URL;
       const groupId = selectedGroup.id;
       
       // Get auth headers for both types
