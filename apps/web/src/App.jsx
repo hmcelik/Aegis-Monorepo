@@ -46,7 +46,7 @@ function App() {
 
   const debugLog = (message, data) => {
     // Only log in development and limit frequency
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log(`🐛 ${message}`, data);
     }
   };
