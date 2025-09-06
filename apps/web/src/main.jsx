@@ -6,7 +6,6 @@ import App from './App.jsx';
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  // Temporarily disable strict mode to debug production issue
+  <App />
 );

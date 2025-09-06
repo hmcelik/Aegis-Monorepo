@@ -1,11 +1,11 @@
-// src/services/api.js
+// src/services/api.js - API Service with Environment Variable Configuration
 
 import axios from 'axios';
 import { useAuth } from '../hooks/useAuth';
 import { mockApiService } from './mockData';
 
-// Safe environment variable access for production builds
-const getEnvVar = (key, defaultValue = '') => {
+// Helper function to safely access environment variables
+const getEnvVar = (key, defaultValue) => {
   try {
     return import.meta.env?.[key] || defaultValue;
   } catch {
@@ -344,7 +344,13 @@ export const apiService = {
       log.info(`📊 Using unified groups endpoint - may have different format than WebApp analytics`);
       return makeApiCall(
         async () => {
-          const url = `/groups/${groupId}/stats`;
+          // Build query parameters
+          const params = new URLSearchParams();
+          if (period) params.append('period', period);
+          if (startDate) params.append('startDate', startDate);
+          if (endDate) params.append('endDate', endDate);
+          
+          const url = `/groups/${groupId}/stats${params.toString() ? `?${params.toString()}` : ''}`;
           log.debug(`📊 Unified stats URL: ${url}`);
           const response = await api.get(url);
           log.debug(`📊 Unified stats raw response:`, response.data);
