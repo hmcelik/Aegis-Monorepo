@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
-import { apiService } from '../services/api';
+import apiService from '../services/api';
 import { LoadingCard, ErrorCard } from './UXComponents';
 
 const AuditLog = ({ groupId, groupTitle }) => {
@@ -89,10 +89,8 @@ const AuditLog = ({ groupId, groupTitle }) => {
       if (error.response?.status === 500 && error.response?.data?.error?.code === 'DATABASE_ERROR') {
         console.warn('📊 Backend database issue detected, audit logs may be temporarily unavailable');
         toast.error('Audit logs are temporarily unavailable due to a database issue. Please try again later.');
-        setError('Database temporarily unavailable. The backend team has been notified.');
       } else {
         toast.error(`Failed to load audit logs: ${error.message}`);
-        setError(error.message);
       }
       
       setLogs([]);

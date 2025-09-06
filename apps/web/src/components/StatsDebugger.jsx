@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { apiService } from '../services/api';
+import apiService from '../services/api';
 
 const StatsDebugger = () => {
   const [testResults, setTestResults] = useState('');

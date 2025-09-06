@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { apiService } from '../services/api';
+import apiService from '../services/api';
 
 export const useDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
 
   const loadDashboardData = async () => {
     try {
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.log('📊 Loading dashboard data...');
       }
       
@@ -15,7 +15,7 @@ export const useDashboard = () => {
       const storedInitData = localStorage.getItem('telegram_init_data');
       const telegramInitData = window.Telegram?.WebApp?.initData || storedInitData;
       
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.log('🔑 Authentication check:', {
           hasJwtToken: !!storedToken,
           hasInitData: !!telegramInitData,
@@ -34,13 +34,13 @@ export const useDashboard = () => {
       
       if (storedToken) {
         // Method 1: Use JWT Bearer token with /groups endpoint
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.log('🔑 Using JWT token authentication for /groups');
         }
         groupsPromise = apiService.groups.getAll();
       } else if (telegramInitData) {
         // Method 2: Use WebApp authentication with /webapp/user/groups
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.log('📱 Using WebApp authentication for /webapp/user/groups');
         }
         groupsPromise = apiService.groups.getAllWebApp();
@@ -57,7 +57,7 @@ export const useDashboard = () => {
 
       clearTimeout(timeoutId);
 
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.log('📈 Groups API result:', groupsRes);
         console.log('💚 Health API result:', healthRes);
       }
@@ -66,7 +66,7 @@ export const useDashboard = () => {
       let groups = [];
       if (groupsRes.status === 'fulfilled') {
         const groupsResponse = groupsRes.value;
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.log('📋 Raw groups response:', groupsResponse);
         }
         
@@ -77,7 +77,7 @@ export const useDashboard = () => {
             ...group,
             bot_active: true // Assume bot is active if we can fetch group data
           }));
-          if (process.env.NODE_ENV === 'development') {
+          if (import.meta.env.DEV) {
             console.log('✅ Parsed groups from axios response.data (legacy):', groups.length);
           }
         } else if (groupsResponse.data?.data && Array.isArray(groupsResponse.data.data)) {
@@ -86,7 +86,7 @@ export const useDashboard = () => {
             ...group,
             bot_active: true // Assume bot is active if we can fetch group data
           }));
-          if (process.env.NODE_ENV === 'development') {
+          if (import.meta.env.DEV) {
             console.log('✅ Parsed groups from unified API format:', groups.length);
           }
         } else if (Array.isArray(groupsResponse)) {
@@ -94,7 +94,7 @@ export const useDashboard = () => {
             ...group,
             bot_active: true // Assume bot is active if we can fetch group data
           }));
-          if (process.env.NODE_ENV === 'development') {
+          if (import.meta.env.DEV) {
             console.log('✅ Parsed groups from direct array:', groups.length);
           }
         } else if (groupsResponse.success && groupsResponse.data) {
@@ -104,11 +104,11 @@ export const useDashboard = () => {
                 bot_active: true // Assume bot is active if we can fetch group data
               }))
             : groupsResponse.data;
-          if (process.env.NODE_ENV === 'development') {
+          if (import.meta.env.DEV) {
             console.log('✅ Parsed groups from success.data format:', groups.length);
           }
         } else {
-          if (process.env.NODE_ENV === 'development') {
+          if (import.meta.env.DEV) {
             console.warn('⚠️ Unexpected groups response format:', groupsResponse);
           }
         }
@@ -120,7 +120,7 @@ export const useDashboard = () => {
       let health = null;
       if (healthRes.status === 'fulfilled') {
         const healthResponse = healthRes.value;
-        if (process.env.NODE_ENV === 'development') {
+        if (import.meta.env.DEV) {
           console.log('🏥 Raw health response:', healthResponse);
         }
         
@@ -132,7 +132,7 @@ export const useDashboard = () => {
         }
       }
 
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.log('📝 Parsed groups:', groups);
         console.log('🏥 Parsed health:', health);
         
@@ -162,11 +162,11 @@ export const useDashboard = () => {
         recent_activity: []
       };
       
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.log('💾 Setting dashboard data:', data);
       }
       setDashboardData(data);
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.DEV) {
         console.log('✅ Dashboard data loaded successfully');
       }
       return data;

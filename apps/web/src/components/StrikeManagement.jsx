@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { apiService } from '../services/api';
+import apiService from '../services/api';
 import { LoadingCard, ErrorCard } from './UXComponents';
 import './StrikeManagement.css';
 

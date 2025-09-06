@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
-import { apiService } from '../services/api';
+import apiService from '../services/api';
 import { Settings, Play, CheckCircle, XCircle, Clock, Database, Shield, Zap } from 'lucide-react';
 import './SuperAdminTestPage.css';
 
