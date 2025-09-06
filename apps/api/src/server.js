@@ -4,14 +4,15 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
-import { initializeDatabase } from '@telegram-moderator/shared/services/database.js';
-import logger from '@telegram-moderator/shared/services/logger.js';
+import { initializeDatabase } from '@telegram-moderator/shared/src/services/database.js';
+import logger from '@telegram-moderator/shared/src/services/logger.js';
 import authRoutes from './routes/auth.js';
 import unifiedGroupRoutes from './routes/unifiedGroups.js';
 import webAppRoutes from './routes/webapp.js';
 import nlpRoutes from './routes/nlp.js';
 import systemRoutes from './routes/system.js';
 import logsRoutes from './routes/logs.js';
+import billingRoutes from './routes/billing.js';
 import * as systemController from './controllers/systemController.js';
 import errorResponder from './utils/errorResponder.js';
 import ApiError from './utils/apiError.js';
@@ -315,6 +316,7 @@ app.use('/api/v1/groups', unifiedGroupRoutes); // Unified API with both auth met
 app.use('/api/v1/webapp', webAppRoutes); // Keep for backward compatibility (deprecated)
 app.use('/api/v1/nlp', nlpRoutes);
 app.use('/api/v1/logs', logsRoutes);
+app.use('/api/v1/billing', billingRoutes);
 
 // 404 handler for API endpoints
 app.use('/api', (req, res, next) => {

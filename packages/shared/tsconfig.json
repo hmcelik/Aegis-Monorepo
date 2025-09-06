@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@telegram-moderator/types": ["../types/src"],
+      "@telegram-moderator/normalizer": ["../normalizer/src"],
+      "@telegram-moderator/policy": ["../policy/src"],
+      "@telegram-moderator/telemetry": ["../telemetry/src"]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "references": [
+    { "path": "../types" },
+    { "path": "../normalizer" }
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "__tests__"
+  ]
+}

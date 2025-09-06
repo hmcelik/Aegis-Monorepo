@@ -1,5 +1,5 @@
 import axios from 'axios';
-import config from '@telegram-moderator/shared/config/index.js';
+import config from '@telegram-moderator/shared/src/config/index.js';
 import ApiError from '../utils/apiError.js';
 
 // Construct the base Telegram API URL from your configuration

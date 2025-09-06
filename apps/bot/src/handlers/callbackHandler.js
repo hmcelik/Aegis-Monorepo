@@ -4,8 +4,8 @@
  * on a per-group basis.
  */
 
-import logger from '@telegram-moderator/shared/services/logger.js';
-import * as telegram from '@telegram-moderator/shared/services/telegram.js';
+import logger from '@telegram-moderator/shared/src/services/logger.js';
+import * as telegram from '@telegram-moderator/shared/src/services/telegram.js';
 import { mainKeyboard } from '../keyboards/mainMenu.js';
 import { aiSensitivityKeyboard } from '../keyboards/aiSensitivityMenu.js';
 import { profanityKeyboard } from '../keyboards/profanityMenu.js';
@@ -14,13 +14,44 @@ import { miscKeyboard } from '../keyboards/miscMenu.js';
 import { whitelistKeyboard } from '../keyboards/whitelistMenu.js';
 import { keywordMenuKeyboard } from '../keyboards/keywordMenu.js';
 import { moderatorMenuKeyboard } from '../keyboards/moderatorMenu.js';
-import { updateSetting, getGroupSettings } from '@telegram-moderator/shared/config/index.js';
-import * as db from '@telegram-moderator/shared/services/database.js';
-import bot from '@telegram-moderator/shared/services/telegram.js';
+import { updateSetting, getGroupSettings } from '@telegram-moderator/shared/src/config/index.js';
+import * as db from '@telegram-moderator/shared/src/services/database.js';
+import bot from '@telegram-moderator/shared/src/services/telegram.js';
 import { escapeMarkdownV2 } from './commandHandler.js';
 
-// A simple in-memory store for tracking pending admin actions (e.g., waiting for text input).
+// A simple in-memory store for tracking pending admin actions with automatic cleanup
 const userState = new Map();
+
+// Cleanup old user states every 30 minutes to prevent memory leaks
+const USER_STATE_CLEANUP_INTERVAL = 30 * 60 * 1000; // 30 minutes
+const USER_STATE_MAX_AGE = 60 * 60 * 1000; // 1 hour
+
+setInterval(() => {
+    const now = Date.now();
+    for (const [key, value] of userState.entries()) {
+        if (now - value.timestamp > USER_STATE_MAX_AGE) {
+            userState.delete(key);
+        }
+    }
+}, USER_STATE_CLEANUP_INTERVAL);
+
+// Enhanced userState setter with timestamp
+const setUserState = (userId, state) => {
+    userState.set(userId, {
+        ...state,
+        timestamp: Date.now()
+    });
+};
+
+// Enhanced userState getter with validation
+const getUserState = (userId) => {
+    const state = userState.get(userId);
+    if (state && (Date.now() - state.timestamp < USER_STATE_MAX_AGE)) {
+        return state;
+    }
+    userState.delete(userId); // Clean up expired state
+    return null;
+};
 
 // This object no longer holds the group context (targetChatId), only the message details for editing.
 let activeMenu = {

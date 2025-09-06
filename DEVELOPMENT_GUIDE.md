@@ -96,11 +96,11 @@ All services load environment from the root `.env` file:
 ```
 
 ### Environment Loading
-The shared package (`packages/shared/config/`) handles centralized environment loading:
+The shared package (`packages/shared/src/config/`) handles centralized environment loading:
 
 ```javascript
 // Automatically loaded in all services
-import config from '@telegram-moderator/shared/config';
+import config from '@telegram-moderator/shared/src/config';
 ```
 
 ## 📝 Development Workflow

@@ -1,6 +1,6 @@
 import { asyncHandler, successResponse } from '../utils/errorHelpers.js';
-import * as db from '@telegram-moderator/shared/services/database.js';
-import logger from '@telegram-moderator/shared/services/logger.js';
+import * as db from '@telegram-moderator/shared/src/services/database.js';
+import logger from '@telegram-moderator/shared/src/services/logger.js';
 
 /**
  * System health check endpoint

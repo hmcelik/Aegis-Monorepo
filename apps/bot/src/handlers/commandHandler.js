@@ -4,10 +4,10 @@
  */
 
 import 'dotenv/config';
-import { sendMessage, getChatAdmins, deleteMessage, getChatMember, sendDocument } from '@telegram-moderator/shared/services/telegram.js';
-import * as db from '@telegram-moderator/shared/services/database.js';
-import { getGroupSettings } from '@telegram-moderator/shared/config/index.js';
-import logger from '@telegram-moderator/shared/services/logger.js';
+import { sendMessage, getChatAdmins, deleteMessage, getChatMember, sendDocument } from '@telegram-moderator/shared/src/services/telegram.js';
+import * as db from '@telegram-moderator/shared/src/services/database.js';
+import { getGroupSettings } from '@telegram-moderator/shared/src/config/index.js';
+import logger from '@telegram-moderator/shared/src/services/logger.js';
 import { mainKeyboard } from '../keyboards/mainMenu.js';
 import { setActiveMenu } from './callbackHandler.js';
 import { Buffer } from 'buffer';

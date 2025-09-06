@@ -220,7 +220,17 @@ The web dashboard is configured for Vercel deployment:
 vercel --prod
 ```
 
-## 🔧 Development Tips
+## � Roadmap & Task Board
+
+See [AEGIS_TASK_BOARD.md](./AEGIS_TASK_BOARD.md) for the comprehensive 90-day reliability-first roadmap including:
+- Queue & Idempotency implementation
+- AI Budget Control & Caching
+- Data Layer migration to PostgreSQL
+- Observability & SLO monitoring
+- Enhanced security and compliance
+- CI/CD improvements with reliability gates
+
+## �🔧 Development Tips
 
 ### Separate Log Monitoring
 For cleaner log monitoring during development, run services in separate terminals:

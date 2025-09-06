@@ -1,4 +1,4 @@
-import logger from '@telegram-moderator/shared/services/logger.js';
+import logger from '@telegram-moderator/shared/src/services/logger.js';
 import { ERROR_TYPES, HTTP_STATUS_MESSAGES } from './errorTypes.js';
 
 const errorResponder = (err, req, res, next) => {

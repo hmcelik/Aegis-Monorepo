@@ -1,10 +1,10 @@
 import { validationResult } from 'express-validator';
-import * as db from '@telegram-moderator/shared/services/database.js';
-import { getGroupSettings, updateSetting } from '@telegram-moderator/shared/config/index.js';
+import * as db from '@telegram-moderator/shared/src/services/database.js';
+import { getGroupSettings, updateSetting } from '@telegram-moderator/shared/src/config/index.js';
 import ApiError from '../utils/apiError.js';
 import { ERROR_TYPES } from '../utils/errorTypes.js';
 import { asyncHandler, successResponse, handleDatabaseError, paginatedResponse } from '../utils/errorHelpers.js';
-import logger from '@telegram-moderator/shared/services/logger.js';
+import logger from '@telegram-moderator/shared/src/services/logger.js';
 
 /**
  * List groups where the user is an admin

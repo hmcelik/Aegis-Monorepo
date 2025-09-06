@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@telegram-moderator/types": ["../../packages/types/src"],
+      "@telegram-moderator/shared": ["../../packages/shared/src"],
+      "@telegram-moderator/normalizer": ["../../packages/normalizer/src"],
+      "@telegram-moderator/policy": ["../../packages/policy/src"],
+      "@telegram-moderator/telemetry": ["../../packages/telemetry/src"]
+    }
+  },
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../../packages/types" },
+    { "path": "../../packages/shared" },
+    { "path": "../../packages/normalizer" },
+    { "path": "../../packages/policy" },
+    { "path": "../../packages/telemetry" }
+  ],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+}

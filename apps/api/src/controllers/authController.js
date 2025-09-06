@@ -1,7 +1,7 @@
 import * as tokenService from '../services/tokenService.js';
-import * as db from '@telegram-moderator/shared/services/database.js';
+import * as db from '@telegram-moderator/shared/src/services/database.js';
 import jwt from 'jsonwebtoken';
-import config from '@telegram-moderator/shared/config/index.js';
+import config from '@telegram-moderator/shared/src/config/index.js';
 
 export const verify = async (req, res, next) => {
     try {

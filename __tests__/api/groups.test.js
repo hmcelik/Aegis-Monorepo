@@ -4,12 +4,12 @@ import axios from 'axios';
 import querystring from 'node:querystring';
 import app from 'apps/api/src/server.js';
 import * as tokenService from 'apps/api/src/services/tokenService.js';
-import * as telegramService from 'packages/shared/services/telegram.js';
+import * as telegramService from 'packages/shared/src/services/telegram.js';
 
 // --- MOCK SETUP ---
 vi.mock('axios');
 
-vi.mock('packages/shared/config/index.js', () => ({
+vi.mock('@telegram-moderator/shared/src/config/index.js', () => ({
   getGroupSettings: vi.fn(),
   updateSetting: vi.fn(),
   default: {
@@ -20,7 +20,15 @@ vi.mock('packages/shared/config/index.js', () => ({
   },
 }));
 
-vi.mock('@telegram-moderator/shared/services/database.js', () => ({
+vi.mock('@telegram-moderator/shared/src/services/database.js', () => ({
+  Database: {
+    getInstance: vi.fn(() => ({
+      run: vi.fn(),
+      get: vi.fn(),
+      all: vi.fn(),
+      close: vi.fn()
+    }))
+  },
   getGroup: vi.fn().mockResolvedValue({ 
     chatId: '-1001', 
     title: 'Test Group',
@@ -60,7 +68,7 @@ vi.mock('@telegram-moderator/shared/services/database.js', () => ({
   exportAuditLog: vi.fn().mockResolvedValue([])
 }));
 
-vi.mock('packages/shared/services/telegram.js', () => ({
+vi.mock('packages/shared/src/services/telegram.js', () => ({
   getChatAdmins: vi.fn(),
 }));
 
@@ -69,7 +77,7 @@ describe('Group API Endpoints', () => {
   let adminToken;
 
   beforeEach(async () => {
-    configService = await import('packages/shared/config/index.js');
+    configService = await import('@telegram-moderator/shared/src/config/index.js');
     vi.clearAllMocks();
     adminToken = tokenService.generateToken({ id: 123 });
   });
@@ -112,7 +120,7 @@ describe('Group API Endpoints', () => {
       axios.post.mockResolvedValue({ data: { result: [{ user: { id: 999 } }] } });
       
       // Mock database service to return false for this test
-      const dbService = await import('@telegram-moderator/shared/services/database.js');
+      const dbService = await import('@telegram-moderator/shared/src/services/database.js');
       dbService.isUserGroupAdmin.mockResolvedValueOnce(false);
 
       const response = await request(app)
@@ -156,7 +164,7 @@ describe('Group API Endpoints', () => {
       axios.post.mockResolvedValue({ data: { result: [{ user: { id: 999 } }] } });
       
       // Mock isUserGroupAdmin to return false for this specific test
-      const dbService = await import('@telegram-moderator/shared/services/database.js');
+      const dbService = await import('@telegram-moderator/shared/src/services/database.js');
       dbService.isUserGroupAdmin.mockResolvedValueOnce(false);
 
       const response = await request(app)

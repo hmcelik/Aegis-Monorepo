@@ -3,12 +3,12 @@
  * It initializes services, and sets up event listeners for multi-tenant operation.
  */
 
-import bot from '@telegram-moderator/shared/services/telegram.js';
-import * as db from '@telegram-moderator/shared/services/database.js';
+import bot from '@telegram-moderator/shared/src/services/telegram.js';
+import * as db from '@telegram-moderator/shared/src/services/database.js';
 import { handleMessage } from './handlers/messageHandler.js';
 import { handleCommand } from './handlers/commandHandler.js';
 import { handleCallback } from './handlers/callbackHandler.js';
-import logger from '@telegram-moderator/shared/services/logger.js';
+import logger from '@telegram-moderator/shared/src/services/logger.js';
 
 /**
  * Registers Telegram slash commands with appropriate scopes.

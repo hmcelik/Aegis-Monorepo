@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import ApiError from '../utils/apiError.js';
-import logger from '@telegram-moderator/shared/services/logger.js';
+import logger from '@telegram-moderator/shared/src/services/logger.js';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'test_bot_token';
 

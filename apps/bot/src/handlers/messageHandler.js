@@ -4,11 +4,11 @@
  * and applies penalties based on the configured rules for each specific group.
  */
 
-import { isPromotional, hasProfanity, analyzeMessage } from '@telegram-moderator/shared/services/nlp.js';
-import * as db from '@telegram-moderator/shared/services/database.js';
-import { deleteMessage, kickUser, banUser, muteUser, sendMessage, getChatAdmins } from '@telegram-moderator/shared/services/telegram.js';
-import { getGroupSettings } from '@telegram-moderator/shared/config/index.js';
-import logger from '@telegram-moderator/shared/services/logger.js';
+import { isPromotional, hasProfanity, analyzeMessage } from '@telegram-moderator/shared/src/services/nlp.js';
+import * as db from '@telegram-moderator/shared/src/services/database.js';
+import { deleteMessage, kickUser, banUser, muteUser, sendMessage, getChatAdmins } from '@telegram-moderator/shared/src/services/telegram.js';
+import { getGroupSettings } from '@telegram-moderator/shared/src/config/index.js';
+import logger from '@telegram-moderator/shared/src/services/logger.js';
 // Removed the obsolete userCache import
 
 /**

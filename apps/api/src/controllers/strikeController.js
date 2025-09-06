@@ -1,9 +1,9 @@
 import { validationResult } from 'express-validator';
-import * as db from '@telegram-moderator/shared/services/database.js';
+import * as db from '@telegram-moderator/shared/src/services/database.js';
 import ApiError from '../utils/apiError.js';
 import { ERROR_TYPES } from '../utils/errorTypes.js';
 import { asyncHandler, successResponse, handleDatabaseError } from '../utils/errorHelpers.js';
-import logger from '@telegram-moderator/shared/services/logger.js';
+import logger from '@telegram-moderator/shared/src/services/logger.js';
 
 /**
  * GET /api/v1/groups/{groupId}/users/{userId}/strikes

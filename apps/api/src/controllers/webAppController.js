@@ -1,7 +1,7 @@
 import * as tokenService from '../services/tokenService.js';
-import * as db from '@telegram-moderator/shared/services/database.js';
-import { getGroupSettings as getConfigGroupSettings } from '@telegram-moderator/shared/config/index.js';
-import logger from '@telegram-moderator/shared/services/logger.js';
+import * as db from '@telegram-moderator/shared/src/services/database.js';
+import { getGroupSettings as getConfigGroupSettings } from '@telegram-moderator/shared/src/config/index.js';
+import logger from '@telegram-moderator/shared/src/services/logger.js';
 import ApiError from '../utils/apiError.js';
 import { ERROR_TYPES } from '../utils/errorTypes.js';
 import { asyncHandler, successResponse, handleDatabaseError } from '../utils/errorHelpers.js';

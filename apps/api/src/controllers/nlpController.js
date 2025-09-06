@@ -1,7 +1,7 @@
 import { validationResult } from 'express-validator';
-import { isPromotional, hasProfanity, analyzeMessage } from '@telegram-moderator/shared/services/nlp.js';
-import { getGroupSettings } from '@telegram-moderator/shared/config/index.js';
-import logger from '@telegram-moderator/shared/services/logger.js';
+import { isPromotional, hasProfanity, analyzeMessage } from '@telegram-moderator/shared/src/services/nlp.js';
+import { getGroupSettings } from '@telegram-moderator/shared/src/config/index.js';
+import logger from '@telegram-moderator/shared/src/services/logger.js';
 import ApiError from '../utils/apiError.js';
 
 /**

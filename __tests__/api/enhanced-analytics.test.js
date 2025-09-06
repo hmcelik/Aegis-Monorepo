@@ -6,10 +6,18 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import app from 'apps/api/src/server.js';
-import * as db from '@telegram-moderator/shared/services/database.js';
+import * as db from '@telegram-moderator/shared/src/services/database.js';
 
 // Mock the database and telegram services
-vi.mock('@telegram-moderator/shared/services/database.js', () => ({
+vi.mock('@telegram-moderator/shared/src/services/database.js', () => ({
+    Database: {
+        getInstance: vi.fn(() => ({
+            run: vi.fn(),
+            get: vi.fn(),
+            all: vi.fn(),
+            close: vi.fn()
+        }))
+    },
     initializeDatabase: vi.fn(),
     getDb: vi.fn(),
     isUserGroupAdmin: vi.fn(),
@@ -20,7 +28,7 @@ vi.mock('@telegram-moderator/shared/services/database.js', () => ({
     logManualAction: vi.fn()
 }));
 
-vi.mock('packages/shared/services/telegram.js', () => ({
+vi.mock('packages/shared/src/services/telegram.js', () => ({
     getChatAdmins: vi.fn(() => Promise.resolve([123456789])),
     getChatMemberCount: vi.fn(() => Promise.resolve(150))
 }));

@@ -1,6 +1,6 @@
 import { validationResult } from 'express-validator';
-import * as db from '@telegram-moderator/shared/services/database.js';
-import { getGroupSettings, updateSetting } from '@telegram-moderator/shared/config/index.js';
+import * as db from '@telegram-moderator/shared/src/services/database.js';
+import { getGroupSettings, updateSetting } from '@telegram-moderator/shared/src/config/index.js';
 import ApiError from '../utils/apiError.js';
 
 export const listGroups = async (req, res, next) => {

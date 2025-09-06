@@ -104,10 +104,10 @@ vi.mock('apps/api/src/middleware/verifyTelegramAuth.js', () => {
 // Import your actual routes and error handlers AFTER mocking
 import authRoutes from 'apps/api/src/routes/auth.js';
 import errorResponder from 'apps/api/src/utils/errorResponder.js';
-import * as db from '@telegram-moderator/shared/services/database.js';
+import * as db from '@telegram-moderator/shared/src/services/database.js';
 
 // Mock the database
-vi.mock('@telegram-moderator/shared/services/database.js');
+vi.mock('@telegram-moderator/shared/src/services/database.js');
 
 const app = express();
 app.use(express.json());

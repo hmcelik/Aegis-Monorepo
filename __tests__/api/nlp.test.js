@@ -2,8 +2,20 @@ import { describe, it, expect, beforeAll, vi } from 'vitest';
 import request from 'supertest';
 import app from 'apps/api/src/server.js';
 
+// Mock the database service
+vi.mock('@telegram-moderator/shared/src/services/database.js', () => ({
+    Database: {
+        getInstance: vi.fn(() => ({
+            run: vi.fn(),
+            get: vi.fn(),
+            all: vi.fn(),
+            close: vi.fn()
+        }))
+    }
+}));
+
 // Mock the NLP service
-vi.mock('packages/shared/services/nlp.js', () => ({
+vi.mock('@telegram-moderator/shared/src/services/nlp.js', () => ({
     isPromotional: vi.fn().mockResolvedValue({
         isSpam: false,
         score: 0.2,

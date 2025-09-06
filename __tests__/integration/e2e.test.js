@@ -3,19 +3,19 @@ import request from 'supertest';
 import axios from 'axios';
 import app from 'apps/api/src/server.js';
 import * as tokenService from 'apps/api/src/services/tokenService.js';
-import telegramService from 'packages/shared/services/telegram.js';
+import telegramService from '@telegram-moderator/shared/src/services/telegram.js';
 
 // --- MOCK SETUP ---
 
 vi.mock('axios');
 
 // ✅ Mock NLP service with named export
-vi.mock('packages/shared/services/nlp.js', () => ({
+vi.mock('@telegram-moderator/shared/src/services/nlp.js', () => ({
   isPromotional: vi.fn().mockResolvedValue({ score: 1.0 }), // always spam
 }));
 
 // ✅ Mock config service (API and bot config usage)
-vi.mock('packages/shared/config/index.js', () => ({
+vi.mock('@telegram-moderator/shared/src/config/index.js', () => ({
   updateSetting: vi.fn(),
   getGroupSettings: vi.fn(),
   default: {
@@ -24,7 +24,7 @@ vi.mock('packages/shared/config/index.js', () => ({
 }));
 
 // ✅ Mock database service (named + default)
-vi.mock('@telegram-moderator/shared/services/database.js', () => {
+vi.mock('@telegram-moderator/shared/src/services/database.js', () => {
   const mockDb = {
     upsertUser: vi.fn(),
     getStrikes: vi.fn().mockResolvedValue({ count: 0 }),
@@ -50,8 +50,8 @@ describe('End-to-End API and Bot Integration Test', () => {
   let configService, db, handleMessage;
 
   beforeEach(async () => {
-    configService = await import('packages/shared/config/index.js');
-    db = (await import('@telegram-moderator/shared/services/database.js')).default;
+    configService = await import('@telegram-moderator/shared/src/config/index.js');
+    db = (await import('@telegram-moderator/shared/src/services/database.js')).default;
 
     // ✅ Get the named export correctly
     handleMessage = (await import('apps/bot/src/handlers/messageHandler.js')).handleMessage;

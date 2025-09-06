@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { isPromotional, hasProfanity, analyzeMessage } from 'packages/shared/services/nlp.js';
+import { isPromotional, hasProfanity, analyzeMessage } from '@telegram-moderator/shared/src/services/nlp.js';
 
 // Mock the logger to prevent console noise during tests
-vi.mock('packages/shared/services/logger.js', () => ({
+vi.mock('@telegram-moderator/shared/src/services/logger.js', () => ({
   default: {
     info: vi.fn(),
     warn: vi.fn(),

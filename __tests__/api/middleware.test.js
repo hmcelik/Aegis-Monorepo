@@ -16,7 +16,7 @@ vi.mock('apps/api/src/services/tokenService.js', () => ({
 
 vi.mock('axios');
 
-vi.mock('packages/shared/services/logger.js', () => ({
+vi.mock('@telegram-moderator/shared/src/services/logger.js', () => ({
   default: {
     info: vi.fn(),
     warn: vi.fn(),

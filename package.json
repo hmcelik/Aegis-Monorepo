@@ -10,6 +10,7 @@
     "dev:api": "turbo run dev --filter=@telegram-moderator/api",
     "dev:bot": "turbo run dev --filter=@telegram-moderator/bot",
     "dev:web": "turbo run dev --filter=mini-app-dashboard",
+    "dev:worker": "turbo run dev --filter=@telegram-moderator/worker",
     "dev:ngrok": "turbo run ngrok --filter=@telegram-moderator/bot",
     "dev:api-with-ngrok": "concurrently \"turbo run dev --filter=@telegram-moderator/api\" \"turbo run ngrok --filter=@telegram-moderator/bot\"",
     "build": "turbo run build",
@@ -18,10 +19,27 @@
     "test:api": "turbo run test --filter=@telegram-moderator/api",
     "test:bot": "turbo run test --filter=@telegram-moderator/bot",
     "test:web": "turbo run test --filter=mini-app-dashboard",
+    "test:worker": "turbo run test --filter=@telegram-moderator/worker",
+    "test:unit": "vitest run __tests__/unit",
+    "test:e2e": "vitest run __tests__/e2e",
     "lint": "turbo run lint"
   },
   "devDependencies": {
+    "@types/node": "^22.5.5",
     "concurrently": "^8.2.2",
-    "turbo": "^2.0.0"
+    "express": "^5.1.0",
+    "ioredis": "^5.7.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "supertest": "^7.1.4",
+    "turbo": "^2.5.6",
+    "typescript": "^5.6.2",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^2.1.1"
+  },
+  "dependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "axios": "^1.11.0",
+    "jsonwebtoken": "^9.0.2"
   }
 }

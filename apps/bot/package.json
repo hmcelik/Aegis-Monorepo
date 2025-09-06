@@ -10,7 +10,8 @@
     "dev": "nodemon --watch src --ext js,json src/index.js",
     "start": "node src/index.js",
     "build": "echo \"(js project) no build step\"",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "echo \"no linter configured\"",
     "ngrok": "ngrok http --url=minnow-good-mostly.ngrok-free.app 3000"
   },

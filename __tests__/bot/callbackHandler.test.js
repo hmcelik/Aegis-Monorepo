@@ -1,14 +1,14 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { handleCallback } from 'apps/bot/src/handlers/callbackHandler'; // Adjust path as needed
-import * as db from 'packages/shared/services/database';
-import * as telegram from 'packages/shared/services/telegram';
-import * as config from 'packages/shared/config/index';
+import * as db from 'packages/shared/src/services/database';
+import * as telegram from 'packages/shared/src/services/telegram';
+import * as config from '@telegram-moderator/shared/src/config/index';
 
 // Mock all dependencies
-vi.mock('packages/shared/services/database');
-vi.mock('packages/shared/services/telegram');
-vi.mock('packages/shared/config/index');
-vi.mock('packages/shared/services/logger', () => ({
+vi.mock('packages/shared/src/services/database');
+vi.mock('packages/shared/src/services/telegram');
+vi.mock('@telegram-moderator/shared/src/config/index');
+vi.mock('packages/shared/src/services/logger', () => ({
   default: {
     info: vi.fn(),
     warn: vi.fn(),

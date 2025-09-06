@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import * as db from '@telegram-moderator/shared/services/database.js';
+import * as db from '@telegram-moderator/shared/src/services/database.js';
 
 // Mock the logger to prevent console noise during tests
-vi.mock('packages/shared/services/logger.js', () => ({
+vi.mock('@telegram-moderator/shared/src/services/logger.js', () => ({
   default: {
     info: vi.fn(),
     warn: vi.fn(),

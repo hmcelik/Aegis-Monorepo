@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import logger from '@telegram-moderator/shared/services/logger.js';
+import logger from '@telegram-moderator/shared/src/services/logger.js';
 import ApiError from '../utils/apiError.js';
 
 /**

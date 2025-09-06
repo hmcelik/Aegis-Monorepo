@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import config, { getGroupSettings, updateSetting } from 'packages/shared/config/index.js';
-import * as db from '@telegram-moderator/shared/services/database.js';
+import config, { getGroupSettings, updateSetting } from '@telegram-moderator/shared/src/config/index.js';
+import * as db from '@telegram-moderator/shared/src/services/database.js';
 
 // Mock the database service
-vi.mock('@telegram-moderator/shared/services/database.js');
+vi.mock('@telegram-moderator/shared/src/services/database.js');
 
 // Mock the logger to prevent console noise during tests
-vi.mock('packages/shared/services/logger.js', () => ({
+vi.mock('@telegram-moderator/shared/src/services/logger.js', () => ({
   default: {
     info: vi.fn(),
     warn: vi.fn(),
