@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { apiService } from '../services/api';
 import GroupSelector from './GroupSelector';
@@ -20,7 +20,6 @@ const GroupManagementDashboard = ({ user }) => {
   const [error, setError] = useState(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [settingsLoading, setSettingsLoading] = useState(false);
-  const [showDebugger, setShowDebugger] = useState(false);
   const [activeTab, setActiveTab] = useState('statistics'); // statistics, settings, strikes, audit
   const [selectedPeriod, setSelectedPeriod] = useState('week'); // Default to week
   const [customStartDate, setCustomStartDate] = useState(null);
@@ -36,7 +35,7 @@ const GroupManagementDashboard = ({ user }) => {
     if (selectedGroup) {
       loadGroupData(selectedGroup.id);
     }
-  }, [selectedGroup]);
+  }, [selectedGroup, loadGroupData]);
 
   const loadGroups = async () => {
     console.log('🔄 Loading groups...');
@@ -106,7 +105,7 @@ const GroupManagementDashboard = ({ user }) => {
     }
   };
 
-  const loadGroupData = async (groupId, period = selectedPeriod, startDate = customStartDate, endDate = customEndDate) => {
+  const loadGroupData = useCallback(async (groupId, period = selectedPeriod, startDate = customStartDate, endDate = customEndDate) => {
     console.log('📊 Loading group data for groupId:', groupId);
     console.log('📊 Using period:', period, 'startDate:', startDate, 'endDate:', endDate);
     console.log('📊 GroupId type:', typeof groupId);
@@ -272,7 +271,7 @@ const GroupManagementDashboard = ({ user }) => {
       setStatsLoading(false);
       setSettingsLoading(false);
     }
-  };
+  }, [selectedPeriod, customStartDate, customEndDate]);
 
   const handleGroupSelect = (group) => {
     console.log('🎯 Group selected:', group);
@@ -304,17 +303,35 @@ const GroupManagementDashboard = ({ user }) => {
     if (!selectedGroup) return;
 
     try {
+      console.log('🔄 Updating settings for group:', selectedGroup.id, 'with data:', newSettings);
       const response = await apiService.groups.updateSettings(selectedGroup.id, newSettings);
       
+      console.log('📡 Update response received:', response);
+      
       if (response?.data?.settings) {
+        console.log('✅ Settings found in response, updating state:', response.data.settings);
         setGroupSettings(response.data.settings);
         toast.success('Settings updated successfully!');
       } else {
+        console.log('⚠️ No settings in response, reloading from server. Response structure:', response);
         toast.success('Settings updated!');
         // Reload settings to get the latest state
         const settingsResponse = await apiService.groups.getSettings(selectedGroup.id);
+        console.log('🔄 Reloaded settings response:', settingsResponse);
         if (settingsResponse?.data) {
-          setGroupSettings(settingsResponse.data);
+          let settingsData = null;
+          
+          // Handle different response structures
+          if (settingsResponse.data?.data?.settings) {
+            settingsData = settingsResponse.data.data.settings;
+          } else if (settingsResponse.data?.settings) {
+            settingsData = settingsResponse.data.settings;
+          } else {
+            settingsData = settingsResponse.data;
+          }
+          
+          console.log('📋 Final settings data to set:', settingsData);
+          setGroupSettings(settingsData);
         }
       }
     } catch (err) {
@@ -342,6 +359,7 @@ const GroupManagementDashboard = ({ user }) => {
   };
 
   // Debug function to test API endpoints directly
+  // eslint-disable-next-line no-unused-vars
   const debugTestStats = async () => {
     if (!selectedGroup) {
       toast.error('Please select a group first');

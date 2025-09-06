@@ -25,6 +25,8 @@ const GroupSettings = ({ settings = {}, loading, onUpdate }) => {
 
   // Initialize form data when settings change
   useEffect(() => {
+    console.log('🎬 GroupSettings useEffect triggered with settings:', settings);
+    
     // Check if settings object has meaningful data (not just an empty object)
     if (settings && Object.keys(settings).length > 0) {
       console.log('🔧 Initializing form with settings:', settings);
@@ -47,7 +49,9 @@ const GroupSettings = ({ settings = {}, loading, onUpdate }) => {
       setIsModified(false);
       console.log('✅ Form initialized with actual settings values:', newFormData);
     } else if (settings) {
-      console.log('⚠️ Settings object exists but is empty, using defaults');
+      console.log('⚠️ Settings object exists but is empty, keeping current form data');
+    } else {
+      console.log('⚠️ No settings provided, keeping defaults');
     }
   }, [settings]);
 
@@ -86,12 +90,14 @@ const GroupSettings = ({ settings = {}, loading, onUpdate }) => {
   };
 
   const handleSave = async () => {
+    console.log('💾 Starting save with formData:', formData);
     setSaving(true);
     try {
       await onUpdate(formData);
+      console.log('✅ Save completed successfully');
       setIsModified(false);
     } catch (error) {
-      console.error('Error saving settings:', error);
+      console.error('❌ Error saving settings:', error);
     } finally {
       setSaving(false);
     }
