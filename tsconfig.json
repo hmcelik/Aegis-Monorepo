@@ -2,6 +2,7 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "rootDir": ".",
     "paths": {
       "@telegram-moderator/shared": ["./packages/shared/src"],
       "@telegram-moderator/shared/*": ["./packages/shared/src/*"],

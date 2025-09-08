@@ -13,6 +13,7 @@ import nlpRoutes from './routes/nlp.js';
 import systemRoutes from './routes/system.js';
 import logsRoutes from './routes/logs.js';
 import billingRoutes from './routes/billing.js';
+import analyticsRoutes from './routes/analytics.js';
 import * as systemController from './controllers/systemController.js';
 import errorResponder from './utils/errorResponder.js';
 import ApiError from './utils/apiError.js';
@@ -317,7 +318,7 @@ app.use('/api/v1/webapp', webAppRoutes); // Keep for backward compatibility (dep
 app.use('/api/v1/nlp', nlpRoutes);
 app.use('/api/v1/logs', logsRoutes);
 app.use('/api/v1/billing', billingRoutes);
-
+app.use('/api/v1/analytics', analyticsRoutes);
 // 404 handler for API endpoints
 app.use('/api', (req, res, next) => {
     next(ApiError.fromType(ERROR_TYPES.ENDPOINT_NOT_FOUND, `API endpoint ${req.method} ${req.path} not found`));
