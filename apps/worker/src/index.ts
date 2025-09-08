@@ -12,13 +12,8 @@ import winston from 'winston';
 // Create a simple logger for the worker
 const logger = winston.createLogger({
   level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.Console()
-  ]
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
+  transports: [new winston.transports.Console()],
 });
 
 interface WorkerConfig {
@@ -63,30 +58,30 @@ class MessageWorkerService {
 
         // Check shard manager status
         const metrics = await this.shardManager.getMetrics();
-        const healthyShards = metrics.shards.filter(shard => 
-          shard.waiting >= 0 && shard.active >= 0
+        const healthyShards = metrics.shards.filter(
+          shard => shard.waiting >= 0 && shard.active >= 0
         ).length;
-        
+
         if (healthyShards === metrics.totalShards) {
-          res.json({ 
-            status: 'ready', 
+          res.json({
+            status: 'ready',
             timestamp: new Date().toISOString(),
             shards: healthyShards,
-            totalShards: metrics.totalShards
+            totalShards: metrics.totalShards,
           });
         } else {
-          res.status(503).json({ 
-            status: 'not ready', 
+          res.status(503).json({
+            status: 'not ready',
             reason: 'some shards not healthy',
             healthyShards,
-            totalShards: metrics.totalShards
+            totalShards: metrics.totalShards,
           });
         }
       } catch (error) {
-        res.status(503).json({ 
-          status: 'not ready', 
+        res.status(503).json({
+          status: 'not ready',
           reason: 'redis connection failed',
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     });
@@ -96,9 +91,9 @@ class MessageWorkerService {
         const metrics = await this.getMetrics();
         res.json(metrics);
       } catch (error) {
-        res.status(500).json({ 
+        res.status(500).json({
           error: 'Failed to get metrics',
-          details: error instanceof Error ? error.message : String(error)
+          details: error instanceof Error ? error.message : String(error),
         });
       }
     });
@@ -108,9 +103,9 @@ class MessageWorkerService {
         const shardingMetrics = await this.shardManager.getMetrics();
         res.json(shardingMetrics);
       } catch (error) {
-        res.status(500).json({ 
+        res.status(500).json({
           error: 'Failed to get sharding metrics',
-          details: error instanceof Error ? error.message : String(error)
+          details: error instanceof Error ? error.message : String(error),
         });
       }
     });
@@ -122,12 +117,12 @@ class MessageWorkerService {
         res.json({
           chatId,
           shardId,
-          totalShards: this.config.partitions
+          totalShards: this.config.partitions,
         });
       } catch (error) {
-        res.status(500).json({ 
+        res.status(500).json({
           error: 'Failed to get distribution info',
-          details: error instanceof Error ? error.message : String(error)
+          details: error instanceof Error ? error.message : String(error),
         });
       }
     });
@@ -146,16 +141,18 @@ class MessageWorkerService {
         enableReadyCheck: false,
         lazyConnect: true,
       },
-      queuePrefix: 'message-processing'
+      queuePrefix: 'message-processing',
     };
 
     // Create ShardManager with message processor callback
-    this.shardManager = new ShardManager(shardingConfig, (messageData) => this.processMessage(messageData));
-    
+    this.shardManager = new ShardManager(shardingConfig, messageData =>
+      this.processMessage(messageData)
+    );
+
     logger.info('Sharded message processing initialized', {
       partitions: this.config.partitions,
       totalConcurrency: this.config.concurrency,
-      maxConcurrencyPerShard: this.config.maxConcurrencyPerShard
+      maxConcurrencyPerShard: this.config.maxConcurrencyPerShard,
     });
   }
 
@@ -169,7 +166,7 @@ class MessageWorkerService {
       messageId: messageData.messageId,
       tenantId,
       hasText: !!messageData.text,
-      hasMedia: !!messageData.media
+      hasMedia: !!messageData.media,
     });
 
     try {
@@ -178,19 +175,19 @@ class MessageWorkerService {
         hasLinks: messageData.text ? /https?:\/\//.test(messageData.text) : false,
         isNewUser: messageData.user?.isNewUser || false,
         userJoinDate: messageData.user?.joinDate,
-        messageLength: messageData.text?.length || 0
+        messageLength: messageData.text?.length || 0,
       };
 
       // Get processing strategy based on budget status
       const strategy = await budgetEnforcer.getProcessingStrategy(tenantId, messageContext);
-      
+
       logger.info('Processing strategy determined', {
         chatId: messageData.chatId,
         messageId: messageData.messageId,
         tenantId,
         useAI: strategy.useAI,
         useFastPath: strategy.useFastPath,
-        reason: strategy.reason
+        reason: strategy.reason,
       });
 
       // Process text content if available
@@ -211,7 +208,7 @@ class MessageWorkerService {
             cost: 0.001, // Placeholder cost
             model: 'gpt-3.5-turbo',
             operation: 'moderation',
-            timestamp: new Date()
+            timestamp: new Date(),
           };
 
           // Record AI usage for budget tracking
@@ -225,18 +222,18 @@ class MessageWorkerService {
             scores: policyResult.scores,
             rulesMatched: policyResult.rulesMatched,
             aiProcessingTime: aiEndTime - aiStartTime,
-            estimatedTokens: aiUsage.tokens
+            estimatedTokens: aiUsage.tokens,
           });
         } else {
           // Fast-path rules only (no AI)
           policyResult = this.policyEngine.evaluateFastPath(messageData.text);
-          
+
           logger.info('Fast-path evaluation completed', {
             chatId: messageData.chatId,
             messageId: messageData.messageId,
             tenantId,
             verdict: policyResult.verdict,
-            reason: strategy.reason
+            reason: strategy.reason,
           });
         }
 
@@ -255,15 +252,14 @@ class MessageWorkerService {
         messageId: messageData.messageId,
         tenantId,
         processingTime,
-        strategyUsed: strategy.reason
+        strategyUsed: strategy.reason,
       });
-
     } catch (error) {
       logger.error('Message processing failed', {
         chatId: messageData.chatId,
         messageId: messageData.messageId,
         tenantId,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -271,79 +267,71 @@ class MessageWorkerService {
 
   private async handleBlockAction(messageData: MessageJob, reason: string): Promise<void> {
     const chatId = parseInt(messageData.chatId);
-    
+
     logger.info('Handling block action', {
       chatId,
       messageId: messageData.messageId,
-      reason
+      reason,
     });
 
     // Create delete message action through outbox
-    const actionId = await outboxManager.createAction(
-      chatId,
-      messageData.messageId,
-      'delete',
-      { reason }
-    );
+    const actionId = await outboxManager.createAction(chatId, messageData.messageId, 'delete', {
+      reason,
+    });
 
     // Process the action immediately
     const result = await outboxManager.processAction(actionId);
-    
+
     if (!result.success) {
       logger.error('Failed to process delete action', {
         chatId,
         messageId: messageData.messageId,
         actionId,
-        error: result.error
+        error: result.error,
       });
     }
   }
 
   private async handleReviewAction(messageData: MessageJob, reason: string): Promise<void> {
     const chatId = parseInt(messageData.chatId);
-    
+
     logger.info('Handling review action', {
       chatId,
       messageId: messageData.messageId,
-      reason
+      reason,
     });
 
     // Create warn action through outbox (softer action for review)
-    const actionId = await outboxManager.createAction(
-      chatId,
-      messageData.messageId,
-      'warn',
-      { 
-        reason,
-        userId: parseInt(messageData.userId),
-        warningLevel: 'low'
-      }
-    );
+    const actionId = await outboxManager.createAction(chatId, messageData.messageId, 'warn', {
+      reason,
+      userId: parseInt(messageData.userId),
+      warningLevel: 'low',
+    });
 
     // Process the action immediately
     const result = await outboxManager.processAction(actionId);
-    
+
     if (!result.success) {
       logger.error('Failed to process warn action', {
         chatId,
         messageId: messageData.messageId,
         actionId,
-        error: result.error
+        error: result.error,
       });
     }
   }
 
   private async getMetrics() {
     const shardingMetrics = await this.shardManager.getMetrics();
-    
+
     return {
       timestamp: new Date().toISOString(),
       sharding: shardingMetrics,
       config: {
         partitions: this.config.partitions,
         totalConcurrency: this.config.concurrency,
-        maxConcurrencyPerShard: this.config.maxConcurrencyPerShard
-      }
+        maxConcurrencyPerShard: this.config.maxConcurrencyPerShard,
+      },
     };
   }
 
@@ -356,17 +344,17 @@ class MessageWorkerService {
       logger.info('Worker service started', {
         port: this.config.port,
         partitions: this.config.partitions,
-        concurrency: this.config.concurrency
+        concurrency: this.config.concurrency,
       });
     });
 
     // Graceful shutdown handling
     const shutdown = async (signal: string) => {
       logger.info(`Received ${signal}, starting graceful shutdown`);
-      
+
       // Stop shard manager
       await this.shardManager.shutdown();
-      
+
       // Close HTTP server
       server.close(() => {
         logger.info('Worker service shut down complete');
@@ -385,13 +373,14 @@ const config: WorkerConfig = {
   concurrency: parseInt(process.env.WORKER_CONCURRENCY || '10'),
   partitions: parseInt(process.env.WORKER_PARTITIONS || '4'),
   port: parseInt(process.env.WORKER_PORT || '3001'),
-  maxConcurrencyPerShard: process.env.MAX_CONCURRENCY_PER_SHARD ? 
-    parseInt(process.env.MAX_CONCURRENCY_PER_SHARD) : undefined,
+  maxConcurrencyPerShard: process.env.MAX_CONCURRENCY_PER_SHARD
+    ? parseInt(process.env.MAX_CONCURRENCY_PER_SHARD)
+    : undefined,
 };
 
 // Start the service
 const workerService = new MessageWorkerService(config);
-workerService.start().catch((error) => {
+workerService.start().catch(error => {
   logger.error('Failed to start worker service', { error: error.message });
   process.exit(1);
 });

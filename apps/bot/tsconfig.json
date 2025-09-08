@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": "../../",
+    "paths": {
+      "@telegram-moderator/types": ["packages/types/src"],
+      "@telegram-moderator/shared": ["packages/shared/src"],
+      "@telegram-moderator/config": ["packages/config/src"]
+    }
+  },
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../../packages/types" },
+    { "path": "../../packages/shared" }
+  ]
+}

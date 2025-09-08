@@ -17,7 +17,7 @@ vi.mock('apps/api/src/middleware/verifyTelegramAuth.js', () => ({
     }
     // Simulate failed verification
     res.status(401).json({ message: 'Invalid hash' });
-  }
+  },
 }));
 
 vi.mock('@telegram-moderator/shared/src/services/database.js');
@@ -28,7 +28,6 @@ app.use('/api/v1/auth', authRoutes);
 app.use(errorResponder);
 
 describe('Auth API Endpoints', () => {
-
   beforeEach(() => {
     // Reset mocks before each test
     vi.clearAllMocks();
@@ -40,15 +39,13 @@ describe('Auth API Endpoints', () => {
       first_name: 'Test',
       username: 'testuser',
       auth_date: Date.now() / 1000,
-      hash: 'valid_hash'
+      hash: 'valid_hash',
     };
 
     // Mock the database function
     db.upsertUser.mockResolvedValue();
 
-    const response = await request(app)
-      .post('/api/v1/auth/verify')
-      .send(validTelegramData);
+    const response = await request(app).post('/api/v1/auth/verify').send(validTelegramData);
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty('token');
@@ -58,12 +55,10 @@ describe('Auth API Endpoints', () => {
   it('POST /auth/verify - should return 401 for invalid Telegram data', async () => {
     const invalidTelegramData = {
       id: 12345,
-      hash: 'invalid_hash'
+      hash: 'invalid_hash',
     };
 
-    const response = await request(app)
-      .post('/api/v1/auth/verify')
-      .send(invalidTelegramData);
+    const response = await request(app).post('/api/v1/auth/verify').send(invalidTelegramData);
 
     expect(response.status).toBe(401);
     expect(response.body.message).toBe('Invalid hash');

@@ -6,7 +6,7 @@ import type { Migration, DatabaseConnection } from '../index.js';
 export const migration_001_initial_schema: Migration = {
   id: '001',
   name: 'initial_schema',
-  
+
   async up(db: DatabaseConnection): Promise<void> {
     // Tenants table - Core multi-tenant structure
     await db.exec(`
@@ -112,5 +112,5 @@ export const migration_001_initial_schema: Migration = {
     await db.exec('DROP TABLE IF EXISTS groups');
     await db.exec('DROP TABLE IF EXISTS tenant_settings');
     await db.exec('DROP TABLE IF EXISTS tenants');
-  }
+  },
 };

@@ -7,7 +7,7 @@ A comprehensive AI-powered Telegram moderation bot with advanced features, compl
 This monorepo contains three main services:
 
 - **🤖 Bot Service** (`apps/bot/`) - AI-powered Telegram moderation bot
-- **🔗 API Service** (`apps/api/`) - REST API with JWT authentication and Telegram WebApp support  
+- **🔗 API Service** (`apps/api/`) - REST API with JWT authentication and Telegram WebApp support
 - **🌐 Web Dashboard** (`apps/web/`) - React-based management interface
 - **📦 Shared Package** (`packages/shared/`) - Common utilities, database, logging, and NLP services
 
@@ -28,7 +28,7 @@ This monorepo contains three main services:
 
 ### Prerequisites
 
-- **Node.js 22+** 
+- **Node.js 22+**
 - **pnpm** (recommended package manager)
 - **SQLite** (included)
 - **ngrok** (for external webhook testing)
@@ -95,37 +95,40 @@ PORT=3000
 # JWT secret for authentication
 JWT_SECRET=your-super-secret-jwt-key-here
 
-# Telegram Bot Secret for webhook verification  
+# Telegram Bot Secret for webhook verification
 TELEGRAM_BOT_SECRET=your-webhook-secret
 ```
 
 ## 🛠️ Development Commands
 
 ### Main Development Commands
+
 ```bash
 # Run all services in parallel (recommended)
 pnpm dev
 
 # Run individual services
 pnpm dev:api          # API server only
-pnpm dev:bot          # Bot only  
+pnpm dev:bot          # Bot only
 pnpm dev:web          # Web dashboard only
 pnpm dev:ngrok        # Ngrok tunnel only
 pnpm dev:api-with-ngrok  # API with ngrok tunnel
 ```
 
 ### Testing Commands
+
 ```bash
 # Run all tests
 pnpm test
 
 # Run individual service tests
 pnpm test:api -- --run    # API tests only (156 tests)
-pnpm test:bot -- --run    # Bot tests only (94 tests) 
+pnpm test:bot -- --run    # Bot tests only (94 tests)
 pnpm test:web -- --run    # Web tests only
 ```
 
 ### Build Commands
+
 ```bash
 # Build all packages
 pnpm build
@@ -139,7 +142,7 @@ pnpm start
 When running locally:
 
 - **API Server**: http://localhost:3000
-- **Web Dashboard**: http://localhost:5173  
+- **Web Dashboard**: http://localhost:5173
 - **Bot**: Polling mode (no HTTP endpoint)
 - **Ngrok Tunnel**: https://your-tunnel.ngrok-free.app (when using ngrok)
 
@@ -149,7 +152,7 @@ The API provides comprehensive endpoints for:
 
 - **Authentication** - JWT + Telegram WebApp auth
 - **Group Management** - Settings, statistics, member management
-- **Strike System** - Automated penalty management  
+- **Strike System** - Automated penalty management
 - **Analytics** - Detailed moderation statistics
 - **NLP Analysis** - Spam and profanity detection endpoints
 
@@ -175,7 +178,7 @@ The monorepo includes comprehensive test suites:
 │   │   │   ├── routes/      # API routes
 │   │   │   └── services/    # Business logic
 │   │   └── package.json
-│   ├── bot/                 # Telegram bot service  
+│   ├── bot/                 # Telegram bot service
 │   │   ├── src/
 │   │   │   ├── handlers/    # Message, command, callback handlers
 │   │   │   └── keyboards/   # Inline keyboard layouts
@@ -193,7 +196,7 @@ The monorepo includes comprehensive test suites:
 │       └── utils/           # Common enums and utilities
 ├── __tests__/               # Test suites
 │   ├── api/                 # API tests
-│   ├── bot/                 # Bot tests  
+│   ├── bot/                 # Bot tests
 │   ├── database/            # Database tests
 │   └── services/            # Shared service tests
 └── package.json             # Root package configuration
@@ -223,6 +226,7 @@ vercel --prod
 ## � Roadmap & Task Board
 
 See [AEGIS_TASK_BOARD.md](./AEGIS_TASK_BOARD.md) for the comprehensive 90-day reliability-first roadmap including:
+
 - Queue & Idempotency implementation
 - AI Budget Control & Caching
 - Data Layer migration to PostgreSQL
@@ -233,13 +237,14 @@ See [AEGIS_TASK_BOARD.md](./AEGIS_TASK_BOARD.md) for the comprehensive 90-day re
 ## �🔧 Development Tips
 
 ### Separate Log Monitoring
+
 For cleaner log monitoring during development, run services in separate terminals:
 
 ```bash
 # Terminal 1: Bot logs
 pnpm dev:bot
 
-# Terminal 2: API logs  
+# Terminal 2: API logs
 pnpm dev:api
 
 # Terminal 3: Web logs
@@ -247,6 +252,7 @@ pnpm dev:web
 ```
 
 ### Webhook Testing with ngrok
+
 For testing webhooks with external services:
 
 ```bash
@@ -281,30 +287,36 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 This project has been successfully migrated from a standalone structure to a modern monorepo setup using Turborepo and pnpm workspaces. All services are fully functional and tested.
 
 # Optional - AI Features
+
 OPENAI_API_KEY=your_openai_api_key_here
 
 # API Configuration
+
 API_PORT=3000
 API_BASE_URL=http://localhost:3000
 JWT_SECRET=your-super-long-random-secret-string-here
 
 # CORS Configuration
+
 ALLOWED_ORIGIN=http://localhost:8080
-```
+
+````
 
 ### Development Setup
 
 1. **Start the Bot** (Terminal 1):
    ```bash
    npm run dev
-   ```
+````
 
 2. **Start the API Server** (Terminal 2):
+
    ```bash
    npm run dev:api
    ```
 
 3. **Start Development Server** (Terminal 3):
+
    ```bash
    npm run dev:examples
    ```
@@ -419,6 +431,7 @@ docker run -d --name moderator-bot telegram-moderator-bot
 ### Bot Settings
 
 Each group can be configured with:
+
 - **Strike thresholds** for warnings, mutes, kicks, and bans
 - **AI spam detection** sensitivity
 - **Profanity filtering** with custom thresholds

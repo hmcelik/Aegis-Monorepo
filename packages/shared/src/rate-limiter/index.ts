@@ -1,6 +1,6 @@
 /**
  * AEG-303: Rate limiting & throttling for AI services
- * 
+ *
  * This module implements:
  * 1. Token bucket algorithm for AI service rate limiting per tenant
  * 2. Queue-based throttling with backpressure management
@@ -14,18 +14,18 @@ import logger from '../services/logger';
 
 export interface RateLimitConfig {
   // Token bucket configuration
-  tokensPerSecond: number;    // Rate at which tokens are added
-  bucketCapacity: number;     // Maximum tokens in bucket
-  initialTokens?: number;     // Starting token count
-  
+  tokensPerSecond: number; // Rate at which tokens are added
+  bucketCapacity: number; // Maximum tokens in bucket
+  initialTokens?: number; // Starting token count
+
   // Circuit breaker configuration
-  failureThreshold: number;   // Failures before opening circuit
-  recoveryTimeoutMs: number;  // Time to wait before half-open
-  halfOpenMaxCalls: number;   // Max calls in half-open state
-  
+  failureThreshold: number; // Failures before opening circuit
+  recoveryTimeoutMs: number; // Time to wait before half-open
+  halfOpenMaxCalls: number; // Max calls in half-open state
+
   // Queue configuration
-  maxQueueSize: number;       // Maximum queued requests
-  timeoutMs: number;          // Request timeout
+  maxQueueSize: number; // Maximum queued requests
+  timeoutMs: number; // Request timeout
 }
 
 export interface RateLimitMetrics {
@@ -33,18 +33,18 @@ export interface RateLimitMetrics {
   currentTokens: number;
   tokensConsumed: number;
   tokensRefilled: number;
-  
+
   // Request metrics
   requestsAccepted: number;
   requestsRejected: number;
   requestsQueued: number;
   requestsTimedOut: number;
-  
+
   // Circuit breaker metrics
   circuitState: 'closed' | 'open' | 'half-open';
   failureCount: number;
   lastFailureTime?: number;
-  
+
   // Performance metrics
   averageWaitTime: number;
   queueLength: number;
@@ -74,12 +74,12 @@ export class RateLimiter extends EventEmitter {
     super();
     this.config = {
       initialTokens: config.bucketCapacity,
-      ...config
+      ...config,
     };
-    
+
     this.tokens = this.config.initialTokens!;
     this.lastRefillTime = Date.now();
-    
+
     this.metrics = {
       currentTokens: this.tokens,
       tokensConsumed: 0,
@@ -92,7 +92,7 @@ export class RateLimiter extends EventEmitter {
       failureCount: 0,
       averageWaitTime: 0,
       queueLength: 0,
-      throughput: 0
+      throughput: 0,
     };
 
     this.startRefillTimer();
@@ -143,7 +143,7 @@ export class RateLimiter extends EventEmitter {
         resolve,
         reject,
         timestamp: Date.now(),
-        timeoutId
+        timeoutId,
       };
 
       this.requestQueue.push(queuedRequest);
@@ -152,7 +152,7 @@ export class RateLimiter extends EventEmitter {
 
       logger.info('Request queued for rate limiting', {
         queueLength: this.requestQueue.length,
-        currentTokens: this.tokens
+        currentTokens: this.tokens,
       });
     });
   }
@@ -173,14 +173,14 @@ export class RateLimiter extends EventEmitter {
    */
   private tryAcquireToken(): boolean {
     this.refillTokens();
-    
+
     if (this.tokens >= 1) {
       this.tokens--;
       this.metrics.currentTokens = this.tokens;
       this.metrics.tokensConsumed++;
       return true;
     }
-    
+
     return false;
   }
 
@@ -191,17 +191,14 @@ export class RateLimiter extends EventEmitter {
     const now = Date.now();
     const timePassed = now - this.lastRefillTime;
     const tokensToAdd = (timePassed / 1000) * this.config.tokensPerSecond;
-    
+
     if (tokensToAdd >= 1) {
       const actualTokensAdded = Math.floor(tokensToAdd);
-      this.tokens = Math.min(
-        this.config.bucketCapacity,
-        this.tokens + actualTokensAdded
-      );
+      this.tokens = Math.min(this.config.bucketCapacity, this.tokens + actualTokensAdded);
       this.metrics.currentTokens = this.tokens;
       this.metrics.tokensRefilled += actualTokensAdded;
       this.lastRefillTime = now;
-      
+
       // Process queued requests
       this.processQueue();
     }
@@ -214,23 +211,23 @@ export class RateLimiter extends EventEmitter {
     while (this.requestQueue.length > 0 && this.tokens >= 1) {
       const request = this.requestQueue.shift()!;
       clearTimeout(request.timeoutId);
-      
+
       this.tokens--;
       this.metrics.currentTokens = this.tokens;
       this.metrics.tokensConsumed++;
       this.metrics.requestsAccepted++;
       this.metrics.queueLength = this.requestQueue.length;
-      
+
       // Calculate wait time
       const waitTime = Date.now() - request.timestamp;
       this.updateAverageWaitTime(waitTime);
-      
+
       request.resolve(true);
-      
+
       logger.info('Queued request processed', {
         waitTime,
         remainingTokens: this.tokens,
-        queueLength: this.requestQueue.length
+        queueLength: this.requestQueue.length,
       });
     }
   }
@@ -260,8 +257,7 @@ export class RateLimiter extends EventEmitter {
    */
   private updateAverageWaitTime(waitTime: number): void {
     const alpha = 0.1; // Exponential moving average factor
-    this.metrics.averageWaitTime = 
-      (alpha * waitTime) + ((1 - alpha) * this.metrics.averageWaitTime);
+    this.metrics.averageWaitTime = alpha * waitTime + (1 - alpha) * this.metrics.averageWaitTime;
   }
 
   /**
@@ -276,7 +272,7 @@ export class RateLimiter extends EventEmitter {
         this.halfOpenCalls = 0;
         this.metrics.circuitState = this.circuitState;
         this.metrics.failureCount = this.failureCount;
-        
+
         this.emit('circuit-closed');
         logger.info('Circuit breaker closed - service recovered');
       }
@@ -295,23 +291,22 @@ export class RateLimiter extends EventEmitter {
     this.lastFailureTime = Date.now();
     this.metrics.failureCount = this.failureCount;
     this.metrics.lastFailureTime = this.lastFailureTime;
-    
-    if (this.circuitState === 'closed' && 
-        this.failureCount >= this.config.failureThreshold) {
+
+    if (this.circuitState === 'closed' && this.failureCount >= this.config.failureThreshold) {
       this.circuitState = 'open';
       this.metrics.circuitState = this.circuitState;
-      
+
       this.emit('circuit-opened', { failureCount: this.failureCount });
       logger.warn('Circuit breaker opened due to failures', {
         failureCount: this.failureCount,
-        threshold: this.config.failureThreshold
+        threshold: this.config.failureThreshold,
       });
     } else if (this.circuitState === 'half-open') {
       // Immediate failure in half-open state
       this.circuitState = 'open';
       this.halfOpenCalls = 0;
       this.metrics.circuitState = this.circuitState;
-      
+
       this.emit('circuit-opened', { failureCount: this.failureCount });
       logger.warn('Circuit breaker re-opened from half-open state');
     }
@@ -321,13 +316,15 @@ export class RateLimiter extends EventEmitter {
    * Checks if circuit breaker should transition to half-open
    */
   private checkCircuitRecovery(): void {
-    if (this.circuitState === 'open' && 
-        this.lastFailureTime &&
-        Date.now() - this.lastFailureTime >= this.config.recoveryTimeoutMs) {
+    if (
+      this.circuitState === 'open' &&
+      this.lastFailureTime &&
+      Date.now() - this.lastFailureTime >= this.config.recoveryTimeoutMs
+    ) {
       this.circuitState = 'half-open';
       this.halfOpenCalls = 0;
       this.metrics.circuitState = this.circuitState;
-      
+
       this.emit('circuit-half-open');
       logger.info('Circuit breaker transitioning to half-open state');
     }
@@ -372,7 +369,7 @@ export class RateLimiter extends EventEmitter {
       failureCount: this.failureCount,
       averageWaitTime: 0,
       queueLength: this.requestQueue.length,
-      throughput: 0
+      throughput: 0,
     };
   }
 
@@ -384,14 +381,14 @@ export class RateLimiter extends EventEmitter {
       clearInterval(this.refillTimer);
       this.refillTimer = undefined;
     }
-    
+
     // Reject all queued requests
     this.requestQueue.forEach(request => {
       clearTimeout(request.timeoutId);
       request.resolve(false);
     });
     this.requestQueue = [];
-    
+
     this.removeAllListeners();
     logger.info('Rate limiter destroyed');
   }
@@ -399,13 +396,13 @@ export class RateLimiter extends EventEmitter {
 
 // Export a default rate limiter instance for AI services
 export const aiRateLimiter = new RateLimiter({
-  tokensPerSecond: 10,        // 10 AI calls per second max
-  bucketCapacity: 20,         // Burst capacity of 20 calls
-  failureThreshold: 5,        // Open circuit after 5 failures
-  recoveryTimeoutMs: 30000,   // 30 second recovery timeout
-  halfOpenMaxCalls: 3,        // 3 test calls in half-open state
-  maxQueueSize: 100,          // Queue up to 100 requests
-  timeoutMs: 10000           // 10 second request timeout
+  tokensPerSecond: 10, // 10 AI calls per second max
+  bucketCapacity: 20, // Burst capacity of 20 calls
+  failureThreshold: 5, // Open circuit after 5 failures
+  recoveryTimeoutMs: 30000, // 30 second recovery timeout
+  halfOpenMaxCalls: 3, // 3 test calls in half-open state
+  maxQueueSize: 100, // Queue up to 100 requests
+  timeoutMs: 10000, // 10 second request timeout
 });
 
 export default RateLimiter;

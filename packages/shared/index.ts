@@ -1,10 +1,10 @@
 // Database layer exports
-export { 
-  DatabaseManager, 
+export {
+  DatabaseManager,
   BaseRepository,
   type DatabaseConnection,
   type DatabaseConfig,
-  type Migration 
+  type Migration,
 } from './src/db/index.js';
 
 export { TenantRepository } from './src/db/repositories/TenantRepository.js';
@@ -15,7 +15,7 @@ export { initializeDatabase, registerMigrations } from './src/db/migrations.js';
 // Cache exports
 export { VerdictCache } from './src/cache/index.js';
 
-// Rate limiting exports  
+// Rate limiting exports
 export { RateLimiter } from './src/rate-limiter/index.js';
 
 // Logger exports

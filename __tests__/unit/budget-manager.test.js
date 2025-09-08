@@ -4,25 +4,25 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 const mockDatabase = {
   run: vi.fn(),
   get: vi.fn(),
-  all: vi.fn()
+  all: vi.fn(),
 };
 
 const mockLogger = {
   info: vi.fn(),
   error: vi.fn(),
   debug: vi.fn(),
-  warn: vi.fn()
+  warn: vi.fn(),
 };
 
 // Mock dependencies before importing
 vi.mock('../../packages/shared/src/services/database.js', () => ({
   Database: {
-    getInstance: () => mockDatabase
-  }
+    getInstance: () => mockDatabase,
+  },
 }));
 
 vi.mock('../../packages/shared/src/services/logger.js', () => ({
-  logger: mockLogger
+  logger: mockLogger,
 }));
 
 // Dynamic import to ensure mocks are in place
@@ -34,7 +34,7 @@ describe('BudgetManager Service', () => {
   beforeEach(() => {
     budgetManager = new BudgetManager();
     vi.clearAllMocks();
-    
+
     // Setup default mock return values
     mockDatabase.run.mockResolvedValue({ lastID: 1 });
     mockDatabase.get.mockResolvedValue(null);
@@ -49,10 +49,10 @@ describe('BudgetManager Service', () => {
     it('should create default budget for new tenant', async () => {
       // Mock no existing budget
       mockDatabase.get.mockResolvedValueOnce(null);
-      
+
       // Mock successful creation
       mockDatabase.run.mockResolvedValueOnce({ lastID: 1 });
-      
+
       // Mock the new budget returned
       const mockBudget = {
         tenant_id: 'tenant-1',
@@ -60,9 +60,9 @@ describe('BudgetManager Service', () => {
         degrade_mode: 'strict_rules',
         reset_date: '2025-10-01T00:00:00.000Z',
         created_at: '2025-09-06T12:00:00.000Z',
-        updated_at: '2025-09-06T12:00:00.000Z'
+        updated_at: '2025-09-06T12:00:00.000Z',
       };
-      
+
       mockDatabase.get.mockResolvedValueOnce(mockBudget);
 
       const budget = await budgetManager.getBudget('tenant-1');
@@ -83,7 +83,7 @@ describe('BudgetManager Service', () => {
         degrade_mode: 'link_blocks',
         reset_date: '2025-10-01T00:00:00.000Z',
         created_at: '2025-09-01T00:00:00.000Z',
-        updated_at: '2025-09-05T10:00:00.000Z'
+        updated_at: '2025-09-05T10:00:00.000Z',
       };
 
       mockDatabase.get.mockResolvedValue(mockBudget);
@@ -102,7 +102,7 @@ describe('BudgetManager Service', () => {
         degrade_mode: 'disable_ai',
         reset_date: '2025-10-01T00:00:00.000Z',
         created_at: '2025-09-01T00:00:00.000Z',
-        updated_at: '2025-09-06T12:00:00.000Z'
+        updated_at: '2025-09-06T12:00:00.000Z',
       };
 
       mockDatabase.run.mockResolvedValue({ changes: 1 });
@@ -110,7 +110,7 @@ describe('BudgetManager Service', () => {
 
       const result = await budgetManager.updateBudget('tenant-1', {
         monthlyLimit: 150.0,
-        degradeMode: 'disable_ai'
+        degradeMode: 'disable_ai',
       });
 
       expect(result.monthlyLimit).toBe(150.0);
@@ -126,14 +126,14 @@ describe('BudgetManager Service', () => {
         tenant_id: 'tenant-1',
         monthly_limit: 100.0,
         degrade_mode: 'strict_rules',
-        reset_date: '2025-10-01T00:00:00.000Z'
+        reset_date: '2025-10-01T00:00:00.000Z',
       };
 
       const mockUsage = {
         api_calls: 50,
         total_tokens: 5000,
         total_spent: 105.0, // Exceeds budget
-        avg_cost_per_call: 2.1
+        avg_cost_per_call: 2.1,
       };
 
       mockDatabase.get
@@ -154,7 +154,7 @@ describe('BudgetManager Service', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         'BudgetManager: Failed to check budget status',
         expect.objectContaining({
-          tenantId: 'tenant-1'
+          tenantId: 'tenant-1',
         })
       );
     });
@@ -167,7 +167,7 @@ describe('BudgetManager Service', () => {
         cost: 0.003,
         model: 'gpt-3.5-turbo',
         operation: 'moderation',
-        timestamp: new Date('2025-09-06T12:00:00.000Z')
+        timestamp: new Date('2025-09-06T12:00:00.000Z'),
       };
 
       mockDatabase.run.mockResolvedValue({ lastID: 123 });
@@ -189,7 +189,7 @@ describe('BudgetManager Service', () => {
         api_calls: 25,
         total_tokens: 2500,
         total_spent: 50.0,
-        avg_cost_per_call: 2.0
+        avg_cost_per_call: 2.0,
       };
 
       mockDatabase.get.mockResolvedValue(mockUsage);
@@ -207,7 +207,7 @@ describe('BudgetManager Service', () => {
         api_calls: null,
         total_tokens: null,
         total_spent: null,
-        avg_cost_per_call: null
+        avg_cost_per_call: null,
       });
 
       const usage = await budgetManager.getCurrentUsage('tenant-1');
@@ -227,7 +227,7 @@ describe('BudgetManager Service', () => {
           cost: 0.003,
           model: 'gpt-3.5-turbo',
           operation: 'moderation',
-          timestamp: '2025-09-06T12:00:00.000Z'
+          timestamp: '2025-09-06T12:00:00.000Z',
         },
         {
           id: 2,
@@ -236,8 +236,8 @@ describe('BudgetManager Service', () => {
           cost: 0.004,
           model: 'gpt-4',
           operation: 'content_analysis',
-          timestamp: '2025-09-06T11:00:00.000Z'
-        }
+          timestamp: '2025-09-06T11:00:00.000Z',
+        },
       ];
 
       mockDatabase.all.mockResolvedValue(mockHistory);
@@ -247,7 +247,7 @@ describe('BudgetManager Service', () => {
       const history = await budgetManager.getUsageHistory('tenant-1', {
         startDate,
         endDate,
-        limit: 50
+        limit: 50,
       });
 
       expect(history).toHaveLength(2);
@@ -265,17 +265,17 @@ describe('BudgetManager Service', () => {
     it('should generate analytics for dashboard', async () => {
       const mockDailyUsage = [
         { date: '2025-09-06', daily_spent: 10.0, daily_tokens: 1000, daily_calls: 5 },
-        { date: '2025-09-05', daily_spent: 8.0, daily_tokens: 800, daily_calls: 4 }
+        { date: '2025-09-05', daily_spent: 8.0, daily_tokens: 800, daily_calls: 4 },
       ];
 
       const mockModelUsage = [
         { model: 'gpt-3.5-turbo', total_cost: 12.0, total_tokens: 1200, call_count: 6 },
-        { model: 'gpt-4', total_cost: 6.0, total_tokens: 600, call_count: 3 }
+        { model: 'gpt-4', total_cost: 6.0, total_tokens: 600, call_count: 3 },
       ];
 
       const mockOperationUsage = [
         { operation: 'moderation', total_cost: 15.0, total_tokens: 1500, call_count: 8 },
-        { operation: 'content_analysis', total_cost: 3.0, total_tokens: 300, call_count: 1 }
+        { operation: 'content_analysis', total_cost: 3.0, total_tokens: 300, call_count: 1 },
       ];
 
       mockDatabase.all
@@ -295,10 +295,7 @@ describe('BudgetManager Service', () => {
     });
 
     it('should handle different time periods', async () => {
-      mockDatabase.all
-        .mockResolvedValue([])
-        .mockResolvedValue([])
-        .mockResolvedValue([]);
+      mockDatabase.all.mockResolvedValue([]).mockResolvedValue([]).mockResolvedValue([]);
 
       await budgetManager.getAnalytics('tenant-1', '7d');
 
@@ -309,7 +306,7 @@ describe('BudgetManager Service', () => {
 
     it('should handle null analytics data', async () => {
       const mockEmptyData = [
-        { date: '2025-09-06', daily_spent: null, daily_tokens: null, daily_calls: null }
+        { date: '2025-09-06', daily_spent: null, daily_tokens: null, daily_calls: null },
       ];
 
       mockDatabase.all
@@ -333,7 +330,7 @@ describe('BudgetManager Service', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         'BudgetManager: Failed to initialize tables',
         expect.objectContaining({
-          error: 'Database connection failed'
+          error: 'Database connection failed',
         })
       );
     });
@@ -346,7 +343,7 @@ describe('BudgetManager Service', () => {
         'BudgetManager: Failed to get budget',
         expect.objectContaining({
           tenantId: 'tenant-1',
-          error: 'Query failed'
+          error: 'Query failed',
         })
       );
     });
@@ -358,7 +355,7 @@ describe('BudgetManager Service', () => {
         tokens: 150,
         cost: 0.003,
         model: 'gpt-3.5-turbo',
-        operation: 'moderation'
+        operation: 'moderation',
       };
 
       await expect(budgetManager.recordUsage('tenant-1', usage)).rejects.toThrow('Insert failed');
@@ -366,7 +363,7 @@ describe('BudgetManager Service', () => {
         'BudgetManager: Failed to record usage',
         expect.objectContaining({
           tenantId: 'tenant-1',
-          error: 'Insert failed'
+          error: 'Insert failed',
         })
       );
     });

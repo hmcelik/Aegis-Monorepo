@@ -19,9 +19,10 @@ const TelegramLoginWidget = ({ onAuth, botUsername }) => {
   const [errorMessage, setErrorMessage] = useState('');
 
   // Resolve and sanitize bot username (strip any leading '@')
-  const resolvedBot = String(
-    botUsername ?? TELEGRAM_BOT_USERNAME ?? 'AegisModerationBot'
-  ).replace(/^@/, '');
+  const resolvedBot = String(botUsername ?? TELEGRAM_BOT_USERNAME ?? 'AegisModerationBot').replace(
+    /^@/,
+    ''
+  );
 
   // Useful UI values (safe for SSR)
   const host = typeof window !== 'undefined' ? window.location.hostname : '';
@@ -40,7 +41,7 @@ const TelegramLoginWidget = ({ onAuth, botUsername }) => {
     const element = elementRef.current;
 
     // global function Telegram's widget will call on success
-    window[callbackName] = (telegramUser) => {
+    window[callbackName] = telegramUser => {
       try {
         console.log('🔐 Telegram widget callback:', telegramUser);
         toast.success('Telegram callback received! Authenticating...', { duration: 2000 });
@@ -86,14 +87,16 @@ const TelegramLoginWidget = ({ onAuth, botUsername }) => {
           console.log('✅ Telegram widget iframe created');
           setLoadingState('ready');
         } else {
-          console.warn('⚠️ Widget script loaded but iframe not found (domain may not be configured)');
+          console.warn(
+            '⚠️ Widget script loaded but iframe not found (domain may not be configured)'
+          );
           setLoadingState('domain_error');
           setErrorMessage('Widget not loading - domain may not be configured with @BotFather');
         }
       }, 800);
     };
 
-    script.onerror = (error) => {
+    script.onerror = error => {
       console.error('❌ Failed to load Telegram widget script:', error);
       setLoadingState('script_error');
       setErrorMessage('Failed to load Telegram widget script');
@@ -113,27 +116,36 @@ const TelegramLoginWidget = ({ onAuth, botUsername }) => {
 
   const renderLoadingState = () => {
     switch (loadingState) {
-      case 'initializing': return <div>🔄 Initializing Telegram widget...</div>;
-      case 'loading':      return <div>⏳ Loading Telegram widget script...</div>;
-      case 'loaded':       return <div>🔄 Setting up Telegram widget...</div>;
-      case 'ready':        return <div>✅ Telegram Login Widget ready! Click to login.</div>;
-      case 'authenticated':return <div>🎉 Authentication successful!</div>;
-      case 'script_error': return (
-        <div style={{ color: 'red' }}>
-          ❌ Failed to load Telegram widget script
-          <br />
-          <small>Check your internet connection and try refreshing the page</small>
-        </div>
-      );
-      case 'domain_error': return (
-        <div style={{ color: 'orange' }}>
-          ⚠️ Widget loaded but not showing — Domain configuration issue
-          <br />
-          <small>Configure your domain with @BotFather (see below)</small>
-        </div>
-      );
-      case 'error':        return <div style={{ color: 'red' }}>❌ {errorMessage}</div>;
-      default:             return <div>🔄 Initializing...</div>;
+      case 'initializing':
+        return <div>🔄 Initializing Telegram widget...</div>;
+      case 'loading':
+        return <div>⏳ Loading Telegram widget script...</div>;
+      case 'loaded':
+        return <div>🔄 Setting up Telegram widget...</div>;
+      case 'ready':
+        return <div>✅ Telegram Login Widget ready! Click to login.</div>;
+      case 'authenticated':
+        return <div>🎉 Authentication successful!</div>;
+      case 'script_error':
+        return (
+          <div style={{ color: 'red' }}>
+            ❌ Failed to load Telegram widget script
+            <br />
+            <small>Check your internet connection and try refreshing the page</small>
+          </div>
+        );
+      case 'domain_error':
+        return (
+          <div style={{ color: 'orange' }}>
+            ⚠️ Widget loaded but not showing — Domain configuration issue
+            <br />
+            <small>Configure your domain with @BotFather (see below)</small>
+          </div>
+        );
+      case 'error':
+        return <div style={{ color: 'red' }}>❌ {errorMessage}</div>;
+      default:
+        return <div>🔄 Initializing...</div>;
     }
   };
 
@@ -150,10 +162,14 @@ const TelegramLoginWidget = ({ onAuth, botUsername }) => {
           fontSize: '0.9rem',
         }}
       >
-        <strong>🤖 Bot:</strong> @{resolvedBot}<br />
-        <strong>🌐 Domain:</strong> {host}<br />
-        <strong>🔗 Protocol:</strong> {protocol}<br />
-        <strong>📡 API:</strong> {API_BASE_URL}/auth/login-widget<br />
+        <strong>🤖 Bot:</strong> @{resolvedBot}
+        <br />
+        <strong>🌐 Domain:</strong> {host}
+        <br />
+        <strong>🔗 Protocol:</strong> {protocol}
+        <br />
+        <strong>📡 API:</strong> {API_BASE_URL}/auth/login-widget
+        <br />
         <strong>📊 Status:</strong> {renderLoadingState()}
       </div>
 
@@ -165,10 +181,13 @@ const TelegramLoginWidget = ({ onAuth, botUsername }) => {
           alignItems: 'center',
           padding: '20px',
           border:
-            loadingState === 'ready' ? '2px solid #4CAF50' :
-            loadingState === 'domain_error' ? '2px solid #FF9800' :
-            (loadingState === 'script_error' || loadingState === 'error') ? '2px solid #f44336' :
-            '2px solid #0088cc',
+            loadingState === 'ready'
+              ? '2px solid #4CAF50'
+              : loadingState === 'domain_error'
+                ? '2px solid #FF9800'
+                : loadingState === 'script_error' || loadingState === 'error'
+                  ? '2px solid #f44336'
+                  : '2px solid #0088cc',
           borderRadius: '8px',
           backgroundColor: '#f8f9fa',
           minHeight: '60px',
@@ -176,8 +195,10 @@ const TelegramLoginWidget = ({ onAuth, botUsername }) => {
       />
 
       <div style={{ marginTop: '10px', fontSize: '0.8rem', color: '#666' }}>
-        <strong>🔧 Bot Configuration Required:</strong><br />
-        Your bot must authorize this domain with @BotFather:<br />
+        <strong>🔧 Bot Configuration Required:</strong>
+        <br />
+        Your bot must authorize this domain with @BotFather:
+        <br />
         <div
           style={{
             background: '#f8f9fa',
@@ -187,16 +208,17 @@ const TelegramLoginWidget = ({ onAuth, botUsername }) => {
             fontFamily: 'monospace',
           }}
         >
-          1. Send <code>/setdomain</code> to @BotFather<br />
-          2. Select: <code>@{resolvedBot}</code><br />
+          1. Send <code>/setdomain</code> to @BotFather
+          <br />
+          2. Select: <code>@{resolvedBot}</code>
+          <br />
           3. Enter domain: <code style={{ color: '#0088cc', fontWeight: 'bold' }}>{host}</code>
         </div>
-
-        <strong>Current Environment:</strong><br />
-        • Domain: <code>{host}</code><br />
-        • Protocol: <code>{protocol}</code><br />
-        • Full URL: <code>{origin}</code><br />
-
+        <strong>Current Environment:</strong>
+        <br />• Domain: <code>{host}</code>
+        <br />• Protocol: <code>{protocol}</code>
+        <br />• Full URL: <code>{origin}</code>
+        <br />
         <div
           style={{
             marginTop: '8px',
@@ -205,13 +227,14 @@ const TelegramLoginWidget = ({ onAuth, botUsername }) => {
             borderRadius: '4px',
           }}
         >
-          <strong>⚠️ Common Issues:</strong><br />
-          • Script fails to load: Check connection<br />
-          • Button doesn’t appear: Domain not configured with @BotFather<br />
-          • “Bot domain invalid”: Use <code>/setdomain</code> in @BotFather<br />
-          • Widget disappears: Domain config removed or bot username changed
+          <strong>⚠️ Common Issues:</strong>
+          <br />
+          • Script fails to load: Check connection
+          <br />
+          • Button doesn’t appear: Domain not configured with @BotFather
+          <br />• “Bot domain invalid”: Use <code>/setdomain</code> in @BotFather
+          <br />• Widget disappears: Domain config removed or bot username changed
         </div>
-
         {(loadingState === 'domain_error' || loadingState === 'script_error') && (
           <div
             style={{
@@ -222,13 +245,14 @@ const TelegramLoginWidget = ({ onAuth, botUsername }) => {
               border: '1px solid #f44336',
             }}
           >
-            <strong>🚨 Debug Information:</strong><br />
-            • Loading State: <code>{loadingState}</code><br />
-            • Error: <code>{errorMessage}</code><br />
-            • Bot Username: <code>@{resolvedBot}</code><br />
-            • Current Domain: <code>{host}</code><br />
-            • Widget Container: {elementRef.current ? 'Present' : 'Missing'}<br />
-            • Iframe Elements: <code>{elementRef.current?.querySelectorAll('iframe').length || 0}</code>
+            <strong>🚨 Debug Information:</strong>
+            <br />• Loading State: <code>{loadingState}</code>
+            <br />• Error: <code>{errorMessage}</code>
+            <br />• Bot Username: <code>@{resolvedBot}</code>
+            <br />• Current Domain: <code>{host}</code>
+            <br />• Widget Container: {elementRef.current ? 'Present' : 'Missing'}
+            <br />• Iframe Elements:{' '}
+            <code>{elementRef.current?.querySelectorAll('iframe').length || 0}</code>
           </div>
         )}
       </div>

@@ -1,7 +1,9 @@
 import express from 'express';
 import * as logsController from '../controllers/logsController.js';
 import { checkJwt } from '../middleware/checkJwt.js';
+import { checkGroupAdmin } from '../middleware/checkGroupAdmin.js';
 
+/** @type {import('express').Router} */
 const router = express.Router();
 
 /**
@@ -21,7 +23,7 @@ const router = express.Router();
  *           type: string
  *         meta:
  *           type: object
- *         
+ *
  * /api/v1/logs:
  *   get:
  *     summary: Get system logs

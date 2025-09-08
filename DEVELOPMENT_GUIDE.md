@@ -9,7 +9,7 @@ This project uses **Turborepo** with **pnpm workspaces** for efficient developme
 ```
 ├── apps/
 │   ├── api/           # REST API service (@telegram-moderator/api)
-│   ├── bot/           # Telegram bot (@telegram-moderator/bot)  
+│   ├── bot/           # Telegram bot (@telegram-moderator/bot)
 │   └── web/           # Web dashboard (mini-app-dashboard)
 ├── packages/
 │   └── shared/        # Shared utilities (@telegram-moderator/shared)
@@ -19,6 +19,7 @@ This project uses **Turborepo** with **pnpm workspaces** for efficient developme
 ## 🛠️ Development Commands
 
 ### Main Development Commands
+
 ```bash
 # Run all services in parallel (recommended for full development)
 pnpm dev
@@ -32,6 +33,7 @@ pnpm dev:api-with-ngrok     # API server + ngrok tunnel together
 ```
 
 ### Advanced Service Commands
+
 ```bash
 # Run services with Turborepo filters (alternative approach)
 pnpm --filter=@telegram-moderator/api dev      # API only
@@ -41,6 +43,7 @@ pnpm --filter=@telegram-moderator/bot ngrok    # Ngrok tunnel only
 ```
 
 ### Testing Commands
+
 ```bash
 # Run all tests across all services
 pnpm test
@@ -56,11 +59,12 @@ pnpm --filter=@telegram-moderator/bot test --run
 ```
 
 ### Build & Production Commands
+
 ```bash
 # Build all packages
 pnpm build
 
-# Start all services in production mode  
+# Start all services in production mode
 pnpm start
 
 # Install all dependencies across workspace
@@ -72,16 +76,17 @@ pnpm clean
 
 ## 🌐 Service Endpoints & Ports
 
-| Service | URL | Port | Description |
-|---------|-----|------|-------------|
-| **API Server** | http://localhost:3000 | 3000 | REST API endpoints |
-| **Web Dashboard** | http://localhost:5173 | 5173 | React web interface |
-| **Bot Service** | N/A | N/A | Telegram polling mode |
-| **Ngrok Tunnel** | https://your-tunnel.ngrok-free.app | 3000 | External API access |
+| Service           | URL                                | Port | Description           |
+| ----------------- | ---------------------------------- | ---- | --------------------- |
+| **API Server**    | http://localhost:3000              | 3000 | REST API endpoints    |
+| **Web Dashboard** | http://localhost:5173              | 5173 | React web interface   |
+| **Bot Service**   | N/A                                | N/A  | Telegram polling mode |
+| **Ngrok Tunnel**  | https://your-tunnel.ngrok-free.app | 3000 | External API access   |
 
 ## 🔧 Environment Configuration
 
 ### Main Environment File
+
 All services load environment from the root `.env` file:
 
 ```bash
@@ -96,6 +101,7 @@ All services load environment from the root `.env` file:
 ```
 
 ### Environment Loading
+
 The shared package (`packages/shared/src/config/`) handles centralized environment loading:
 
 ```javascript
@@ -106,29 +112,32 @@ import config from '@telegram-moderator/shared/src/config';
 ## 📝 Development Workflow
 
 ### 1. Initial Setup
+
 ```bash
 # Clone and setup
 git clone <repo-url>
 cd telegram-moderator-dashboard
 pnpm install
 
-# Configure environment  
+# Configure environment
 cp .env.example .env
 # Edit .env with your credentials
 ```
 
 ### 2. Development Process
+
 ```bash
 # Start all services for full development
 pnpm dev
 
 # Or run services separately in different terminals:
 pnpm dev:bot     # Terminal 1: Bot logs
-pnpm dev:api     # Terminal 2: API logs  
+pnpm dev:api     # Terminal 2: API logs
 pnpm dev:web     # Terminal 3: Web logs
 ```
 
 ### 3. Testing Workflow
+
 ```bash
 # Run tests before committing
 pnpm test
@@ -139,6 +148,7 @@ pnpm test:api -- --run    # API endpoint testing
 ```
 
 ### 4. External Testing with Ngrok
+
 For webhook testing with external services:
 
 ```bash
@@ -153,12 +163,14 @@ pnpm dev:ngrok    # Terminal 2
 ## 🧪 Testing Framework
 
 ### Test Structure
+
 - **Vitest** for test runner
 - **Supertest** for API endpoint testing
 - **Centralized test files** in `__tests__/` directory
 - **Service-specific configurations** in each app
 
 ### Running Tests
+
 ```bash
 # All tests with coverage
 pnpm test
@@ -188,6 +200,7 @@ pnpm --filter=@telegram-moderator/shared add lodash
 ```
 
 ### Workspace Dependencies
+
 ```bash
 # Reference shared package in apps
 {
@@ -200,6 +213,7 @@ pnpm --filter=@telegram-moderator/shared add lodash
 ## 🔄 Turborepo Features
 
 ### Caching
+
 Turborepo automatically caches build outputs and test results:
 
 ```bash
@@ -211,7 +225,9 @@ turbo prune
 ```
 
 ### Pipeline Configuration
+
 Defined in `turbo.json`:
+
 - **dev**: No cache (live development)
 - **build**: Full caching enabled
 - **test**: Cache test results
@@ -227,6 +243,7 @@ Defined in `turbo.json`:
 4. **Ngrok not working**: Verify ngrok installation and auth token
 
 ### Debug Commands
+
 ```bash
 # Check workspace structure
 pnpm list --depth=0
@@ -248,25 +265,29 @@ turbo run build --dry-run
 ## 📚 Additional Resources
 
 - [Turborepo Documentation](https://turbo.build/repo/docs)
-- [pnpm Workspaces](https://pnpm.io/workspaces)  
+- [pnpm Workspaces](https://pnpm.io/workspaces)
 - [Vitest Testing Framework](https://vitest.dev/)
 - [Telegram Bot API](https://core.telegram.org/bots/api)
 - **Ngrok Tunnel**: https://minnow-good-mostly.ngrok-free.app
 
 ## Environment Setup
+
 - Main `.env` file located at monorepo root
 - All services load environment from root `.env` file
 - Development settings in `.env.development`
 - Example configuration in `.env.example`
 
 ## Separate Log Monitoring
+
 To monitor logs separately, run these commands in different terminals:
+
 1. `pnpm dev:bot` - Bot logs only
-2. `pnpm dev:api` - API logs only  
+2. `pnpm dev:api` - API logs only
 3. `pnpm dev:web` - Web logs only
 
 ## Ngrok Integration
+
 To test API with external webhook:
+
 - `pnpm dev:api-with-ngrok` - Runs API + ngrok tunnel
 - Or manually: `pnpm --filter=@telegram-moderator/bot ngrok` (while API is running)
-

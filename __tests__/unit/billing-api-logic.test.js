@@ -4,17 +4,17 @@ const { describe, it, expect, beforeEach, afterEach, vi } = require('vitest');
 const mockDatabase = {
   run: vi.fn(),
   get: vi.fn(),
-  all: vi.fn()
+  all: vi.fn(),
 };
 
 const mockLogger = {
   info: vi.fn(),
   error: vi.fn(),
   debug: vi.fn(),
-  warn: vi.fn()
+  warn: vi.fn(),
 };
 
-// Mock BudgetManager 
+// Mock BudgetManager
 const mockBudgetManager = {
   getBudget: vi.fn(),
   updateBudget: vi.fn(),
@@ -23,7 +23,7 @@ const mockBudgetManager = {
   getUsageHistory: vi.fn(),
   getAnalytics: vi.fn(),
   isBudgetExhausted: vi.fn(),
-  initializeTables: vi.fn()
+  initializeTables: vi.fn(),
 };
 
 // Mock Express middlewares
@@ -35,16 +35,16 @@ const mockCheckJwt = vi.fn((req, res, next) => {
 // Mock dependencies
 vi.mock('../../packages/shared/src/services/database.js', () => ({
   Database: {
-    getInstance: () => mockDatabase
-  }
+    getInstance: () => mockDatabase,
+  },
 }));
 
 vi.mock('../../packages/shared/src/services/logger.js', () => ({
-  logger: mockLogger
+  logger: mockLogger,
 }));
 
 vi.mock('../../apps/api/src/services/budgetManager.js', () => ({
-  BudgetManager: vi.fn().mockImplementation(() => mockBudgetManager)
+  BudgetManager: vi.fn().mockImplementation(() => mockBudgetManager),
 }));
 
 vi.mock('../../apps/api/src/middleware/checkJwt.js', () => mockCheckJwt);
@@ -52,7 +52,7 @@ vi.mock('../../apps/api/src/middleware/checkJwt.js', () => mockCheckJwt);
 describe('Billing API Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Reset default middleware behavior
     mockCheckJwt.mockImplementation((req, res, next) => {
       req.user = { tenantId: 'tenant-1', isAdmin: false };
@@ -70,14 +70,14 @@ describe('Billing API Integration', () => {
         tenantId: 'tenant-1',
         monthlyLimit: 100.0,
         degradeMode: 'strict_rules',
-        resetDate: '2025-10-01T00:00:00.000Z'
+        resetDate: '2025-10-01T00:00:00.000Z',
       };
 
       const usage = {
         totalSpent: 30.0,
         tokenCount: 1500,
         apiCalls: 15,
-        avgCostPerCall: 2.0
+        avgCostPerCall: 2.0,
       };
 
       // Simulate budget status calculation
@@ -94,11 +94,11 @@ describe('Billing API Integration', () => {
       const budget = {
         tenantId: 'tenant-1',
         monthlyLimit: 100.0,
-        degradeMode: 'strict_rules'
+        degradeMode: 'strict_rules',
       };
 
       const usage = {
-        totalSpent: 105.0 // Exceeds limit
+        totalSpent: 105.0, // Exceeds limit
       };
 
       const remaining = Math.max(0, budget.monthlyLimit - usage.totalSpent);
@@ -110,16 +110,16 @@ describe('Billing API Integration', () => {
 
     it('should validate budget update parameters', () => {
       const validDegradeModes = ['strict_rules', 'link_blocks', 'disable_ai'];
-      
+
       // Test valid inputs
       expect(validDegradeModes.includes('strict_rules')).toBe(true);
       expect(validDegradeModes.includes('invalid_mode')).toBe(false);
-      
+
       // Test monthly limit validation
-      const validateMonthlyLimit = (limit) => {
+      const validateMonthlyLimit = limit => {
         return typeof limit === 'number' && limit >= 0;
       };
-      
+
       expect(validateMonthlyLimit(100.0)).toBe(true);
       expect(validateMonthlyLimit(-50)).toBe(false);
       expect(validateMonthlyLimit('invalid')).toBe(false);
@@ -128,12 +128,16 @@ describe('Billing API Integration', () => {
 
   describe('Usage Recording Logic', () => {
     it('should validate usage record parameters', () => {
-      const validateUsage = (usage) => {
+      const validateUsage = usage => {
         return (
-          typeof usage.tokens === 'number' && usage.tokens >= 0 &&
-          typeof usage.cost === 'number' && usage.cost >= 0 &&
-          typeof usage.model === 'string' && usage.model.length > 0 &&
-          typeof usage.operation === 'string' && usage.operation.length > 0
+          typeof usage.tokens === 'number' &&
+          usage.tokens >= 0 &&
+          typeof usage.cost === 'number' &&
+          usage.cost >= 0 &&
+          typeof usage.model === 'string' &&
+          usage.model.length > 0 &&
+          typeof usage.operation === 'string' &&
+          usage.operation.length > 0
         );
       };
 
@@ -141,14 +145,14 @@ describe('Billing API Integration', () => {
         tokens: 150,
         cost: 0.003,
         model: 'gpt-3.5-turbo',
-        operation: 'moderation'
+        operation: 'moderation',
       };
 
       const invalidUsage = {
         tokens: -10, // Invalid negative tokens
         cost: 0.003,
         model: 'gpt-3.5-turbo',
-        operation: 'moderation'
+        operation: 'moderation',
       };
 
       expect(validateUsage(validUsage)).toBe(true);
@@ -163,7 +167,7 @@ describe('Billing API Integration', () => {
           tokens: 150,
           cost: 0.003,
           model: 'gpt-3.5-turbo',
-          operation: 'moderation'
+          operation: 'moderation',
         },
         {
           id: 2,
@@ -171,14 +175,14 @@ describe('Billing API Integration', () => {
           tokens: 200,
           cost: 0.004,
           model: 'gpt-4',
-          operation: 'moderation'
-        }
+          operation: 'moderation',
+        },
       ];
 
       const summary = {
         totalRecords: usageHistory.length,
         totalTokens: usageHistory.reduce((sum, record) => sum + record.tokens, 0),
-        totalCost: usageHistory.reduce((sum, record) => sum + record.cost, 0)
+        totalCost: usageHistory.reduce((sum, record) => sum + record.cost, 0),
       };
 
       expect(summary.totalRecords).toBe(2);
@@ -191,7 +195,7 @@ describe('Billing API Integration', () => {
     it('should allow tenant access to own data', () => {
       const user = { tenantId: 'tenant-1', isAdmin: false };
       const requestedTenantId = 'tenant-1';
-      
+
       const hasAccess = user.isAdmin || user.tenantId === requestedTenantId;
       expect(hasAccess).toBe(true);
     });
@@ -199,7 +203,7 @@ describe('Billing API Integration', () => {
     it('should deny tenant access to other tenant data', () => {
       const user = { tenantId: 'tenant-1', isAdmin: false };
       const requestedTenantId = 'other-tenant';
-      
+
       const hasAccess = user.isAdmin || user.tenantId === requestedTenantId;
       expect(hasAccess).toBe(false);
     });
@@ -207,7 +211,7 @@ describe('Billing API Integration', () => {
     it('should allow admin access to any tenant data', () => {
       const user = { tenantId: 'other-tenant', isAdmin: true };
       const requestedTenantId = 'tenant-1';
-      
+
       const hasAccess = user.isAdmin || user.tenantId === requestedTenantId;
       expect(hasAccess).toBe(true);
     });
@@ -217,14 +221,14 @@ describe('Billing API Integration', () => {
     it('should process daily usage data correctly', () => {
       const mockDailyUsage = [
         { date: '2025-09-06', daily_spent: 10.0, daily_tokens: 1000, daily_calls: 5 },
-        { date: '2025-09-05', daily_spent: null, daily_tokens: null, daily_calls: null }
+        { date: '2025-09-05', daily_spent: null, daily_tokens: null, daily_calls: null },
       ];
 
       const processedData = mockDailyUsage.map(day => ({
         date: day.date,
         spent: day.daily_spent || 0,
         tokens: day.daily_tokens || 0,
-        calls: day.daily_calls || 0
+        calls: day.daily_calls || 0,
       }));
 
       expect(processedData[0].spent).toBe(10.0);
@@ -236,7 +240,7 @@ describe('Billing API Integration', () => {
     });
 
     it('should calculate time period boundaries', () => {
-      const calculateStartDate = (period) => {
+      const calculateStartDate = period => {
         const now = new Date();
         const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
         const startDate = new Date(now);
@@ -264,30 +268,30 @@ describe('Billing API Integration', () => {
 
   describe('Query Parameter Handling', () => {
     it('should handle usage history query parameters', () => {
-      const processQueryParams = (query) => {
+      const processQueryParams = query => {
         const options = {};
-        
+
         if (query.startDate) {
           options.startDate = new Date(query.startDate);
         }
-        
+
         if (query.endDate) {
           options.endDate = new Date(query.endDate);
         }
-        
+
         if (query.limit) {
           options.limit = Math.min(parseInt(query.limit), 1000); // Cap at 1000
         } else {
           options.limit = 100; // Default
         }
-        
+
         return options;
       };
 
       const params1 = {
         startDate: '2025-09-01',
         endDate: '2025-09-06',
-        limit: '50'
+        limit: '50',
       };
 
       const processed1 = processQueryParams(params1);
@@ -296,7 +300,7 @@ describe('Billing API Integration', () => {
       expect(processed1.limit).toBe(50);
 
       const params2 = {
-        limit: '2000' // Exceeds max
+        limit: '2000', // Exceeds max
       };
 
       const processed2 = processQueryParams(params2);
@@ -304,7 +308,7 @@ describe('Billing API Integration', () => {
     });
 
     it('should handle analytics period validation', () => {
-      const validatePeriod = (period) => {
+      const validatePeriod = period => {
         const validPeriods = ['7d', '30d', '90d'];
         return validPeriods.includes(period) ? period : '30d';
       };
@@ -325,13 +329,13 @@ describe('Billing API Integration', () => {
           error: 'Validation Error',
           details: {
             field,
-            message
-          }
+            message,
+          },
         };
       };
 
       const error = createValidationError('monthlyLimit', 'Must be a positive number');
-      
+
       expect(error.status).toBe(400);
       expect(error.error).toBe('Validation Error');
       expect(error.details.field).toBe('monthlyLimit');
@@ -345,14 +349,14 @@ describe('Billing API Integration', () => {
           error: 'Database Error',
           details: {
             operation,
-            message: originalError.message
-          }
+            message: originalError.message,
+          },
         };
       };
 
       const dbError = new Error('Connection timeout');
       const error = createDatabaseError('getBudget', dbError);
-      
+
       expect(error.status).toBe(500);
       expect(error.error).toBe('Database Error');
       expect(error.details.operation).toBe('getBudget');
@@ -360,18 +364,18 @@ describe('Billing API Integration', () => {
     });
 
     it('should format access denied errors correctly', () => {
-      const createAccessDeniedError = (tenantId) => {
+      const createAccessDeniedError = tenantId => {
         return {
           status: 403,
           error: 'Access Denied',
           details: {
-            message: `Access denied for tenant: ${tenantId}`
-          }
+            message: `Access denied for tenant: ${tenantId}`,
+          },
         };
       };
 
       const error = createAccessDeniedError('tenant-1');
-      
+
       expect(error.status).toBe(403);
       expect(error.error).toBe('Access Denied');
       expect(error.details.message).toBe('Access denied for tenant: tenant-1');

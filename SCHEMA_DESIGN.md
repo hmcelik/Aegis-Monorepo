@@ -5,20 +5,23 @@
 ### Existing SQLite Tables
 
 **Core Telegram Bot Tables:**
+
 - `groups` - Chat group information
-- `users` - User profiles and metadata  
+- `users` - User profiles and metadata
 - `strikes` - User warning/penalty tracking
 - `audit_log` - Action history and compliance
 - `settings` - Per-group configuration
 - `keyword_whitelist` - Group-specific allowed terms
 
 **Budget & AI Management Tables:**
+
 - `tenant_budgets` - Monthly AI spend limits per tenant
 - `ai_usage` - AI call tracking for cost accounting
 
 ## Target Postgres Schema Design
 
 ### Core Design Principles
+
 1. **Normalized Schema**: Proper foreign keys and constraints
 2. **Tenant Isolation**: Multi-tenant architecture with row-level security
 3. **Event Sourcing**: Comprehensive audit trail with immutable events
@@ -28,6 +31,7 @@
 ### Proposed Schema
 
 #### 1. Tenants & Organizations
+
 ```sql
 CREATE TABLE tenants (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -49,6 +53,7 @@ CREATE TABLE tenant_settings (
 ```
 
 #### 2. Groups & Users (Telegram Entities)
+
 ```sql
 CREATE TABLE groups (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -87,6 +92,7 @@ CREATE TABLE group_members (
 ```
 
 #### 3. Event Sourcing Tables
+
 ```sql
 CREATE TABLE events (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -107,6 +113,7 @@ CREATE INDEX idx_events_occurred_at ON events(occurred_at);
 ```
 
 #### 4. Decision & Action Tracking
+
 ```sql
 CREATE TABLE decisions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -141,6 +148,7 @@ CREATE INDEX idx_decisions_created_at ON decisions(created_at);
 ```
 
 #### 5. Policy Management
+
 ```sql
 CREATE TABLE policies (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -165,6 +173,7 @@ CREATE TABLE group_policies (
 ```
 
 #### 6. Usage & Budget Tracking
+
 ```sql
 CREATE TABLE usage_metrics (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -210,17 +219,20 @@ CREATE TABLE daily_usage_rollups (
 ### Migration Strategy
 
 #### Phase 1: Dual-Write Setup
+
 1. Create Postgres schema alongside SQLite
 2. Implement repository pattern with database abstraction
 3. Add feature flag for dual-write mode
 4. Validate data consistency between databases
 
 #### Phase 2: Read Migration
+
 1. Switch reads to Postgres (behind feature flag)
 2. Monitor performance and consistency
 3. Gradual rollout to all tenants
 
 #### Phase 3: Full Cutover
+
 1. Stop dual-write to SQLite
 2. Archive SQLite data
 3. Remove SQLite dependencies
@@ -228,17 +240,20 @@ CREATE TABLE daily_usage_rollups (
 ### Performance Considerations
 
 #### Indexing Strategy
+
 - Primary keys (UUID) with btree indexes
 - Foreign key indexes for joins
 - Composite indexes for common query patterns
 - Partial indexes for filtered queries
 
 #### Partitioning
+
 - Daily usage rollups partitioned by date
 - Events table partitioned by tenant_id
 - Consider sharding for very high volume
 
 #### Row-Level Security
+
 ```sql
 -- Enable RLS for tenant isolation
 ALTER TABLE tenants ENABLE ROW LEVEL SECURITY;
@@ -247,7 +262,7 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE decisions ENABLE ROW LEVEL SECURITY;
 
 -- Policies ensure users only see their tenant's data
-CREATE POLICY tenant_isolation ON tenants FOR ALL 
+CREATE POLICY tenant_isolation ON tenants FOR ALL
 USING (id = current_setting('app.current_tenant_id')::UUID);
 ```
 

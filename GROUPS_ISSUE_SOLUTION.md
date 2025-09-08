@@ -48,14 +48,14 @@ node scripts/populate-groups.js
 
 ```javascript
 // Add to environment or config
-SKIP_TELEGRAM_ADMIN_CHECK=true  // Development mode only
+SKIP_TELEGRAM_ADMIN_CHECK = true; // Development mode only
 ```
 
 ### Quick Database Population
 
 ```sql
 -- Direct database insertion (for testing)
-INSERT INTO groups (chatId, chatTitle) VALUES 
+INSERT INTO groups (chatId, chatTitle) VALUES
 ('-1001234567890', 'Test Group 1'),
 ('-1001234567891', 'Test Group 2');
 ```
@@ -63,6 +63,7 @@ INSERT INTO groups (chatId, chatTitle) VALUES
 ## 📋 Verification Steps
 
 1. **Check Database**:
+
    ```bash
    node -e "
    import * as db from './packages/shared/src/services/database.js';
@@ -75,6 +76,7 @@ INSERT INTO groups (chatId, chatTitle) VALUES
    ```
 
 2. **Test API**:
+
    ```bash
    curl -H "Authorization: Bearer YOUR_TOKEN" http://localhost:3000/api/v1/groups
    ```

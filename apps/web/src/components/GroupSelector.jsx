@@ -5,12 +5,12 @@ import { EmptyState } from './UXComponents';
 const GroupSelector = ({ groups = [], selectedGroup, onGroupSelect, onRefresh }) => {
   // Ensure groups is always an array and handle all edge cases
   const safeGroups = Array.isArray(groups) ? groups : [];
-  
-  console.log('🔍 GroupSelector render:', { 
-    groupsType: typeof groups, 
-    isArray: Array.isArray(groups), 
+
+  console.log('🔍 GroupSelector render:', {
+    groupsType: typeof groups,
+    isArray: Array.isArray(groups),
     groupsLength: safeGroups.length,
-    safeGroupsType: typeof safeGroups
+    safeGroupsType: typeof safeGroups,
   });
 
   if (!safeGroups || safeGroups.length === 0) {
@@ -22,15 +22,15 @@ const GroupSelector = ({ groups = [], selectedGroup, onGroupSelect, onRefresh })
             <span className="text-2xl">📋</span>
             <span>Your Groups</span>
           </h3>
-          <button 
-            onClick={onRefresh} 
-            className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100/70 rounded-xl transition-all duration-200 hover:shadow-md" 
+          <button
+            onClick={onRefresh}
+            className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100/70 rounded-xl transition-all duration-200 hover:shadow-md"
             title="Refresh groups"
           >
             <RefreshCw size={18} />
           </button>
         </div>
-        
+
         {/* Empty State */}
         <div className="flex-1 flex items-center justify-center p-8">
           <EmptyState
@@ -56,9 +56,9 @@ const GroupSelector = ({ groups = [], selectedGroup, onGroupSelect, onRefresh })
             <div className="text-sm text-gray-500 font-normal">({safeGroups.length} total)</div>
           </div>
         </h3>
-        <button 
-          onClick={onRefresh} 
-          className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100/70 rounded-xl transition-all duration-200 hover:shadow-md" 
+        <button
+          onClick={onRefresh}
+          className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100/70 rounded-xl transition-all duration-200 hover:shadow-md"
           title="Refresh groups"
         >
           <RefreshCw size={18} />
@@ -68,15 +68,15 @@ const GroupSelector = ({ groups = [], selectedGroup, onGroupSelect, onRefresh })
       {/* Groups List */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-4">
-          {safeGroups.map((group) => {
+          {safeGroups.map(group => {
             // Extra safety check for each group object
             if (!group || typeof group !== 'object') {
               console.warn('⚠️ Invalid group object:', group);
               return null;
             }
-            
+
             const isSelected = selectedGroup?.id === group.id;
-            
+
             return (
               <div
                 key={group.id || Math.random()} // Fallback key if id is missing
@@ -95,44 +95,52 @@ const GroupSelector = ({ groups = [], selectedGroup, onGroupSelect, onRefresh })
                 <div className="p-5">
                   {/* Group Avatar and Title */}
                   <div className="flex items-start space-x-4 mb-4">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold shadow-md ${
-                      isSelected 
-                        ? 'bg-gradient-to-r from-blue-500 to-blue-600' 
-                        : 'bg-gradient-to-r from-gray-400 to-gray-500'
-                    }`}>
+                    <div
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold shadow-md ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-blue-500 to-blue-600'
+                          : 'bg-gradient-to-r from-gray-400 to-gray-500'
+                      }`}
+                    >
                       {group.title?.[0] || '🏘️'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className={`font-semibold text-base mb-1 truncate ${
-                        isSelected ? 'text-blue-900' : 'text-gray-900'
-                      }`}>
+                      <h4
+                        className={`font-semibold text-base mb-1 truncate ${
+                          isSelected ? 'text-blue-900' : 'text-gray-900'
+                        }`}
+                      >
                         {group.title || 'Unknown Group'}
                       </h4>
                       <div className="flex items-center space-x-3">
-                        <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
-                          isSelected ? 'bg-blue-200 text-blue-800' : 'bg-gray-100 text-gray-600'
-                        }`}>
+                        <div
+                          className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
+                            isSelected ? 'bg-blue-200 text-blue-800' : 'bg-gray-100 text-gray-600'
+                          }`}
+                        >
                           <Users size={12} />
                           <span>{group.member_count || 0}</span>
                         </div>
-                        <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          isSelected ? 'bg-blue-200 text-blue-800' : 'bg-gray-100 text-gray-600'
-                        }`}>
+                        <div
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            isSelected ? 'bg-blue-200 text-blue-800' : 'bg-gray-100 text-gray-600'
+                          }`}
+                        >
                           {group.type || 'Unknown'}
                         </div>
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Action Button */}
                   <div className="flex justify-end">
-                    <button 
+                    <button
                       className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center space-x-2.5 ${
                         isSelected
                           ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md hover:shadow-lg'
                           : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:from-gray-200 hover:to-gray-300'
                       }`}
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         if (onGroupSelect && typeof onGroupSelect === 'function') {
                           onGroupSelect(group);

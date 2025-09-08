@@ -2,7 +2,7 @@ import { NormalizedContent } from '@telegram-moderator/types';
 
 export function normalize(text: string): NormalizedContent {
   const originalText = text;
-  
+
   // Basic normalization steps
   let normalizedText = text
     .normalize('NFKC') // Unicode normalization
@@ -11,7 +11,7 @@ export function normalize(text: string): NormalizedContent {
 
   // Remove zero-width characters
   normalizedText = normalizedText.replace(/[\u200B-\u200D\uFEFF]/g, '');
-  
+
   // Collapse multiple whitespace
   normalizedText = normalizedText.replace(/\s+/g, ' ');
 
@@ -32,7 +32,7 @@ export function normalize(text: string): NormalizedContent {
     normalizedText,
     urls,
     mentions,
-    hashtags
+    hashtags,
   };
 }
 

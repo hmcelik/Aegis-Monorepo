@@ -5,6 +5,7 @@ import { unifiedAuth } from '../middleware/unifiedAuth.js';
 import { checkGroupAdmin } from '../middleware/checkGroupAdmin.js';
 import { body, param, query } from 'express-validator';
 
+/** @type {import('express').Router} */
 const router = express.Router();
 
 // All group routes require unified authentication (JWT or WebApp)
@@ -166,9 +167,10 @@ router.get('/', groupController.listGroups);
  *       404:
  *         description: Group not found
  */
-router.get('/:groupId/settings',
-    param('groupId').isString().notEmpty().withMessage('Group ID is required'),
-    groupController.getSettings
+router.get(
+  '/:groupId/settings',
+  param('groupId').isString().notEmpty().withMessage('Group ID is required'),
+  groupController.getSettings
 );
 
 /**
@@ -265,23 +267,24 @@ router.get('/:groupId/settings',
  *       403:
  *         description: Forbidden - Not a group admin
  */
-router.put('/:groupId/settings',
-    param('groupId').isString().notEmpty().withMessage('Group ID is required'),
-    body('settings').isObject().withMessage('Settings object is required'),
-    body('settings.alertLevel').optional().isInt({ min: 0, max: 10 }),
-    body('settings.muteLevel').optional().isInt({ min: 0, max: 10 }),
-    body('settings.kickLevel').optional().isInt({ min: 0, max: 10 }),
-    body('settings.banLevel').optional().isInt({ min: 0, max: 10 }),
-    body('settings.spamThreshold').optional().isFloat({ min: 0, max: 1 }),
-    body('settings.profanityThreshold').optional().isFloat({ min: 0, max: 1 }),
-    body('settings.muteDurationMinutes').optional().isInt({ min: 1, max: 10080 }),
-    body('settings.strikeExpirationDays').optional().isInt({ min: 1, max: 365 }),
-    body('settings.goodBehaviorDays').optional().isInt({ min: 1, max: 365 }),
-    body('settings.warningMessage').optional().isLength({ max: 500 }),
-    body('settings.warningMessageDeleteSeconds').optional().isInt({ min: 5, max: 300 }),
-    body('settings.keywordWhitelistBypass').optional().isBoolean(),
-    body('settings.whitelistedKeywords').optional().isArray({ max: 100 }),
-    groupController.updateSettings
+router.put(
+  '/:groupId/settings',
+  param('groupId').isString().notEmpty().withMessage('Group ID is required'),
+  body('settings').isObject().withMessage('Settings object is required'),
+  body('settings.alertLevel').optional().isInt({ min: 0, max: 10 }),
+  body('settings.muteLevel').optional().isInt({ min: 0, max: 10 }),
+  body('settings.kickLevel').optional().isInt({ min: 0, max: 10 }),
+  body('settings.banLevel').optional().isInt({ min: 0, max: 10 }),
+  body('settings.spamThreshold').optional().isFloat({ min: 0, max: 1 }),
+  body('settings.profanityThreshold').optional().isFloat({ min: 0, max: 1 }),
+  body('settings.muteDurationMinutes').optional().isInt({ min: 1, max: 10080 }),
+  body('settings.strikeExpirationDays').optional().isInt({ min: 1, max: 365 }),
+  body('settings.goodBehaviorDays').optional().isInt({ min: 1, max: 365 }),
+  body('settings.warningMessage').optional().isLength({ max: 500 }),
+  body('settings.warningMessageDeleteSeconds').optional().isInt({ min: 5, max: 300 }),
+  body('settings.keywordWhitelistBypass').optional().isBoolean(),
+  body('settings.whitelistedKeywords').optional().isArray({ max: 100 }),
+  groupController.updateSettings
 );
 
 /**
@@ -394,10 +397,11 @@ router.put('/:groupId/settings',
  *       404:
  *         description: Group not found
  */
-router.get('/:groupId/stats',
-    param('groupId').isString().notEmpty().withMessage('Group ID is required'),
-    query('period').optional().isIn(['day', 'week', 'month', 'year']).withMessage('Invalid period'),
-    groupController.getStats
+router.get(
+  '/:groupId/stats',
+  param('groupId').isString().notEmpty().withMessage('Group ID is required'),
+  query('period').optional().isIn(['day', 'week', 'month', 'year']).withMessage('Invalid period'),
+  groupController.getStats
 );
 
 /**
@@ -450,13 +454,14 @@ router.get('/:groupId/stats',
  *       403:
  *         description: Forbidden - Not a group admin
  */
-router.get('/:groupId/audit',
-    param('groupId').isString().notEmpty().withMessage('Group ID is required'),
-    query('page').optional().isInt({ min: 1 }),
-    query('limit').optional().isInt({ min: 1, max: 100 }),
-    query('type').optional().isString(),
-    query('userId').optional().isString(),
-    groupController.getAuditLog
+router.get(
+  '/:groupId/audit',
+  param('groupId').isString().notEmpty().withMessage('Group ID is required'),
+  query('page').optional().isInt({ min: 1 }),
+  query('limit').optional().isInt({ min: 1, max: 100 }),
+  query('type').optional().isString(),
+  query('userId').optional().isString(),
+  groupController.getAuditLog
 );
 
 /**
@@ -503,45 +508,63 @@ router.get('/:groupId/audit',
  *       403:
  *         description: Forbidden - Not a group admin
  */
-router.get('/:groupId/audit/export',
-    param('groupId').isString().notEmpty().withMessage('Group ID is required'),
-    query('format').optional().isIn(['json', 'csv']),
-    query('startDate').optional().isISO8601(),
-    query('endDate').optional().isISO8601(),
-    groupController.exportAuditLog
+router.get(
+  '/:groupId/audit/export',
+  param('groupId').isString().notEmpty().withMessage('Group ID is required'),
+  query('format').optional().isIn(['json', 'csv']),
+  query('startDate').optional().isISO8601(),
+  query('endDate').optional().isISO8601(),
+  groupController.exportAuditLog
 );
 
 // Strike management routes (existing implementation with unified auth)
-router.use('/:groupId/users/:userId/strikes', 
-    param('groupId').isString().notEmpty(),
-    param('userId').isString().notEmpty(),
-    checkGroupAdmin
+router.use(
+  '/:groupId/users/:userId/strikes',
+  param('groupId').isString().notEmpty(),
+  param('userId').isString().notEmpty(),
+  checkGroupAdmin
 );
 
 // Mount strike routes
-router.get('/:groupId/users/:userId/strikes',
-    query('limit').optional().isInt({ min: 1, max: 100 }),
-    query('offset').optional().isInt({ min: 0 }),
-    query('includeHistory').optional().isIn(['true', 'false']),
-    strikeController.getUserStrikes
+router.get(
+  '/:groupId/users/:userId/strikes',
+  query('limit').optional().isInt({ min: 1, max: 100 }),
+  query('offset').optional().isInt({ min: 0 }),
+  query('includeHistory').optional().isIn(['true', 'false']),
+  strikeController.getUserStrikes
 );
 
-router.post('/:groupId/users/:userId/strikes',
-    body('amount').isInt({ min: 1, max: 100 }).withMessage('Amount must be between 1 and 100'),
-    body('reason').optional().isLength({ max: 500 }).withMessage('Reason must be less than 500 characters'),
-    strikeController.addUserStrikes
+router.post(
+  '/:groupId/users/:userId/strikes',
+  body('amount').isInt({ min: 1, max: 100 }).withMessage('Amount must be between 1 and 100'),
+  body('reason')
+    .optional()
+    .isLength({ max: 500 })
+    .withMessage('Reason must be less than 500 characters'),
+  strikeController.addUserStrikes
 );
 
-router.delete('/:groupId/users/:userId/strikes',
-    body('amount').optional().isInt({ min: 1, max: 100 }).withMessage('Amount must be between 1 and 100'),
-    body('reason').optional().isLength({ max: 500 }).withMessage('Reason must be less than 500 characters'),
-    strikeController.removeUserStrikes
+router.delete(
+  '/:groupId/users/:userId/strikes',
+  body('amount')
+    .optional()
+    .isInt({ min: 1, max: 100 })
+    .withMessage('Amount must be between 1 and 100'),
+  body('reason')
+    .optional()
+    .isLength({ max: 500 })
+    .withMessage('Reason must be less than 500 characters'),
+  strikeController.removeUserStrikes
 );
 
-router.put('/:groupId/users/:userId/strikes',
-    body('count').isInt({ min: 0, max: 1000 }).withMessage('Count must be between 0 and 1000'),
-    body('reason').optional().isLength({ max: 500 }).withMessage('Reason must be less than 500 characters'),
-    strikeController.setUserStrikes
+router.put(
+  '/:groupId/users/:userId/strikes',
+  body('count').isInt({ min: 0, max: 1000 }).withMessage('Count must be between 0 and 1000'),
+  body('reason')
+    .optional()
+    .isLength({ max: 500 })
+    .withMessage('Reason must be less than 500 characters'),
+  strikeController.setUserStrikes
 );
 
 export default router;

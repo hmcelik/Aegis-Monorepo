@@ -5,7 +5,7 @@ import { checkJwt } from '../middleware/checkJwt.js';
 import { checkGroupAdmin } from '../middleware/checkGroupAdmin.js';
 import { body, param, query } from 'express-validator';
 
-
+/** @type {import('express').Router} */
 const router = express.Router();
 
 // All group routes require a valid JWT
@@ -162,17 +162,19 @@ router.get('/', groupController.listGroups);
  *       403:
  *         description: Forbidden - Not a group admin
  */
-router.get('/:groupId/settings', 
-    param('groupId').isString(),
-    checkGroupAdmin, 
-    groupController.getSettings
+router.get(
+  '/:groupId/settings',
+  param('groupId').isString(),
+  checkGroupAdmin,
+  groupController.getSettings
 );
 
-router.put('/:groupId/settings',
-    param('groupId').isString(),
-    body('settings').isObject(),
-    checkGroupAdmin,
-    groupController.updateSettings
+router.put(
+  '/:groupId/settings',
+  param('groupId').isString(),
+  body('settings').isObject(),
+  checkGroupAdmin,
+  groupController.updateSettings
 );
 
 /**
@@ -260,10 +262,11 @@ router.put('/:groupId/settings',
  *       403:
  *         description: Forbidden - Not a group admin
  */
-router.get('/:groupId/stats',
-    param('groupId').isString(),
-    checkGroupAdmin,
-    groupController.getStats
+router.get(
+  '/:groupId/stats',
+  param('groupId').isString(),
+  checkGroupAdmin,
+  groupController.getStats
 );
 
 /**
@@ -373,16 +376,19 @@ router.get('/:groupId/stats',
  *       403:
  *         description: Forbidden - Not a group admin
  */
-router.get('/:groupId/audit',
-    param('groupId').isString().notEmpty(),
-    query('page').optional().isInt({ min: 1 }),
-    query('limit').optional().isInt({ min: 1, max: 200 }),
-    query('userId').optional().isString(),
-    query('type').optional().isIn(['AUTO', 'MANUAL-STRIKE-ADD', 'MANUAL-STRIKE-REMOVE', 'MANUAL-STRIKE-SET']),
-    query('startDate').optional().isISO8601(),
-    query('endDate').optional().isISO8601(),
-    checkGroupAdmin,
-    auditController.getAuditLog
+router.get(
+  '/:groupId/audit',
+  param('groupId').isString().notEmpty(),
+  query('page').optional().isInt({ min: 1 }),
+  query('limit').optional().isInt({ min: 1, max: 200 }),
+  query('userId').optional().isString(),
+  query('type')
+    .optional()
+    .isIn(['AUTO', 'MANUAL-STRIKE-ADD', 'MANUAL-STRIKE-REMOVE', 'MANUAL-STRIKE-SET']),
+  query('startDate').optional().isISO8601(),
+  query('endDate').optional().isISO8601(),
+  checkGroupAdmin,
+  auditController.getAuditLog
 );
 
 /**
@@ -450,16 +456,18 @@ router.get('/:groupId/audit',
  *       403:
  *         description: Forbidden - Not a group admin
  */
-router.get('/:groupId/audit/export',
-    param('groupId').isString().notEmpty(),
-    query('format').optional().isIn(['csv', 'json']),
-    query('userId').optional().isString(),
-    query('type').optional().isIn(['AUTO', 'MANUAL-STRIKE-ADD', 'MANUAL-STRIKE-REMOVE', 'MANUAL-STRIKE-SET']),
-    query('startDate').optional().isISO8601(),
-    query('endDate').optional().isISO8601(),
-    checkGroupAdmin,
-    auditController.exportAuditLog
+router.get(
+  '/:groupId/audit/export',
+  param('groupId').isString().notEmpty(),
+  query('format').optional().isIn(['csv', 'json']),
+  query('userId').optional().isString(),
+  query('type')
+    .optional()
+    .isIn(['AUTO', 'MANUAL-STRIKE-ADD', 'MANUAL-STRIKE-REMOVE', 'MANUAL-STRIKE-SET']),
+  query('startDate').optional().isISO8601(),
+  query('endDate').optional().isISO8601(),
+  checkGroupAdmin,
+  auditController.exportAuditLog
 );
-
 
 export default router;

@@ -7,15 +7,12 @@ import winston from 'winston';
 // Create logger for dual-write operations
 const logger = winston.createLogger({
   level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
   transports: [
     new winston.transports.Console({
-      format: winston.format.simple()
-    })
-  ]
+      format: winston.format.simple(),
+    }),
+  ],
 });
 
 /**
@@ -44,7 +41,7 @@ export class DualWriteAdapter extends EventEmitter {
       enableDualWrite: false,
       readFromNew: false,
       writeToOld: true,
-      writeToNew: false
+      writeToNew: false,
     }
   ) {
     super();
@@ -84,11 +81,14 @@ export class DualWriteAdapter extends EventEmitter {
     // Write to old database (if enabled)
     if (this.flags.writeToOld) {
       try {
-        await this.oldDb.run(`
+        await this.oldDb.run(
+          `
           INSERT INTO audit_log (timestamp, chatId, userId, logData)
           VALUES (datetime('now'), ?, ?, ?)
-        `, [data.chatId, data.userId, JSON.stringify(data.logData)]);
-        
+        `,
+          [data.chatId, data.userId, JSON.stringify(data.logData)]
+        );
+
         this.emit('old-db-write', { table: 'audit_log', success: true });
       } catch (error) {
         errors.push(error as Error);
@@ -101,22 +101,25 @@ export class DualWriteAdapter extends EventEmitter {
     if (this.flags.writeToNew && data.tenantId) {
       try {
         // Create event in new event sourcing table
-        await this.newDb.run(`
+        await this.newDb.run(
+          `
           INSERT INTO events (tenant_id, event_type, aggregate_id, aggregate_type, event_data, metadata)
           VALUES (?, ?, ?, ?, ?, ?)
-        `, [
-          data.tenantId,
-          'audit_log_entry',
-          data.chatId,
-          'group',
-          JSON.stringify({
-            userId: data.userId,
-            logData: data.logData,
-            timestamp: new Date().toISOString()
-          }),
-          JSON.stringify({ source: 'dual_write_adapter' })
-        ]);
-        
+        `,
+          [
+            data.tenantId,
+            'audit_log_entry',
+            data.chatId,
+            'group',
+            JSON.stringify({
+              userId: data.userId,
+              logData: data.logData,
+              timestamp: new Date().toISOString(),
+            }),
+            JSON.stringify({ source: 'dual_write_adapter' }),
+          ]
+        );
+
         this.emit('new-db-write', { table: 'events', success: true });
       } catch (error) {
         errors.push(error as Error);
@@ -146,16 +149,24 @@ export class DualWriteAdapter extends EventEmitter {
     if (this.flags.writeToOld) {
       try {
         // Check if group exists first
-        const existing = await this.oldDb.query(`SELECT chatId FROM groups WHERE chatId = ?`, [data.chatId]);
-        
+        const existing = await this.oldDb.query(`SELECT chatId FROM groups WHERE chatId = ?`, [
+          data.chatId,
+        ]);
+
         if (existing.length > 0) {
           // Update existing group
-          await this.oldDb.run(`UPDATE groups SET chatTitle = ? WHERE chatId = ?`, [data.chatTitle, data.chatId]);
+          await this.oldDb.run(`UPDATE groups SET chatTitle = ? WHERE chatId = ?`, [
+            data.chatTitle,
+            data.chatId,
+          ]);
         } else {
           // Insert new group
-          await this.oldDb.run(`INSERT INTO groups (chatId, chatTitle) VALUES (?, ?)`, [data.chatId, data.chatTitle]);
+          await this.oldDb.run(`INSERT INTO groups (chatId, chatTitle) VALUES (?, ?)`, [
+            data.chatId,
+            data.chatTitle,
+          ]);
         }
-        
+
         this.emit('old-db-write', { table: 'groups', success: true });
       } catch (error) {
         errors.push(error as Error);
@@ -174,25 +185,34 @@ export class DualWriteAdapter extends EventEmitter {
       } else {
         try {
           // Check if group exists
-          const existing = await this.newDb.query(`
+          const existing = await this.newDb.query(
+            `
             SELECT id FROM groups WHERE chat_id = ? AND tenant_id = ?
-          `, [data.chatId, data.tenantId]);
+          `,
+            [data.chatId, data.tenantId]
+          );
 
           if (existing.length > 0) {
             // Update existing group
-            await this.newDb.run(`
+            await this.newDb.run(
+              `
               UPDATE groups 
               SET chat_title = ?, chat_type = ?, updated_at = CURRENT_TIMESTAMP
               WHERE chat_id = ? AND tenant_id = ?
-            `, [data.chatTitle, data.chatType || 'group', data.chatId, data.tenantId]);
+            `,
+              [data.chatTitle, data.chatType || 'group', data.chatId, data.tenantId]
+            );
           } else {
             // Create new group
-            await this.newDb.run(`
+            await this.newDb.run(
+              `
               INSERT INTO groups (tenant_id, chat_id, chat_title, chat_type)
               VALUES (?, ?, ?, ?)
-            `, [data.tenantId, data.chatId, data.chatTitle, data.chatType || 'group']);
+            `,
+              [data.tenantId, data.chatId, data.chatTitle, data.chatType || 'group']
+            );
           }
-          
+
           this.emit('new-db-write', { table: 'groups', success: true });
         } catch (error) {
           errors.push(error as Error);
@@ -224,15 +244,18 @@ export class DualWriteAdapter extends EventEmitter {
     // Write to old database (if enabled)
     if (this.flags.writeToOld) {
       try {
-        await this.oldDb.run(`
+        await this.oldDb.run(
+          `
           INSERT INTO users (userId, username, firstName, lastName)
           VALUES (?, ?, ?, ?)
           ON CONFLICT(userId) DO UPDATE SET
             username = excluded.username,
             firstName = excluded.firstName,
             lastName = excluded.lastName
-        `, [data.userId, data.username, data.firstName, data.lastName]);
-        
+        `,
+          [data.userId, data.username, data.firstName, data.lastName]
+        );
+
         this.emit('old-db-write', { table: 'users', success: true });
       } catch (error) {
         errors.push(error as Error);
@@ -245,33 +268,51 @@ export class DualWriteAdapter extends EventEmitter {
     if (this.flags.writeToNew && data.tenantId) {
       try {
         // Check if user exists
-        const existing = await this.newDb.query(`
+        const existing = await this.newDb.query(
+          `
           SELECT id FROM users WHERE user_id = ? AND tenant_id = ?
-        `, [data.userId, data.tenantId]);
+        `,
+          [data.userId, data.tenantId]
+        );
 
         if (existing.length > 0) {
           // Update existing user
-          await this.newDb.run(`
+          await this.newDb.run(
+            `
             UPDATE users 
             SET username = ?, first_name = ?, last_name = ?, 
                 language_code = ?, is_bot = ?, updated_at = CURRENT_TIMESTAMP
             WHERE user_id = ? AND tenant_id = ?
-          `, [
-            data.username, data.firstName, data.lastName,
-            data.languageCode, data.isBot ? 1 : 0,
-            data.userId, data.tenantId
-          ]);
+          `,
+            [
+              data.username,
+              data.firstName,
+              data.lastName,
+              data.languageCode,
+              data.isBot ? 1 : 0,
+              data.userId,
+              data.tenantId,
+            ]
+          );
         } else {
           // Create new user
-          await this.newDb.run(`
+          await this.newDb.run(
+            `
             INSERT INTO users (tenant_id, user_id, username, first_name, last_name, language_code, is_bot)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-          `, [
-            data.tenantId, data.userId, data.username, data.firstName,
-            data.lastName, data.languageCode, data.isBot ? 1 : 0
-          ]);
+          `,
+            [
+              data.tenantId,
+              data.userId,
+              data.username,
+              data.firstName,
+              data.lastName,
+              data.languageCode,
+              data.isBot ? 1 : 0,
+            ]
+          );
         }
-        
+
         this.emit('new-db-write', { table: 'users', success: true });
       } catch (error) {
         errors.push(error as Error);
@@ -310,8 +351,16 @@ export class DualWriteAdapter extends EventEmitter {
       try {
         // Get group and user IDs from new database
         const [groupResult, userResult] = await Promise.all([
-          this.newDb.query('SELECT id FROM groups WHERE chat_id = ? AND tenant_id = ?', [data.chatId, data.tenantId]),
-          data.userId ? this.newDb.query('SELECT id FROM users WHERE user_id = ? AND tenant_id = ?', [data.userId, data.tenantId]) : Promise.resolve([])
+          this.newDb.query('SELECT id FROM groups WHERE chat_id = ? AND tenant_id = ?', [
+            data.chatId,
+            data.tenantId,
+          ]),
+          data.userId
+            ? this.newDb.query('SELECT id FROM users WHERE user_id = ? AND tenant_id = ?', [
+                data.userId,
+                data.tenantId,
+              ])
+            : Promise.resolve([]),
         ]);
 
         const groupId = groupResult[0]?.id;
@@ -330,11 +379,15 @@ export class DualWriteAdapter extends EventEmitter {
             processingTimeMs: data.processingTimeMs,
             aiModel: data.aiModel,
             aiCost: data.aiCost,
-            cacheHit: data.cacheHit
+            cacheHit: data.cacheHit,
           });
-          
+
           newDecisionId = decision.id;
-          this.emit('new-db-write', { table: 'decisions', success: true, decisionId: newDecisionId });
+          this.emit('new-db-write', {
+            table: 'decisions',
+            success: true,
+            decisionId: newDecisionId,
+          });
         }
       } catch (error) {
         errors.push(error as Error);
@@ -357,9 +410,9 @@ export class DualWriteAdapter extends EventEmitter {
             processingTimeMs: data.processingTimeMs,
             aiModel: data.aiModel,
             aiCost: data.aiCost,
-            cacheHit: data.cacheHit
+            cacheHit: data.cacheHit,
           },
-          tenantId: data.tenantId
+          tenantId: data.tenantId,
         });
       } catch (error) {
         errors.push(error as Error);
@@ -380,13 +433,16 @@ export class DualWriteAdapter extends EventEmitter {
     // Try new database first if enabled
     if (this.flags.readFromNew && tenantId) {
       try {
-        const results = await this.newDb.query(`
+        const results = await this.newDb.query(
+          `
           SELECT id, chat_id as chatId, chat_title as chatTitle, chat_type as chatType,
                  member_count as memberCount, is_active as isActive
           FROM groups 
           WHERE chat_id = ? AND tenant_id = ?
-        `, [chatId, tenantId]);
-        
+        `,
+          [chatId, tenantId]
+        );
+
         if (results.length > 0) {
           this.emit('new-db-read', { table: 'groups', success: true });
           return results[0];
@@ -399,19 +455,22 @@ export class DualWriteAdapter extends EventEmitter {
 
     // Fallback to old database
     try {
-      const results = await this.oldDb.query(`
+      const results = await this.oldDb.query(
+        `
         SELECT chatId, chatTitle
         FROM groups 
         WHERE chatId = ?
-      `, [chatId]);
-      
+      `,
+        [chatId]
+      );
+
       if (results.length > 0) {
         this.emit('old-db-read', { table: 'groups', success: true });
         return {
           chatId: results[0].chatId,
           chatTitle: results[0].chatTitle,
           chatType: 'group', // Default for old schema
-          isActive: true
+          isActive: true,
         };
       }
     } catch (error) {
@@ -425,11 +484,13 @@ export class DualWriteAdapter extends EventEmitter {
   /**
    * Validate data consistency between old and new databases
    */
-  async validateConsistency(options: {
-    checkGroups?: boolean;
-    checkUsers?: boolean;
-    sampleSize?: number;
-  } = {}): Promise<{
+  async validateConsistency(
+    options: {
+      checkGroups?: boolean;
+      checkUsers?: boolean;
+      sampleSize?: number;
+    } = {}
+  ): Promise<{
     groupsConsistent: boolean;
     usersConsistent: boolean;
     inconsistencies: any[];
@@ -442,21 +503,27 @@ export class DualWriteAdapter extends EventEmitter {
     if (checkGroups) {
       try {
         // Sample groups from old database
-        const oldGroups = await this.oldDb.query(`
+        const oldGroups = await this.oldDb.query(
+          `
           SELECT chatId, chatTitle FROM groups LIMIT ?
-        `, [sampleSize]);
+        `,
+          [sampleSize]
+        );
 
         for (const oldGroup of oldGroups) {
           // Check if exists in new database (need tenant context)
-          const newGroups = await this.newDb.query(`
+          const newGroups = await this.newDb.query(
+            `
             SELECT chat_id, chat_title FROM groups WHERE chat_id = ?
-          `, [oldGroup.chatId]);
+          `,
+            [oldGroup.chatId]
+          );
 
           if (newGroups.length === 0) {
             inconsistencies.push({
               type: 'missing_group',
               chatId: oldGroup.chatId,
-              oldData: oldGroup
+              oldData: oldGroup,
             });
             groupsConsistent = false;
           } else if (newGroups[0].chat_title !== oldGroup.chatTitle) {
@@ -464,7 +531,7 @@ export class DualWriteAdapter extends EventEmitter {
               type: 'group_title_mismatch',
               chatId: oldGroup.chatId,
               oldTitle: oldGroup.chatTitle,
-              newTitle: newGroups[0].chat_title
+              newTitle: newGroups[0].chat_title,
             });
             groupsConsistent = false;
           }
@@ -478,33 +545,41 @@ export class DualWriteAdapter extends EventEmitter {
     if (checkUsers) {
       try {
         // Sample users from old database
-        const oldUsers = await this.oldDb.query(`
+        const oldUsers = await this.oldDb.query(
+          `
           SELECT userId, username, firstName, lastName FROM users LIMIT ?
-        `, [sampleSize]);
+        `,
+          [sampleSize]
+        );
 
         for (const oldUser of oldUsers) {
           // Check if exists in new database
-          const newUsers = await this.newDb.query(`
+          const newUsers = await this.newDb.query(
+            `
             SELECT user_id, username, first_name, last_name FROM users WHERE user_id = ?
-          `, [oldUser.userId]);
+          `,
+            [oldUser.userId]
+          );
 
           if (newUsers.length === 0) {
             inconsistencies.push({
               type: 'missing_user',
               userId: oldUser.userId,
-              oldData: oldUser
+              oldData: oldUser,
             });
             usersConsistent = false;
           } else {
             const newUser = newUsers[0];
-            if (newUser.username !== oldUser.username ||
-                newUser.first_name !== oldUser.firstName ||
-                newUser.last_name !== oldUser.lastName) {
+            if (
+              newUser.username !== oldUser.username ||
+              newUser.first_name !== oldUser.firstName ||
+              newUser.last_name !== oldUser.lastName
+            ) {
               inconsistencies.push({
                 type: 'user_data_mismatch',
                 userId: oldUser.userId,
                 oldData: oldUser,
-                newData: newUser
+                newData: newUser,
               });
               usersConsistent = false;
             }
@@ -519,13 +594,13 @@ export class DualWriteAdapter extends EventEmitter {
     this.emit('consistency-check', {
       groupsConsistent,
       usersConsistent,
-      inconsistencyCount: inconsistencies.length
+      inconsistencyCount: inconsistencies.length,
     });
 
     return {
       groupsConsistent,
       usersConsistent,
-      inconsistencies
+      inconsistencies,
     };
   }
 }

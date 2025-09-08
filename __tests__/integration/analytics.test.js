@@ -9,13 +9,13 @@ vi.mock('@telegram-moderator/shared/src/services/logger.js', () => ({
   logger: {
     info: vi.fn(),
     error: vi.fn(),
-    debug: vi.fn()
+    debug: vi.fn(),
   },
   default: {
     info: vi.fn(),
     error: vi.fn(),
-    debug: vi.fn()
-  }
+    debug: vi.fn(),
+  },
 }));
 
 describe('Analytics API Endpoints', () => {
@@ -27,7 +27,7 @@ describe('Analytics API Endpoints', () => {
       getDailyRollups: vi.fn(),
       getAggregatedMetrics: vi.fn(),
       performDailyRollup: vi.fn(),
-      cleanupOldMetrics: vi.fn()
+      cleanupOldMetrics: vi.fn(),
     };
 
     createUsageRollupService.mockReturnValue(mockService);
@@ -48,8 +48,8 @@ describe('Analytics API Endpoints', () => {
           aiCost: 2.5,
           cacheHits: 30,
           cacheMisses: 20,
-          avgProcessingTimeMs: 150
-        }
+          avgProcessingTimeMs: 150,
+        },
       ];
 
       mockService.getDailyRollups.mockResolvedValue(mockRollups);
@@ -59,7 +59,7 @@ describe('Analytics API Endpoints', () => {
         .set('Authorization', mockToken)
         .query({
           startDate: '2025-09-01',
-          endDate: '2025-09-07'
+          endDate: '2025-09-07',
         });
 
       expect(response.status).toBe(200);
@@ -74,7 +74,7 @@ describe('Analytics API Endpoints', () => {
         .set('Authorization', mockToken)
         .query({
           startDate: 'invalid-date',
-          endDate: '2025-09-07'
+          endDate: '2025-09-07',
         });
 
       expect(response.status).toBe(400);
@@ -83,12 +83,10 @@ describe('Analytics API Endpoints', () => {
     });
 
     it('should return 401 without authentication', async () => {
-      const response = await request(app)
-        .get('/api/v1/analytics/daily-usage')
-        .query({
-          startDate: '2025-09-01',
-          endDate: '2025-09-07'
-        });
+      const response = await request(app).get('/api/v1/analytics/daily-usage').query({
+        startDate: '2025-09-01',
+        endDate: '2025-09-07',
+      });
 
       expect(response.status).toBe(401);
     });
@@ -101,7 +99,7 @@ describe('Analytics API Endpoints', () => {
         .set('Authorization', mockToken)
         .query({
           startDate: '2025-09-01',
-          endDate: '2025-09-07'
+          endDate: '2025-09-07',
         });
 
       expect(response.status).toBe(500);
@@ -117,7 +115,7 @@ describe('Analytics API Endpoints', () => {
         totalAICalls: 500,
         totalCost: 25.0,
         cacheHitRate: 0.6,
-        avgProcessingTime: 140
+        avgProcessingTime: 140,
       };
 
       mockService.getAggregatedMetrics.mockResolvedValue(mockMetrics);
@@ -127,7 +125,7 @@ describe('Analytics API Endpoints', () => {
         .set('Authorization', mockToken)
         .query({
           startDate: '2025-09-01',
-          endDate: '2025-09-07'
+          endDate: '2025-09-07',
         });
 
       expect(response.status).toBe(200);
@@ -140,7 +138,7 @@ describe('Analytics API Endpoints', () => {
         .get('/api/v1/analytics/metrics')
         .set('Authorization', mockToken)
         .query({
-          startDate: '2025-09-01'
+          startDate: '2025-09-01',
           // Missing endDate
         });
 
@@ -157,7 +155,7 @@ describe('Analytics API Endpoints', () => {
         .post('/api/v1/analytics/rollup')
         .set('Authorization', mockToken)
         .send({
-          date: '2025-09-07'
+          date: '2025-09-07',
         });
 
       expect(response.status).toBe(200);
@@ -170,7 +168,7 @@ describe('Analytics API Endpoints', () => {
         .post('/api/v1/analytics/rollup')
         .set('Authorization', mockToken)
         .send({
-          date: '2025-09-07'
+          date: '2025-09-07',
         });
 
       expect(response.status).toBe(403);
@@ -182,7 +180,7 @@ describe('Analytics API Endpoints', () => {
         .post('/api/v1/analytics/rollup')
         .set('Authorization', mockToken)
         .send({
-          date: 'invalid-date'
+          date: 'invalid-date',
         });
 
       expect(response.status).toBe(400);
@@ -232,7 +230,7 @@ describe('Analytics API Endpoints', () => {
         totalAICalls: 500,
         totalCost: 25.0,
         cacheHitRate: 0.6,
-        avgProcessingTime: 140
+        avgProcessingTime: 140,
       };
 
       const mockRollups = [
@@ -244,8 +242,8 @@ describe('Analytics API Endpoints', () => {
           aiCost: 2.5,
           cacheHits: 30,
           cacheMisses: 20,
-          avgProcessingTimeMs: 150
-        }
+          avgProcessingTimeMs: 150,
+        },
       ];
 
       mockService.getAggregatedMetrics.mockResolvedValue(mockMetrics);
@@ -296,7 +294,7 @@ describe('Analytics API Integration', () => {
       getDailyRollups: vi.fn(),
       getAggregatedMetrics: vi.fn(),
       performDailyRollup: vi.fn(),
-      cleanupOldMetrics: vi.fn()
+      cleanupOldMetrics: vi.fn(),
     };
 
     createUsageRollupService.mockReturnValue(mockService);
@@ -304,19 +302,16 @@ describe('Analytics API Integration', () => {
 
   it('should handle concurrent requests efficiently', async () => {
     mockService.getDailyRollups.mockResolvedValue([]);
-    
+
     const requests = Array.from({ length: 10 }, () =>
-      request(app)
-        .get('/api/v1/analytics/daily-usage')
-        .set('Authorization', mockToken)
-        .query({
-          startDate: '2025-09-01',
-          endDate: '2025-09-07'
-        })
+      request(app).get('/api/v1/analytics/daily-usage').set('Authorization', mockToken).query({
+        startDate: '2025-09-01',
+        endDate: '2025-09-07',
+      })
     );
 
     const responses = await Promise.all(requests);
-    
+
     expect(responses.every(res => res.status === 200)).toBe(true);
     expect(mockService.getDailyRollups).toHaveBeenCalledTimes(10);
   });
@@ -327,7 +322,7 @@ describe('Analytics API Integration', () => {
       totalAICalls: 500,
       totalCost: 25.0,
       cacheHitRate: 0.6,
-      avgProcessingTime: 140
+      avgProcessingTime: 140,
     };
 
     const mockRollups = [
@@ -339,8 +334,8 @@ describe('Analytics API Integration', () => {
         aiCost: 25.0, // Should match totalCost
         cacheHits: 300,
         cacheMisses: 200, // Combined should give 0.6 hit rate
-        avgProcessingTimeMs: 140
-      }
+        avgProcessingTimeMs: 140,
+      },
     ];
 
     mockService.getAggregatedMetrics.mockResolvedValue(mockMetrics);
@@ -354,15 +349,15 @@ describe('Analytics API Integration', () => {
       request(app)
         .get('/api/v1/analytics/daily-usage')
         .set('Authorization', mockToken)
-        .query({ startDate: '2025-09-07', endDate: '2025-09-07' })
+        .query({ startDate: '2025-09-07', endDate: '2025-09-07' }),
     ]);
 
     expect(metricsResponse.status).toBe(200);
     expect(rollupsResponse.status).toBe(200);
-    
+
     const metrics = metricsResponse.body.data;
     const rollups = rollupsResponse.body.data;
-    
+
     // Verify data consistency
     expect(metrics.totalMessages).toBe(rollups[0].messagesProcessed);
     expect(metrics.totalAICalls).toBe(rollups[0].aiCallsMade);

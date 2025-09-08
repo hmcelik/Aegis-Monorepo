@@ -12,16 +12,26 @@
  * @returns {object} The keyboard layout object for the Telegram API.
  */
 export const profanityKeyboard = (settings, chatId) => ({
-    reply_markup: {
-        inline_keyboard: [
-            // Toggle profanity detection on/off
-            [{ text: `${settings.profanityEnabled ? '✅' : '❌'} Profanity Detection (${settings.profanityEnabled ? 'ON' : 'OFF'})`, callback_data: `toggle_profanity:${chatId}` }],
-            // Set profanity detection threshold
-            [{ text: `🎯 Sensitivity (current: ${(settings.profanityThreshold * 100).toFixed(0)}%)`, callback_data: `set_profanity_threshold:${chatId}` }],
-            // Set custom profanity warning message
-            [{ text: `💬 Warning Message`, callback_data: `set_profanity_warning:${chatId}` }],
-            // Navigation button to return to the main menu.
-            [{ text: '⬅️ Back', callback_data: `settings_main:${chatId}` }],
-        ],
-    },
+  reply_markup: {
+    inline_keyboard: [
+      // Toggle profanity detection on/off
+      [
+        {
+          text: `${settings.profanityEnabled ? '✅' : '❌'} Profanity Detection (${settings.profanityEnabled ? 'ON' : 'OFF'})`,
+          callback_data: `toggle_profanity:${chatId}`,
+        },
+      ],
+      // Set profanity detection threshold
+      [
+        {
+          text: `🎯 Sensitivity (current: ${(settings.profanityThreshold * 100).toFixed(0)}%)`,
+          callback_data: `set_profanity_threshold:${chatId}`,
+        },
+      ],
+      // Set custom profanity warning message
+      [{ text: `💬 Warning Message`, callback_data: `set_profanity_warning:${chatId}` }],
+      // Navigation button to return to the main menu.
+      [{ text: '⬅️ Back', callback_data: `settings_main:${chatId}` }],
+    ],
+  },
 });

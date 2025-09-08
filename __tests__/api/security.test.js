@@ -14,15 +14,15 @@ describe('API Security and Validation', () => {
     it('should validate string length limits', async () => {
       app.post('/test-input', (req, res) => {
         const { message } = req.body;
-        
+
         if (typeof message !== 'string') {
           return res.status(400).json({ message: 'Message must be a string' });
         }
-        
+
         if (message.length > 1000) {
           return res.status(400).json({ message: 'Message too long' });
         }
-        
+
         res.json({ message: 'Input valid', length: message.length });
       });
 
@@ -36,9 +36,7 @@ describe('API Security and Validation', () => {
 
       // Invalid input - too long
       const longMessage = 'a'.repeat(1001);
-      const invalidResponse = await request(app)
-        .post('/test-input')
-        .send({ message: longMessage });
+      const invalidResponse = await request(app).post('/test-input').send({ message: longMessage });
 
       expect(invalidResponse.status).toBe(400);
       expect(invalidResponse.body.message).toBe('Message too long');
@@ -47,18 +45,16 @@ describe('API Security and Validation', () => {
     it('should validate required fields', async () => {
       app.post('/test-required', (req, res) => {
         const { userId, groupId } = req.body;
-        
+
         if (!userId || !groupId) {
           return res.status(400).json({ message: 'Missing required fields' });
         }
-        
+
         res.json({ message: 'Fields valid', userId, groupId });
       });
 
       // Missing fields
-      const response = await request(app)
-        .post('/test-required')
-        .send({ userId: '123' }); // Missing groupId
+      const response = await request(app).post('/test-required').send({ userId: '123' }); // Missing groupId
 
       expect(response.status).toBe(400);
       expect(response.body.message).toBe('Missing required fields');
@@ -67,15 +63,15 @@ describe('API Security and Validation', () => {
     it('should validate data types', async () => {
       app.post('/test-types', (req, res) => {
         const { score, isSpam } = req.body;
-        
+
         if (typeof score !== 'number' || score < 0 || score > 1) {
           return res.status(400).json({ message: 'Score must be a number between 0 and 1' });
         }
-        
+
         if (typeof isSpam !== 'boolean') {
           return res.status(400).json({ message: 'isSpam must be a boolean' });
         }
-        
+
         res.json({ message: 'Types valid', score, isSpam });
       });
 
@@ -93,10 +89,13 @@ describe('API Security and Validation', () => {
     it('should sanitize HTML input', async () => {
       app.post('/test-html', (req, res) => {
         const { content } = req.body;
-        
+
         // Basic XSS prevention - remove script tags
-        const sanitized = content.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-        
+        const sanitized = content.replace(
+          /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+          ''
+        );
+
         res.json({ original: content, sanitized });
       });
 
@@ -112,17 +111,15 @@ describe('API Security and Validation', () => {
     it('should handle special characters safely', async () => {
       app.post('/test-special', (req, res) => {
         const { text } = req.body;
-        
+
         // Ensure special characters don't break processing
         const processed = text; // No JSON.stringify here
-        
+
         res.json({ processed, length: text.length });
       });
 
       const specialChars = '<>&"\'';
-      const response = await request(app)
-        .post('/test-special')
-        .send({ text: specialChars });
+      const response = await request(app).post('/test-special').send({ text: specialChars });
 
       expect(response.status).toBe(200);
       expect(response.body.processed).toContain(specialChars);
@@ -132,27 +129,25 @@ describe('API Security and Validation', () => {
   describe('Rate Limiting Simulation', () => {
     it('should handle multiple requests gracefully', async () => {
       let requestCount = 0;
-      
+
       app.get('/test-rate', (req, res) => {
         requestCount++;
-        
+
         if (requestCount > 5) {
           return res.status(429).json({ message: 'Too many requests' });
         }
-        
+
         res.json({ message: 'Request processed', count: requestCount });
       });
 
       // Make multiple requests
-      const promises = Array.from({ length: 7 }, () => 
-        request(app).get('/test-rate')
-      );
-      
+      const promises = Array.from({ length: 7 }, () => request(app).get('/test-rate'));
+
       const responses = await Promise.all(promises);
-      
+
       // First 5 should succeed
       expect(responses.slice(0, 5).every(r => r.status === 200)).toBe(true);
-      
+
       // Last 2 should be rate limited
       expect(responses.slice(5).some(r => r.status === 429)).toBe(true);
     });
@@ -184,12 +179,11 @@ describe('API Security and Validation', () => {
         }
         res.status(error.statusCode || 500).json({
           statusCode: error.statusCode || 500,
-          message: error.message || 'Internal server error'
+          message: error.message || 'Internal server error',
         });
       });
 
-      const response = await request(app)
-        .get('/test-error');
+      const response = await request(app).get('/test-error');
 
       expect(response.status).toBe(500);
       expect(response.body.message).toBe('Generic error');
@@ -212,12 +206,11 @@ describe('API Security and Validation', () => {
         }
         res.status(error.statusCode || 500).json({
           statusCode: error.statusCode || 500,
-          message: error.message || 'Internal server error'
+          message: error.message || 'Internal server error',
         });
       });
 
-      const response = await request(app)
-        .get('/test-async-error');
+      const response = await request(app).get('/test-async-error');
 
       expect(response.status).toBe(500);
       expect(response.body.message).toBe('Async error');
@@ -240,12 +233,11 @@ describe('API Security and Validation', () => {
         }
         res.status(error.statusCode || 500).json({
           statusCode: error.statusCode || 500,
-          message: error.message || 'Internal server error'
+          message: error.message || 'Internal server error',
         });
       });
 
-      const response = await request(app)
-        .get('/test-production-error');
+      const response = await request(app).get('/test-production-error');
 
       expect(response.status).toBe(500);
       expect(response.body.message).toBe('Sensitive internal error');
@@ -259,17 +251,15 @@ describe('API Security and Validation', () => {
     it('should handle large payloads within limits', async () => {
       app.post('/test-large', (req, res) => {
         const { data } = req.body;
-        
-        res.json({ 
+
+        res.json({
           message: 'Large payload processed',
-          size: data.length // Direct length, not JSON stringified
+          size: data.length, // Direct length, not JSON stringified
         });
       });
 
       const largeData = 'x'.repeat(1000);
-      const response = await request(app)
-        .post('/test-large')
-        .send({ data: largeData });
+      const response = await request(app).post('/test-large').send({ data: largeData });
 
       expect(response.status).toBe(200);
       expect(response.body.size).toBe(1000);
@@ -294,15 +284,20 @@ describe('API Security and Validation', () => {
   describe('Header Validation', () => {
     it('should validate Content-Type headers', async () => {
       // Add route that strictly requires JSON
-      app.post('/test-content-type', (req, res, next) => {
-        // Check content type manually
-        if (req.get('Content-Type') !== 'application/json') {
-          return res.status(400).json({ error: 'Content-Type must be application/json' });
+      app.post(
+        '/test-content-type',
+        (req, res, next) => {
+          // Check content type manually
+          if (req.get('Content-Type') !== 'application/json') {
+            return res.status(400).json({ error: 'Content-Type must be application/json' });
+          }
+          next();
+        },
+        express.json(),
+        (req, res) => {
+          res.json({ message: 'Content-Type valid' });
         }
-        next();
-      }, express.json(), (req, res) => {
-        res.json({ message: 'Content-Type valid' });
-      });
+      );
 
       // Valid Content-Type
       const validResponse = await request(app)
@@ -326,12 +321,11 @@ describe('API Security and Validation', () => {
       app.get('/test-headers', (req, res) => {
         const userAgent = req.headers['user-agent'] || 'Unknown';
         const authorization = req.headers['authorization'] || 'None';
-        
+
         res.json({ userAgent, authorization });
       });
 
-      const response = await request(app)
-        .get('/test-headers');
+      const response = await request(app).get('/test-headers');
 
       expect(response.status).toBe(200);
       expect(response.body.authorization).toBe('None');

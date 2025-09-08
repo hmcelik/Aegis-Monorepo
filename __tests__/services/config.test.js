@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import config, { getGroupSettings, updateSetting } from '@telegram-moderator/shared/src/config/index.js';
+import config, {
+  getGroupSettings,
+  updateSetting,
+} from '@telegram-moderator/shared/src/config/index.js';
 import * as db from '@telegram-moderator/shared/src/services/database.js';
 
 // Mock the database service
@@ -16,7 +19,7 @@ vi.mock('@telegram-moderator/shared/src/services/logger.js', () => ({
 
 describe('Configuration Service', () => {
   const mockChatId = 'chat-12345';
-  
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -24,7 +27,7 @@ describe('Configuration Service', () => {
   describe('Default Settings Management', () => {
     it('should return correct default settings for new groups', async () => {
       // Mock database to return default values
-      db.getSetting.mockImplementation((chatId, key, defaultValue) => 
+      db.getSetting.mockImplementation((chatId, key, defaultValue) =>
         Promise.resolve(defaultValue)
       );
 
@@ -46,7 +49,7 @@ describe('Configuration Service', () => {
         warningMessageDeleteSeconds: 15,
         goodBehaviorDays: 7,
         muteDurationMinutes: 60,
-        strikeExpirationDays: 30
+        strikeExpirationDays: 30,
       });
     });
 
@@ -59,7 +62,7 @@ describe('Configuration Service', () => {
         muteLevel: 1,
         moderatorIds: ['123', '456'],
         warningMessage: 'Custom warning message',
-        muteDurationMinutes: 120
+        muteDurationMinutes: 120,
       };
 
       db.getSetting.mockImplementation((chatId, key, defaultValue) => {
@@ -152,7 +155,7 @@ describe('Configuration Service', () => {
       // Invalid thresholds should be handled (implementation-dependent)
       await updateSetting(mockChatId, 'spamThreshold', -0.1);
       await updateSetting(mockChatId, 'spamThreshold', 1.5);
-      
+
       // Implementation should handle edge cases gracefully
       expect(db.setSetting).toHaveBeenCalledTimes(3);
     });
@@ -226,7 +229,7 @@ describe('Configuration Service', () => {
         'Warning with quotes: "Please stop spamming"',
         'Warning with newlines:\nFirst line\nSecond line',
         'Warning with HTML: <b>Bold warning</b>',
-        'Warning with Unicode: Предупреждение о спаме'
+        'Warning with Unicode: Предупреждение о спаме',
       ];
 
       for (const message of specialMessages) {
@@ -247,7 +250,9 @@ describe('Configuration Service', () => {
     it('should handle setting update errors gracefully', async () => {
       db.setSetting.mockRejectedValue(new Error('Failed to update setting'));
 
-      await expect(updateSetting(mockChatId, 'spamThreshold', 0.8)).rejects.toThrow('Failed to update setting');
+      await expect(updateSetting(mockChatId, 'spamThreshold', 0.8)).rejects.toThrow(
+        'Failed to update setting'
+      );
     });
 
     it('should handle invalid chat IDs gracefully', async () => {
@@ -269,7 +274,7 @@ describe('Configuration Service', () => {
 
   describe('Configuration Consistency', () => {
     it('should maintain consistent default values across calls', async () => {
-      db.getSetting.mockImplementation((chatId, key, defaultValue) => 
+      db.getSetting.mockImplementation((chatId, key, defaultValue) =>
         Promise.resolve(defaultValue)
       );
 
@@ -287,7 +292,7 @@ describe('Configuration Service', () => {
         updateSetting(mockChatId, 'alertLevel', 2),
         updateSetting(mockChatId, 'muteLevel', 1),
         updateSetting(mockChatId, 'kickLevel', 3),
-        updateSetting(mockChatId, 'banLevel', 5)
+        updateSetting(mockChatId, 'banLevel', 5),
       ];
 
       await Promise.all(updates);
@@ -303,7 +308,7 @@ describe('Configuration Service', () => {
         keywordWhitelistBypass: false,
         moderatorIds: ['123', '456'],
         warningMessage: 'Test warning',
-        muteDurationMinutes: 120
+        muteDurationMinutes: 120,
       };
 
       // Mock the save operation
@@ -336,18 +341,16 @@ describe('Configuration Service', () => {
 
   describe('Performance Tests', () => {
     it('should handle rapid setting retrievals efficiently', async () => {
-      db.getSetting.mockImplementation((chatId, key, defaultValue) => 
+      db.getSetting.mockImplementation((chatId, key, defaultValue) =>
         Promise.resolve(defaultValue)
       );
 
       const startTime = Date.now();
-      
-      const promises = Array.from({ length: 50 }, () => 
-        getGroupSettings(mockChatId)
-      );
-      
+
+      const promises = Array.from({ length: 50 }, () => getGroupSettings(mockChatId));
+
       await Promise.all(promises);
-      
+
       const endTime = Date.now();
       const duration = endTime - startTime;
 
@@ -359,13 +362,13 @@ describe('Configuration Service', () => {
       db.setSetting.mockResolvedValue();
 
       const startTime = Date.now();
-      
-      const promises = Array.from({ length: 50 }, (_, i) => 
-        updateSetting(mockChatId, 'spamThreshold', 0.8 + (i * 0.001))
+
+      const promises = Array.from({ length: 50 }, (_, i) =>
+        updateSetting(mockChatId, 'spamThreshold', 0.8 + i * 0.001)
       );
-      
+
       await Promise.all(promises);
-      
+
       const endTime = Date.now();
       const duration = endTime - startTime;
 

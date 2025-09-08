@@ -12,16 +12,7 @@
       "@telegram-moderator/telemetry": ["../telemetry/src"]
     }
   },
-  "include": [
-    "src/**/*"
-  ],
-  "references": [
-    { "path": "../types" },
-    { "path": "../normalizer" }
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "__tests__"
-  ]
+  "include": ["src/**/*"],
+  "references": [{ "path": "../types" }, { "path": "../normalizer" }],
+  "exclude": ["node_modules", "dist", "__tests__"]
 }

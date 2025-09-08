@@ -13,12 +13,12 @@ describe('Database Layer', () => {
     // Use in-memory SQLite for testing
     const config: DatabaseConfig = {
       type: 'sqlite',
-      database: ':memory:'
+      database: ':memory:',
     };
 
     dbManager = new DatabaseManager(config);
     await initializeDatabase(dbManager);
-    
+
     const connection = await dbManager.getConnection();
     tenantRepo = new TenantRepository(connection);
   });
@@ -40,7 +40,7 @@ describe('Database Layer', () => {
       // Check if migrations table exists
       const connection = await dbManager.getConnection();
       const migrations = await connection.query('SELECT * FROM schema_migrations');
-      
+
       // Should have our 4 initial migrations
       expect(migrations.length).toBeGreaterThanOrEqual(4);
       expect(migrations.some(m => m.id === '001')).toBe(true);
@@ -52,10 +52,10 @@ describe('Database Layer', () => {
     it('should not re-run completed migrations', async () => {
       const connection = await dbManager.getConnection();
       const beforeCount = await connection.query('SELECT COUNT(*) as count FROM schema_migrations');
-      
+
       // Try to run migrations again
       await dbManager.runMigrations();
-      
+
       const afterCount = await connection.query('SELECT COUNT(*) as count FROM schema_migrations');
       expect(afterCount[0].count).toBe(beforeCount[0].count);
     });
@@ -66,7 +66,7 @@ describe('Database Layer', () => {
       const tenant = await tenantRepo.create({
         name: 'Test Tenant',
         status: 'active',
-        planType: 'basic'
+        planType: 'basic',
       });
 
       expect(tenant).toBeDefined();
@@ -78,7 +78,7 @@ describe('Database Layer', () => {
 
     it('should find tenant by ID', async () => {
       const created = await tenantRepo.create({
-        name: 'Find Test Tenant'
+        name: 'Find Test Tenant',
       });
 
       const found = await tenantRepo.findById(created.id);
@@ -89,7 +89,7 @@ describe('Database Layer', () => {
 
     it('should find tenant by name', async () => {
       await tenantRepo.create({
-        name: 'Unique Tenant Name'
+        name: 'Unique Tenant Name',
       });
 
       const found = await tenantRepo.findByName('Unique Tenant Name');
@@ -99,12 +99,12 @@ describe('Database Layer', () => {
 
     it('should update tenant information', async () => {
       const tenant = await tenantRepo.create({
-        name: 'Original Name'
+        name: 'Original Name',
       });
 
       const updated = await tenantRepo.update(tenant.id, {
         name: 'Updated Name',
-        status: 'suspended'
+        status: 'suspended',
       });
 
       expect(updated).toBeDefined();
@@ -126,12 +126,12 @@ describe('Database Layer', () => {
 
     it('should manage tenant settings', async () => {
       const tenant = await tenantRepo.create({
-        name: 'Settings Test Tenant'
+        name: 'Settings Test Tenant',
       });
 
       // Set a setting
       await tenantRepo.setSetting(tenant.id, 'max_messages_per_day', '1000');
-      
+
       // Get the setting
       const value = await tenantRepo.getSetting(tenant.id, 'max_messages_per_day');
       expect(value).toBe('1000');
@@ -148,7 +148,7 @@ describe('Database Layer', () => {
       // Delete setting
       const deleted = await tenantRepo.deleteSetting(tenant.id, 'max_messages_per_day');
       expect(deleted).toBe(true);
-      
+
       const deletedValue = await tenantRepo.getSetting(tenant.id, 'max_messages_per_day');
       expect(deletedValue).toBeNull();
     });
@@ -160,9 +160,9 @@ describe('Database Layer', () => {
 
     beforeEach(async () => {
       testTenant = await tenantRepo.create({
-        name: 'Decision Test Tenant'
+        name: 'Decision Test Tenant',
       });
-      
+
       const connection = await dbManager.getConnection();
       decisionRepo = new DecisionRepository(connection, testTenant.id);
     });
@@ -176,7 +176,7 @@ describe('Database Layer', () => {
         processingTimeMs: 150,
         aiModel: 'gpt-4',
         aiCost: 0.001,
-        cacheHit: false
+        cacheHit: false,
       });
 
       expect(decision).toBeDefined();
@@ -188,11 +188,11 @@ describe('Database Layer', () => {
 
     it('should find decision by content hash', async () => {
       const contentHash = 'test_hash_123';
-      
+
       await decisionRepo.createDecision({
         contentHash,
         verdict: 'allow',
-        confidence: 0.8
+        confidence: 0.8,
       });
 
       const found = await decisionRepo.findByContentHash(contentHash);
@@ -205,15 +205,15 @@ describe('Database Layer', () => {
       // Create test decisions
       await decisionRepo.createDecision({
         contentHash: 'hash1',
-        verdict: 'block'
+        verdict: 'block',
       });
       await decisionRepo.createDecision({
         contentHash: 'hash2',
-        verdict: 'allow'
+        verdict: 'allow',
       });
       await decisionRepo.createDecision({
         contentHash: 'hash3',
-        verdict: 'block'
+        verdict: 'block',
       });
 
       // List all decisions
@@ -235,14 +235,14 @@ describe('Database Layer', () => {
     it('should create and retrieve actions', async () => {
       const decision = await decisionRepo.createDecision({
         contentHash: 'action_test',
-        verdict: 'block'
+        verdict: 'block',
       });
 
       const action = await decisionRepo.createAction({
         decisionId: decision.id,
         actionType: 'delete',
         actionData: { messageId: 12345 },
-        success: true
+        success: true,
       });
 
       expect(action).toBeDefined();
@@ -263,30 +263,30 @@ describe('Database Layer', () => {
         verdict: 'block',
         processingTimeMs: 100,
         aiCost: 0.001,
-        cacheHit: false
+        cacheHit: false,
       });
       await decisionRepo.createDecision({
         contentHash: 'stats2',
         verdict: 'allow',
         processingTimeMs: 200,
         aiCost: 0.002,
-        cacheHit: true
+        cacheHit: true,
       });
       await decisionRepo.createDecision({
         contentHash: 'stats3',
         verdict: 'block',
         processingTimeMs: 150,
         aiCost: 0.0015,
-        cacheHit: false
+        cacheHit: false,
       });
 
       const stats = await decisionRepo.getDecisionStats();
-      
+
       expect(stats.total).toBe(3);
       expect(stats.byVerdict.block).toBe(2);
       expect(stats.byVerdict.allow).toBe(1);
       expect(stats.avgProcessingTime).toBe(150); // (100 + 200 + 150) / 3
-      expect(stats.cacheHitRate).toBe(1/3); // 1 cache hit out of 3
+      expect(stats.cacheHitRate).toBe(1 / 3); // 1 cache hit out of 3
       expect(stats.totalCost).toBeCloseTo(0.0045); // 0.001 + 0.002 + 0.0015
     });
   });
@@ -298,7 +298,7 @@ describe('Database Layer', () => {
 
     beforeEach(async () => {
       oldDb = await dbManager.getConnection('old');
-      
+
       // Initialize old database schema
       await oldDb.exec(`
         CREATE TABLE IF NOT EXISTS groups (
@@ -323,20 +323,28 @@ describe('Database Layer', () => {
       // Create a separate database manager for the new database and run migrations on it
       const newDbManager = new DatabaseManager({
         type: 'sqlite',
-        database: ':memory:'
+        database: ':memory:',
       });
-      
+
       // We need to import and register the migrations manually since this is a separate manager
-      const { migration_001_initial_schema } = await import('../src/db/migrations/001_initial_schema.js');
-      const { migration_002_decision_tracking } = await import('../src/db/migrations/002_decision_tracking.js');
-      const { migration_003_policy_management } = await import('../src/db/migrations/003_policy_management.js');
-      const { migration_004_usage_tracking } = await import('../src/db/migrations/004_usage_tracking.js');
-      
+      const { migration_001_initial_schema } = await import(
+        '../src/db/migrations/001_initial_schema.js'
+      );
+      const { migration_002_decision_tracking } = await import(
+        '../src/db/migrations/002_decision_tracking.js'
+      );
+      const { migration_003_policy_management } = await import(
+        '../src/db/migrations/003_policy_management.js'
+      );
+      const { migration_004_usage_tracking } = await import(
+        '../src/db/migrations/004_usage_tracking.js'
+      );
+
       newDbManager.registerMigration(migration_001_initial_schema);
       newDbManager.registerMigration(migration_002_decision_tracking);
       newDbManager.registerMigration(migration_003_policy_management);
       newDbManager.registerMigration(migration_004_usage_tracking);
-      
+
       // Get the connection and run migrations
       newDb = await newDbManager.getConnection();
       await newDbManager.runMigrations();
@@ -349,7 +357,7 @@ describe('Database Layer', () => {
       expect(initialFlags.enableDualWrite).toBe(false);
 
       adapter.updateFlags({ enableDualWrite: true, writeToNew: true });
-      
+
       const updatedFlags = adapter.getFlags();
       expect(updatedFlags.enableDualWrite).toBe(true);
       expect(updatedFlags.writeToNew).toBe(true);
@@ -357,21 +365,23 @@ describe('Database Layer', () => {
 
     it('should write to both databases when dual-write enabled', async () => {
       // Create a tenant directly in the new database for FK constraint
-      await newDb.run(
-        `INSERT INTO tenants (id, name, status, plan_type) VALUES (?, ?, ?, ?)`,
-        ['test-tenant-id', 'Dual Write Test', 'active', 'basic']
-      );
+      await newDb.run(`INSERT INTO tenants (id, name, status, plan_type) VALUES (?, ?, ?, ?)`, [
+        'test-tenant-id',
+        'Dual Write Test',
+        'active',
+        'basic',
+      ]);
 
-      adapter.updateFlags({ 
-        enableDualWrite: true, 
-        writeToOld: true, 
-        writeToNew: true 
+      adapter.updateFlags({
+        enableDualWrite: true,
+        writeToOld: true,
+        writeToNew: true,
       });
 
       await adapter.upsertGroup({
         chatId: '12345',
         chatTitle: 'Test Group',
-        tenantId: 'test-tenant-id'
+        tenantId: 'test-tenant-id',
       });
 
       // Check old database
@@ -386,31 +396,38 @@ describe('Database Layer', () => {
     });
 
     it('should handle errors gracefully in dual-write mode', async () => {
-      adapter.updateFlags({ 
-        enableDualWrite: true, 
-        writeToOld: true, 
-        writeToNew: true 
+      adapter.updateFlags({
+        enableDualWrite: true,
+        writeToOld: true,
+        writeToNew: true,
       });
 
       // This should fail because no tenant ID provided for new DB
-      await expect(adapter.upsertGroup({
-        chatId: '99999',
-        chatTitle: 'Error Test Group'
-      })).rejects.toThrow('Dual-write failed');
+      await expect(
+        adapter.upsertGroup({
+          chatId: '99999',
+          chatTitle: 'Error Test Group',
+        })
+      ).rejects.toThrow('Dual-write failed');
     });
 
     it('should read from new database when enabled', async () => {
       // Create a tenant directly in the new database
-      await newDb.run(
-        `INSERT INTO tenants (id, name, status, plan_type) VALUES (?, ?, ?, ?)`,
-        ['read-test-tenant-id', 'Read Test Tenant', 'active', 'basic']
-      );
+      await newDb.run(`INSERT INTO tenants (id, name, status, plan_type) VALUES (?, ?, ?, ?)`, [
+        'read-test-tenant-id',
+        'Read Test Tenant',
+        'active',
+        'basic',
+      ]);
 
       // Insert into new database
-      await newDb.run(`
+      await newDb.run(
+        `
         INSERT INTO groups (tenant_id, chat_id, chat_title, chat_type)
         VALUES (?, ?, ?, ?)
-      `, ['read-test-tenant-id', '54321', 'New DB Group', 'supergroup']);
+      `,
+        ['read-test-tenant-id', '54321', 'New DB Group', 'supergroup']
+      );
 
       adapter.updateFlags({ readFromNew: true });
 
@@ -422,9 +439,12 @@ describe('Database Layer', () => {
 
     it('should fallback to old database when new read fails', async () => {
       // Insert into old database only
-      await oldDb.run(`
+      await oldDb.run(
+        `
         INSERT INTO groups (chatId, chatTitle) VALUES (?, ?)
-      `, ['67890', 'Old DB Group']);
+      `,
+        ['67890', 'Old DB Group']
+      );
 
       adapter.updateFlags({ readFromNew: true });
 
@@ -439,11 +459,11 @@ describe('Database Layer', () => {
     it('should handle database connection failures', async () => {
       const badConfig: DatabaseConfig = {
         type: 'postgres',
-        connectionString: 'postgresql://invalid:invalid@localhost:5432/invalid'
+        connectionString: 'postgresql://invalid:invalid@localhost:5432/invalid',
       };
 
       const badDbManager = new DatabaseManager(badConfig);
-      
+
       // The connection will only fail when we try to use it
       const connection = await badDbManager.getConnection();
       await expect(connection.query('SELECT 1')).rejects.toThrow();
@@ -451,7 +471,7 @@ describe('Database Layer', () => {
 
     it('should handle migration failures', async () => {
       const connection = await dbManager.getConnection();
-      
+
       // Register a bad migration
       dbManager.registerMigration({
         id: '999',
@@ -461,7 +481,7 @@ describe('Database Layer', () => {
         },
         async down() {
           // Do nothing
-        }
+        },
       });
 
       await expect(dbManager.runMigrations()).rejects.toThrow('Intentional migration failure');

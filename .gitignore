@@ -6,6 +6,11 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
+# Log files
+combined.log
+error.log
+*.log
+
 # Runtime data
 pids
 *.pid

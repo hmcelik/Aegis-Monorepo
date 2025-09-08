@@ -23,7 +23,11 @@ const StrikeManagement = ({ groupId, groupTitle }) => {
       return;
     }
 
-    if (strikesCount < 1 || (action !== 'set' && strikesCount > 100) || (action === 'set' && strikesCount > 1000)) {
+    if (
+      strikesCount < 1 ||
+      (action !== 'set' && strikesCount > 100) ||
+      (action === 'set' && strikesCount > 1000)
+    ) {
       const maxStikes = action === 'set' ? 1000 : 100;
       toast.error(`Strikes count must be between 1 and ${maxStikes}`);
       return;
@@ -35,15 +39,30 @@ const StrikeManagement = ({ groupId, groupTitle }) => {
 
       switch (action) {
         case 'add':
-          response = await apiService.strikes.add(groupId, userId.trim(), strikesCount, reason.trim());
+          response = await apiService.strikes.add(
+            groupId,
+            userId.trim(),
+            strikesCount,
+            reason.trim()
+          );
           toast.success(`✅ Added ${strikesCount} strike(s) to user ${userId}`);
           break;
         case 'remove':
-          response = await apiService.strikes.remove(groupId, userId.trim(), strikesCount, reason.trim());
+          response = await apiService.strikes.remove(
+            groupId,
+            userId.trim(),
+            strikesCount,
+            reason.trim()
+          );
           toast.success(`✅ Removed ${strikesCount} strike(s) from user ${userId}`);
           break;
         case 'set':
-          response = await apiService.strikes.set(groupId, userId.trim(), strikesCount, reason.trim());
+          response = await apiService.strikes.set(
+            groupId,
+            userId.trim(),
+            strikesCount,
+            reason.trim()
+          );
           toast.success(`✅ Set strikes to ${strikesCount} for user ${userId}`);
           break;
         default:
@@ -52,17 +71,16 @@ const StrikeManagement = ({ groupId, groupTitle }) => {
       }
 
       console.log('Strike action response:', response);
-      
+
       // Clear form after successful action
       setUserId('');
       setStrikesCount(1);
       setReason('');
-      
+
       // Refresh history if currently viewing this user
       if (showHistory && selectedUserId === userId.trim()) {
         loadStrikeHistory(selectedUserId);
       }
-
     } catch (error) {
       console.error('Strike action error:', error);
       toast.error(`Failed to ${action} strikes: ${error.message}`);
@@ -80,14 +98,14 @@ const StrikeManagement = ({ groupId, groupTitle }) => {
     setHistoryLoading(true);
     try {
       const response = await apiService.strikes.getHistory(groupId, targetUserId.trim(), page, 10);
-      
+
       if (response?.data) {
         setStrikeHistory(response.data.history || []);
         setHistoryPagination(response.data.pagination || null);
         setSelectedUserId(targetUserId.trim());
         setShowHistory(true);
         setHistoryPage(page);
-        
+
         if (response.data.history?.length > 0) {
           toast.success(`Loaded strike history for user ${targetUserId}`);
         } else {
@@ -103,31 +121,39 @@ const StrikeManagement = ({ groupId, groupTitle }) => {
     }
   };
 
-  const handleHistoryPageChange = (newPage) => {
+  const handleHistoryPageChange = newPage => {
     if (selectedUserId && newPage !== historyPage) {
       loadStrikeHistory(selectedUserId, newPage);
     }
   };
 
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = timestamp => {
     return new Date(timestamp).toLocaleString();
   };
 
-  const getActionIcon = (actionType) => {
+  const getActionIcon = actionType => {
     switch (actionType) {
-      case 'add': return '➕';
-      case 'remove': return '➖';
-      case 'set': return '📝';
-      default: return '❓';
+      case 'add':
+        return '➕';
+      case 'remove':
+        return '➖';
+      case 'set':
+        return '📝';
+      default:
+        return '❓';
     }
   };
 
-  const getActionColor = (actionType) => {
+  const getActionColor = actionType => {
     switch (actionType) {
-      case 'add': return '#ff6b6b';
-      case 'remove': return '#51cf66';
-      case 'set': return '#339af0';
-      default: return '#868e96';
+      case 'add':
+        return '#ff6b6b';
+      case 'remove':
+        return '#51cf66';
+      case 'set':
+        return '#339af0';
+      default:
+        return '#868e96';
     }
   };
 
@@ -135,13 +161,15 @@ const StrikeManagement = ({ groupId, groupTitle }) => {
     <div className="strike-management">
       <div className="strike-management-header">
         <h3>⚡ Strike Management</h3>
-        <p>Manage user strikes for <strong>{groupTitle}</strong></p>
+        <p>
+          Manage user strikes for <strong>{groupTitle}</strong>
+        </p>
       </div>
 
       {/* Strike Action Form */}
       <div className="strike-action-form">
         <h4>Strike Actions</h4>
-        
+
         <div className="form-row">
           <div className="form-group">
             <label htmlFor="userId">User ID:</label>
@@ -149,7 +177,7 @@ const StrikeManagement = ({ groupId, groupTitle }) => {
               type="text"
               id="userId"
               value={userId}
-              onChange={(e) => setUserId(e.target.value)}
+              onChange={e => setUserId(e.target.value)}
               placeholder="Enter Telegram User ID"
               disabled={loading}
             />
@@ -160,7 +188,7 @@ const StrikeManagement = ({ groupId, groupTitle }) => {
             <select
               id="action"
               value={action}
-              onChange={(e) => setAction(e.target.value)}
+              onChange={e => setAction(e.target.value)}
               disabled={loading}
             >
               <option value="add">➕ Add Strikes</option>
@@ -170,14 +198,12 @@ const StrikeManagement = ({ groupId, groupTitle }) => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="strikesCount">
-              Strikes ({action === 'set' ? '0-1000' : '1-100'}):
-            </label>
+            <label htmlFor="strikesCount">Strikes ({action === 'set' ? '0-1000' : '1-100'}):</label>
             <input
               type="number"
               id="strikesCount"
               value={strikesCount}
-              onChange={(e) => setStrikesCount(parseInt(e.target.value) || 1)}
+              onChange={e => setStrikesCount(parseInt(e.target.value) || 1)}
               min={action === 'set' ? 0 : 1}
               max={action === 'set' ? 1000 : 100}
               disabled={loading}
@@ -191,7 +217,7 @@ const StrikeManagement = ({ groupId, groupTitle }) => {
             type="text"
             id="reason"
             value={reason}
-            onChange={(e) => setReason(e.target.value)}
+            onChange={e => setReason(e.target.value)}
             placeholder="Enter reason for this action"
             disabled={loading}
           />
@@ -206,7 +232,9 @@ const StrikeManagement = ({ groupId, groupTitle }) => {
             <>⏳ Processing...</>
           ) : (
             <>
-              {getActionIcon(action)} {action === 'add' ? 'Add' : action === 'remove' ? 'Remove' : 'Set'} {strikesCount} Strike{strikesCount !== 1 ? 's' : ''}
+              {getActionIcon(action)}{' '}
+              {action === 'add' ? 'Add' : action === 'remove' ? 'Remove' : 'Set'} {strikesCount}{' '}
+              Strike{strikesCount !== 1 ? 's' : ''}
             </>
           )}
         </button>
@@ -215,7 +243,7 @@ const StrikeManagement = ({ groupId, groupTitle }) => {
       {/* Strike History Section */}
       <div className="strike-history-section">
         <h4>📜 Strike History</h4>
-        
+
         <div className="history-controls">
           <div className="form-group">
             <label htmlFor="historyUserId">User ID for History:</label>
@@ -223,12 +251,12 @@ const StrikeManagement = ({ groupId, groupTitle }) => {
               type="text"
               id="historyUserId"
               value={selectedUserId}
-              onChange={(e) => setSelectedUserId(e.target.value)}
+              onChange={e => setSelectedUserId(e.target.value)}
               placeholder="Enter User ID to view history"
               disabled={historyLoading}
             />
           </div>
-          
+
           <button
             className="load-history-btn"
             onClick={() => loadStrikeHistory(selectedUserId, 1)}
@@ -247,36 +275,34 @@ const StrikeManagement = ({ groupId, groupTitle }) => {
                 <div className="history-header">
                   <h5>History for User {selectedUserId}</h5>
                   <div className="current-strikes">
-                    Current Strikes: <span className="strikes-count">{historyPagination?.currentStrikes || 'Unknown'}</span>
+                    Current Strikes:{' '}
+                    <span className="strikes-count">
+                      {historyPagination?.currentStrikes || 'Unknown'}
+                    </span>
                   </div>
                 </div>
 
                 <div className="history-list">
-                  {strikeHistory.map((entry) => (
+                  {strikeHistory.map(entry => (
                     <div key={entry.id} className="history-entry">
                       <div className="entry-header">
-                        <span 
+                        <span
                           className="action-badge"
                           style={{ backgroundColor: getActionColor(entry.action) }}
                         >
                           {getActionIcon(entry.action)} {entry.action.toUpperCase()}
                         </span>
                         <span className="entry-strikes">
-                          {entry.action === 'add' ? '+' : entry.action === 'remove' ? '-' : '='}{entry.strikes} strikes
+                          {entry.action === 'add' ? '+' : entry.action === 'remove' ? '-' : '='}
+                          {entry.strikes} strikes
                         </span>
-                        <span className="entry-timestamp">
-                          {formatTimestamp(entry.timestamp)}
-                        </span>
+                        <span className="entry-timestamp">{formatTimestamp(entry.timestamp)}</span>
                       </div>
                       <div className="entry-details">
                         <div className="entry-admin">
                           By: {entry.adminName} ({entry.adminId})
                         </div>
-                        {entry.reason && (
-                          <div className="entry-reason">
-                            Reason: {entry.reason}
-                          </div>
-                        )}
+                        {entry.reason && <div className="entry-reason">Reason: {entry.reason}</div>}
                       </div>
                     </div>
                   ))}
@@ -291,12 +317,12 @@ const StrikeManagement = ({ groupId, groupTitle }) => {
                     >
                       ⬅️ Previous
                     </button>
-                    
+
                     <span className="page-info">
-                      Page {historyPage} of {historyPagination.totalPages} 
-                      ({historyPagination.total} total entries)
+                      Page {historyPage} of {historyPagination.totalPages}({historyPagination.total}{' '}
+                      total entries)
                     </span>
-                    
+
                     <button
                       disabled={historyPage >= historyPagination.totalPages}
                       onClick={() => handleHistoryPageChange(historyPage + 1)}

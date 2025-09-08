@@ -7,9 +7,9 @@ import './SuperAdminTestPage.css';
 const SUPER_ADMIN_ID = '5057224206';
 
 // Helper function to extract groups array from API response
-const extractGroupsFromResponse = (response) => {
+const extractGroupsFromResponse = response => {
   if (!response) return [];
-  
+
   // Check axios response format first
   if (response.data) {
     // Unified API format: {data: {success: true, data: [groups]}}
@@ -25,12 +25,12 @@ const extractGroupsFromResponse = (response) => {
       return response.data.groups;
     }
   }
-  
+
   // Direct array response (rare)
   if (Array.isArray(response)) {
     return response;
   }
-  
+
   return [];
 };
 
@@ -42,7 +42,8 @@ const SuperAdminTestPage = ({ user }) => {
   const [lastTestTime, setLastTestTime] = useState(null);
 
   // Check if user is super admin
-  const isSuperAdmin = user?.id?.toString() === SUPER_ADMIN_ID || user?.id === parseInt(SUPER_ADMIN_ID);
+  const isSuperAdmin =
+    user?.id?.toString() === SUPER_ADMIN_ID || user?.id === parseInt(SUPER_ADMIN_ID);
 
   useEffect(() => {
     if (isSuperAdmin) {
@@ -55,25 +56,25 @@ const SuperAdminTestPage = ({ user }) => {
       const start = Date.now();
       const response = await fetch('/api/health');
       const latency = Date.now() - start;
-      
+
       if (response.ok) {
         setServerStatus({
           status: 'online',
           latency: latency,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       } else {
         setServerStatus({
           status: 'degraded',
           latency: latency,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       }
     } catch (error) {
       setServerStatus({
         status: 'offline',
         error: error.message,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
     }
   };
@@ -92,7 +93,7 @@ const SuperAdminTestPage = ({ user }) => {
         } catch (error) {
           return { success: false, error: error.message };
         }
-      }
+      },
     },
     {
       id: 'webapp_health',
@@ -102,11 +103,15 @@ const SuperAdminTestPage = ({ user }) => {
       test: async () => {
         try {
           const response = await apiService.webApp.getHealth();
-          return { success: true, data: 'WebApp health endpoint accessible', details: response.data };
+          return {
+            success: true,
+            data: 'WebApp health endpoint accessible',
+            details: response.data,
+          };
         } catch (error) {
           return { success: false, error: error.message };
         }
-      }
+      },
     },
     {
       id: 'webapp_auth',
@@ -124,7 +129,7 @@ const SuperAdminTestPage = ({ user }) => {
         } catch (error) {
           return { success: false, error: error.message };
         }
-      }
+      },
     },
     {
       id: 'token_status',
@@ -138,7 +143,7 @@ const SuperAdminTestPage = ({ user }) => {
         } catch (error) {
           return { success: false, error: error.message };
         }
-      }
+      },
     },
     {
       id: 'groups',
@@ -148,15 +153,15 @@ const SuperAdminTestPage = ({ user }) => {
       test: async () => {
         try {
           const response = await apiService.groups.getAll();
-          return { 
-            success: true, 
+          return {
+            success: true,
             data: `Found ${response.data?.length || 0} groups (JWT method)`,
-            details: response.data 
+            details: response.data,
           };
         } catch (error) {
           return { success: false, error: error.message };
         }
-      }
+      },
     },
     {
       id: 'webapp_groups',
@@ -166,15 +171,15 @@ const SuperAdminTestPage = ({ user }) => {
       test: async () => {
         try {
           const response = await apiService.groups.getAllWebApp();
-          return { 
-            success: true, 
+          return {
+            success: true,
             data: `Found ${response.data?.length || 0} groups (WebApp method)`,
-            details: response.data 
+            details: response.data,
           };
         } catch (error) {
           return { success: false, error: error.message };
         }
-      }
+      },
     },
     // NLP Testing
     {
@@ -189,7 +194,7 @@ const SuperAdminTestPage = ({ user }) => {
         } catch (error) {
           return { success: false, error: error.message };
         }
-      }
+      },
     },
     {
       id: 'nlp_spam',
@@ -198,17 +203,17 @@ const SuperAdminTestPage = ({ user }) => {
       description: 'Test NLP spam detection',
       test: async () => {
         try {
-          const testText = "Buy now! Limited time offer! Click here for amazing deals!!!";
+          const testText = 'Buy now! Limited time offer! Click here for amazing deals!!!';
           const response = await apiService.nlp.testSpam(testText);
-          return { 
-            success: true, 
+          return {
+            success: true,
             data: `Spam detection result: ${response.analysis?.isSpam ? 'SPAM' : 'NOT SPAM'}`,
-            details: response.analysis 
+            details: response.analysis,
           };
         } catch (error) {
           return { success: false, error: error.message };
         }
-      }
+      },
     },
     {
       id: 'nlp_profanity',
@@ -217,17 +222,17 @@ const SuperAdminTestPage = ({ user }) => {
       description: 'Test NLP profanity detection',
       test: async () => {
         try {
-          const testText = "This is a clean message for testing.";
+          const testText = 'This is a clean message for testing.';
           const response = await apiService.nlp.testProfanity(testText);
-          return { 
-            success: true, 
+          return {
+            success: true,
             data: `Profanity detection result: ${response.analysis?.hasProfanity ? 'PROFANE' : 'CLEAN'}`,
-            details: response.analysis 
+            details: response.analysis,
           };
         } catch (error) {
           return { success: false, error: error.message };
         }
-      }
+      },
     },
     {
       id: 'nlp_analyze',
@@ -243,20 +248,20 @@ const SuperAdminTestPage = ({ user }) => {
           } catch {
             groupsResponse = await apiService.groups.getAllWebApp();
           }
-          
+
           const groupId = groupsResponse.data?.[0]?.id || '-4982630468'; // Use first group ID or fallback
-          
+
           const testText = "Buy crypto now! Amazing deals! Don't miss out!!!";
           const response = await apiService.nlp.analyze(testText, { groupId });
-          return { 
-            success: true, 
+          return {
+            success: true,
             data: `Analysis complete - Spam: ${response.analysis?.spam?.isSpam ? 'YES' : 'NO'}, Profanity: ${response.analysis?.profanity?.hasProfanity ? 'YES' : 'NO'}`,
-            details: response.analysis 
+            details: response.analysis,
           };
         } catch (error) {
           return { success: false, error: error.message };
         }
-      }
+      },
     },
     // Audit Log Testing
     {
@@ -273,23 +278,27 @@ const SuperAdminTestPage = ({ user }) => {
           } catch {
             groupsResponse = await apiService.groups.getAllWebApp();
           }
-          
+
           const groups = extractGroupsFromResponse(groupsResponse);
           if (!groups || groups.length === 0) {
             return { success: false, error: 'No groups available to test audit logs' };
           }
-          
+
           const firstGroup = groups[0];
           const response = await apiService.audit.getLogs(firstGroup.id, { page: 1, limit: 10 });
-          return { 
-            success: true, 
+          return {
+            success: true,
             data: `Found ${response.data?.length || 0} audit log entries for group: ${firstGroup.title}`,
-            details: { groupId: firstGroup.id, logs: response.data, pagination: response.pagination }
+            details: {
+              groupId: firstGroup.id,
+              logs: response.data,
+              pagination: response.pagination,
+            },
           };
         } catch (error) {
           return { success: false, error: error.message };
         }
-      }
+      },
     },
     {
       id: 'audit_export',
@@ -305,23 +314,23 @@ const SuperAdminTestPage = ({ user }) => {
           } catch {
             groupsResponse = await apiService.groups.getAllWebApp();
           }
-          
+
           const groups = extractGroupsFromResponse(groupsResponse);
           if (!groups || groups.length === 0) {
             return { success: false, error: 'No groups available to test audit export' };
           }
-          
+
           const firstGroup = groups[0];
           const response = await apiService.audit.export(firstGroup.id, 'json');
-          return { 
-            success: true, 
+          return {
+            success: true,
             data: `Audit export successful for group: ${firstGroup.title}`,
-            details: { groupId: firstGroup.id, format: 'json', hasData: !!response.data }
+            details: { groupId: firstGroup.id, format: 'json', hasData: !!response.data },
           };
         } catch (error) {
           return { success: false, error: error.message };
         }
-      }
+      },
     },
     // Strike Management Testing
     {
@@ -338,50 +347,54 @@ const SuperAdminTestPage = ({ user }) => {
           } catch {
             groupsResponse = await apiService.groups.getAllWebApp();
           }
-          
+
           const groups = extractGroupsFromResponse(groupsResponse);
           if (!groups || groups.length === 0) {
             return { success: false, error: 'No groups available to test strikes' };
           }
-          
+
           const firstGroup = groups[0];
           const testUserId = '123456789'; // Test user ID
-          
+
           // Test getting strike history
           const response = await apiService.strikes.getHistory(firstGroup.id, testUserId);
-          return { 
-            success: true, 
+          return {
+            success: true,
             data: `Strike history retrieved for test user in group: ${firstGroup.title}`,
-            details: { groupId: firstGroup.id, userId: testUserId, currentStrikes: response.data?.currentStrikes }
+            details: {
+              groupId: firstGroup.id,
+              userId: testUserId,
+              currentStrikes: response.data?.currentStrikes,
+            },
           };
         } catch (error) {
           return { success: false, error: error.message };
         }
-      }
-    }
+      },
+    },
   ];
 
-  const runTest = async (testId) => {
+  const runTest = async testId => {
     const test = testEndpoints.find(t => t.id === testId);
     if (!test) return;
 
     setTestResults(prev => ({
       ...prev,
-      [testId]: { status: 'running', startTime: Date.now() }
+      [testId]: { status: 'running', startTime: Date.now() },
     }));
 
     try {
       const result = await test.test();
       const duration = Date.now() - testResults[testId]?.startTime || 0;
-      
+
       setTestResults(prev => ({
         ...prev,
         [testId]: {
           ...result,
           status: result.success ? 'success' : 'error',
           duration,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }));
 
       if (result.success) {
@@ -397,8 +410,8 @@ const SuperAdminTestPage = ({ user }) => {
           error: error.message,
           status: 'error',
           duration: Date.now() - (testResults[testId]?.startTime || 0),
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       }));
       toast.error(`❌ ${test.name} failed`);
     }
@@ -407,33 +420,34 @@ const SuperAdminTestPage = ({ user }) => {
   const runAllTests = async () => {
     setIsRunningTests(true);
     setLastTestTime(new Date().toISOString());
-    
+
     for (const test of testEndpoints) {
       await runTest(test.id);
       // Small delay between tests
       await new Promise(resolve => setTimeout(resolve, 500));
     }
-    
+
     setIsRunningTests(false);
     toast.success('🎯 All tests completed');
   };
 
   const runSelectedTests = async () => {
     setIsRunningTests(true);
-    
+
     const selectedTestIds = Object.keys(selectedTests).filter(id => selectedTests[id]);
     for (const testId of selectedTestIds) {
       await runTest(testId);
       await new Promise(resolve => setTimeout(resolve, 500));
     }
-    
+
     setIsRunningTests(false);
     toast.success('🎯 Selected tests completed');
   };
 
-  const getStatusIcon = (result) => {
+  const getStatusIcon = result => {
     if (!result) return <Clock size={16} className="text-gray-400" />;
-    if (result.status === 'running') return <Clock size={16} className="text-blue-500 animate-spin" />;
+    if (result.status === 'running')
+      return <Clock size={16} className="text-blue-500 animate-spin" />;
     if (result.status === 'success') return <CheckCircle size={16} className="text-green-500" />;
     return <XCircle size={16} className="text-red-500" />;
   };
@@ -458,17 +472,21 @@ const SuperAdminTestPage = ({ user }) => {
       <div className="admin-header">
         <h1>🛠️ Super Admin Test Panel</h1>
         <p>Comprehensive API endpoint testing and diagnostics</p>
-        
+
         {/* Server Status */}
         <div className={`server-status ${serverStatus?.status || 'offline'}`}>
           <h3>🌐 Server Status</h3>
           <div className="server-status-info">
             <div className="server-status-item">
-              <span>Status: <strong>{serverStatus?.status || 'checking...'}</strong></span>
+              <span>
+                Status: <strong>{serverStatus?.status || 'checking...'}</strong>
+              </span>
             </div>
             {serverStatus?.latency && (
               <div className="server-status-item">
-                <span>Latency: <strong>{serverStatus.latency}ms</strong></span>
+                <span>
+                  Latency: <strong>{serverStatus.latency}ms</strong>
+                </span>
               </div>
             )}
             <button onClick={checkServerStatus} className="refresh-server-btn">
@@ -491,7 +509,7 @@ const SuperAdminTestPage = ({ user }) => {
               <Play size={16} />
               {isRunningTests ? 'Running Tests...' : 'Run All Tests'}
             </button>
-            
+
             <button
               onClick={runSelectedTests}
               disabled={isRunningTests || Object.values(selectedTests).every(v => !v)}
@@ -513,9 +531,7 @@ const SuperAdminTestPage = ({ user }) => {
         </div>
 
         {lastTestTime && (
-          <div className="test-meta">
-            Last test run: {new Date(lastTestTime).toLocaleString()}
-          </div>
+          <div className="test-meta">Last test run: {new Date(lastTestTime).toLocaleString()}</div>
         )}
       </div>
 
@@ -524,10 +540,7 @@ const SuperAdminTestPage = ({ user }) => {
         {testEndpoints.map(test => {
           const result = testResults[test.id];
           return (
-            <div
-              key={test.id}
-              className={`test-card ${result?.status || 'pending'}`}
-            >
+            <div key={test.id} className={`test-card ${result?.status || 'pending'}`}>
               <div className="test-header">
                 <div className="test-header-top">
                   <div className="test-info">
@@ -535,22 +548,22 @@ const SuperAdminTestPage = ({ user }) => {
                       type="checkbox"
                       className="test-checkbox"
                       checked={selectedTests[test.id] || false}
-                      onChange={(e) => setSelectedTests(prev => ({
-                        ...prev,
-                        [test.id]: e.target.checked
-                      }))}
+                      onChange={e =>
+                        setSelectedTests(prev => ({
+                          ...prev,
+                          [test.id]: e.target.checked,
+                        }))
+                      }
                     />
                     <div className="test-icon">{test.icon}</div>
                     <h3 className="test-name">{test.name}</h3>
                   </div>
                   <div className="test-status-icon">{getStatusIcon(result)}</div>
                 </div>
-                
-                <p className="test-description">
-                  {test.description}
-                </p>
+
+                <p className="test-description">{test.description}</p>
               </div>
-              
+
               <button
                 onClick={() => runTest(test.id)}
                 disabled={result?.status === 'running'}
@@ -558,12 +571,14 @@ const SuperAdminTestPage = ({ user }) => {
               >
                 {result?.status === 'running' ? 'Running...' : 'Run Test'}
               </button>
-              
+
               {result && (
                 <div className="test-result">
                   <div className="test-result-row">
                     <span className="test-result-label">Status:</span>
-                    <span className={`test-result-value test-result-${result.status}`}>{result.status}</span>
+                    <span className={`test-result-value test-result-${result.status}`}>
+                      {result.status}
+                    </span>
                   </div>
                   {result.duration && (
                     <div className="test-result-row">
@@ -571,30 +586,28 @@ const SuperAdminTestPage = ({ user }) => {
                       <span className="test-result-value">{result.duration}ms</span>
                     </div>
                   )}
-                  
+
                   {result.data && (
                     <div className="test-result-row">
                       <span className="test-result-label">Result:</span>
                       <span className="test-result-value test-result-success">{result.data}</span>
                     </div>
                   )}
-                  
+
                   {result.error && (
                     <div className="test-result-row">
                       <span className="test-result-label">Error:</span>
                       <span className="test-result-value test-result-error">{result.error}</span>
                     </div>
                   )}
-                  
+
                   {result.details && (
                     <details className="test-result-details">
                       <summary>Details</summary>
-                      <pre>
-                        {JSON.stringify(result.details, null, 2)}
-                      </pre>
+                      <pre>{JSON.stringify(result.details, null, 2)}</pre>
                     </details>
                   )}
-                  
+
                   {result.timestamp && (
                     <div className="test-timestamp">
                       {new Date(result.timestamp).toLocaleString()}

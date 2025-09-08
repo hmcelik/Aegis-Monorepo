@@ -40,14 +40,14 @@ export class OutboxManager {
     payload: Record<string, unknown>
   ): Promise<string> {
     const id = `${chatId}:${messageId}:${actionType}`;
-    
+
     // Check if action already exists (idempotency)
     const existing = this.outboxEntries.get(id);
     if (existing) {
       logger.info('Action already exists, returning existing ID', {
         id,
         status: existing.status,
-        retryCount: existing.retryCount
+        retryCount: existing.retryCount,
       });
       return id;
     }
@@ -60,16 +60,16 @@ export class OutboxManager {
       payload,
       status: 'pending',
       createdAt: new Date(),
-      retryCount: 0
+      retryCount: 0,
     };
 
     this.outboxEntries.set(id, entry);
-    
+
     logger.info('Created outbox action entry', {
       id,
       actionType,
       chatId,
-      messageId
+      messageId,
     });
 
     return id;
@@ -97,7 +97,7 @@ export class OutboxManager {
       logger.error('Action failed after max retries', {
         id,
         retryCount: entry.retryCount,
-        maxRetries: this.maxRetries
+        maxRetries: this.maxRetries,
       });
       return { success: false, error: 'Max retries exceeded' };
     }
@@ -109,7 +109,7 @@ export class OutboxManager {
     try {
       // Execute the action
       const result = await this.executeAction(entry);
-      
+
       if (result.success) {
         entry.status = 'completed';
         entry.processedAt = new Date();
@@ -120,7 +120,7 @@ export class OutboxManager {
         logger.warn('Action failed, will retry', {
           id,
           error: result.error,
-          retryCount: entry.retryCount
+          retryCount: entry.retryCount,
         });
       }
 
@@ -128,11 +128,11 @@ export class OutboxManager {
     } catch (error) {
       entry.status = 'pending';
       entry.lastError = error instanceof Error ? error.message : String(error);
-      
+
       logger.error('Action execution threw error', {
         id,
         error: entry.lastError,
-        retryCount: entry.retryCount
+        retryCount: entry.retryCount,
       });
 
       return { success: false, error: entry.lastError };
@@ -150,7 +150,7 @@ export class OutboxManager {
       actionType,
       chatId,
       messageId,
-      payload
+      payload,
     });
 
     // Simulate different action types
@@ -172,27 +172,27 @@ export class OutboxManager {
 
   private async deleteMessage(chatId: number, messageId: string): Promise<ActionResult> {
     logger.info('Deleting message', { chatId, messageId });
-    
+
     if (this.telegramClient) {
       // Use real Telegram API client
       try {
         const response = await this.telegramClient.deleteMessage(chatId, parseInt(messageId));
-        return { 
-          success: response.ok, 
+        return {
+          success: response.ok,
           error: response.ok ? undefined : response.description,
-          telegramResponse: response 
+          telegramResponse: response,
         };
       } catch (error) {
-        return { 
-          success: false, 
+        return {
+          success: false,
           error: error instanceof Error ? error.message : 'Unknown error',
-          telegramResponse: null
+          telegramResponse: null,
         };
       }
     } else {
       // Mock implementation for testing
       const shouldFail = messageId.includes('fail');
-      
+
       if (shouldFail) {
         return { success: false, error: 'Failed to delete message' };
       } else {
@@ -203,11 +203,11 @@ export class OutboxManager {
 
   private async muteUser(chatId: number, userId: number, duration: number): Promise<ActionResult> {
     logger.info('Muting user', { chatId, userId, duration });
-    
+
     if (this.telegramClient) {
       // Use real Telegram API client
       try {
-        const untilDate = Math.floor(Date.now() / 1000) + (duration * 60); // Convert minutes to timestamp
+        const untilDate = Math.floor(Date.now() / 1000) + duration * 60; // Convert minutes to timestamp
         const permissions = {
           can_send_messages: false,
           can_send_media_messages: false,
@@ -216,26 +216,23 @@ export class OutboxManager {
           can_add_web_page_previews: false,
           can_change_info: false,
           can_invite_users: false,
-          can_pin_messages: false
+          can_pin_messages: false,
         };
-        
-        const response = await this.telegramClient.restrictChatMember(
-          chatId, 
-          userId, 
-          permissions, 
-          { until_date: untilDate }
-        );
-        
-        return { 
-          success: response.ok, 
+
+        const response = await this.telegramClient.restrictChatMember(chatId, userId, permissions, {
+          until_date: untilDate,
+        });
+
+        return {
+          success: response.ok,
           error: response.ok ? undefined : response.description,
-          telegramResponse: response 
+          telegramResponse: response,
         };
       } catch (error) {
-        return { 
-          success: false, 
+        return {
+          success: false,
           error: error instanceof Error ? error.message : 'Unknown error',
-          telegramResponse: null
+          telegramResponse: null,
         };
       }
     } else {
@@ -246,7 +243,7 @@ export class OutboxManager {
 
   private async kickUser(chatId: number, userId: number): Promise<ActionResult> {
     logger.info('Kicking user', { chatId, userId });
-    
+
     if (this.telegramClient) {
       // Use real Telegram API client (ban then immediately unban = kick)
       try {
@@ -254,23 +251,23 @@ export class OutboxManager {
         if (banResponse.ok) {
           // Immediately unban to simulate kick
           const unbanResponse = await this.telegramClient.unbanChatMember(chatId, userId);
-          return { 
-            success: unbanResponse.ok, 
+          return {
+            success: unbanResponse.ok,
             error: unbanResponse.ok ? undefined : unbanResponse.description,
-            telegramResponse: unbanResponse 
+            telegramResponse: unbanResponse,
           };
         } else {
-          return { 
-            success: false, 
+          return {
+            success: false,
             error: banResponse.description || 'Failed to ban user',
-            telegramResponse: banResponse 
+            telegramResponse: banResponse,
           };
         }
       } catch (error) {
-        return { 
-          success: false, 
+        return {
+          success: false,
           error: error instanceof Error ? error.message : 'Unknown error',
-          telegramResponse: null
+          telegramResponse: null,
         };
       }
     } else {
@@ -281,21 +278,21 @@ export class OutboxManager {
 
   private async banUser(chatId: number, userId: number): Promise<ActionResult> {
     logger.info('Banning user', { chatId, userId });
-    
+
     if (this.telegramClient) {
       // Use real Telegram API client
       try {
         const response = await this.telegramClient.banChatMember(chatId, userId);
-        return { 
-          success: response.ok, 
+        return {
+          success: response.ok,
           error: response.ok ? undefined : response.description,
-          telegramResponse: response 
+          telegramResponse: response,
         };
       } catch (error) {
-        return { 
-          success: false, 
+        return {
+          success: false,
           error: error instanceof Error ? error.message : 'Unknown error',
-          telegramResponse: null
+          telegramResponse: null,
         };
       }
     } else {
@@ -306,26 +303,26 @@ export class OutboxManager {
 
   private async warnUser(chatId: number, userId: number, reason: string): Promise<ActionResult> {
     logger.info('Warning user', { chatId, userId, reason });
-    
+
     if (this.telegramClient) {
       // Use real Telegram API client to send warning message
       try {
         const warningText = `⚠️ Warning: ${reason}\n\nPlease follow the group rules to avoid further action.`;
         const response = await this.telegramClient.sendMessage(chatId, warningText, {
           reply_to_message_id: undefined, // Could be set if we had the original message
-          parse_mode: 'HTML'
+          parse_mode: 'HTML',
         });
-        
-        return { 
-          success: response.ok, 
+
+        return {
+          success: response.ok,
           error: response.ok ? undefined : response.description,
-          telegramResponse: response 
+          telegramResponse: response,
         };
       } catch (error) {
-        return { 
-          success: false, 
+        return {
+          success: false,
           error: error instanceof Error ? error.message : 'Unknown error',
-          telegramResponse: null
+          telegramResponse: null,
         };
       }
     } else {
@@ -361,9 +358,8 @@ export class OutboxManager {
       processing: entries.filter(e => e.status === 'processing').length,
       completed: entries.filter(e => e.status === 'completed').length,
       failed: entries.filter(e => e.status === 'failed').length,
-      avgRetryCount: entries.length > 0 
-        ? entries.reduce((sum, e) => sum + e.retryCount, 0) / entries.length 
-        : 0
+      avgRetryCount:
+        entries.length > 0 ? entries.reduce((sum, e) => sum + e.retryCount, 0) / entries.length : 0,
     };
   }
 

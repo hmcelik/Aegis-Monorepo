@@ -26,31 +26,31 @@ vi.mock('@telegram-moderator/shared/src/services/database.js', () => ({
       run: vi.fn(),
       get: vi.fn(),
       all: vi.fn(),
-      close: vi.fn()
-    }))
+      close: vi.fn(),
+    })),
   },
-  getGroup: vi.fn().mockResolvedValue({ 
-    chatId: '-1001', 
+  getGroup: vi.fn().mockResolvedValue({
+    chatId: '-1001',
     title: 'Test Group',
     type: 'supergroup',
-    memberCount: 100
+    memberCount: 100,
   }),
   getAuditLog: vi.fn().mockResolvedValue(new Array(5).fill({})),
   getTotalDeletionsToday: vi.fn().mockResolvedValue(3),
   getAllGroups: vi.fn().mockResolvedValue([
     { chatId: '-1001', chatTitle: 'Group A' },
-    { chatId: '-1002', chatTitle: 'Group B' }
+    { chatId: '-1002', chatTitle: 'Group B' },
   ]),
-  getUserAdminGroups: vi.fn().mockResolvedValue([
-    { id: '-1001', title: 'Group A', type: 'supergroup', memberCount: 100 }
-  ]),
+  getUserAdminGroups: vi
+    .fn()
+    .mockResolvedValue([{ id: '-1001', title: 'Group A', type: 'supergroup', memberCount: 100 }]),
   isUserGroupAdmin: vi.fn().mockResolvedValue(true),
   getStrikes: vi.fn().mockResolvedValue({ count: 0, timestamp: null }),
   getStrikeHistory: vi.fn().mockResolvedValue([]),
   getBasicGroupStats: vi.fn().mockResolvedValue({
     totalMessages: 1000,
     flaggedToday: 5,
-    activeStrikes: 3
+    activeStrikes: 3,
   }),
   getGroupStats: vi.fn().mockResolvedValue({
     totalMessagesProcessed: 5000,
@@ -59,13 +59,13 @@ vi.mock('@telegram-moderator/shared/src/services/database.js', () => ({
     deletionsToday: 3,
     mutesToday: 8,
     kicksToday: 2,
-    bansToday: 1
+    bansToday: 1,
   }),
   getAuditLogPaginated: vi.fn().mockResolvedValue({
     logs: [],
-    pagination: { total: 0, offset: 0, limit: 50, hasMore: false }
+    pagination: { total: 0, offset: 0, limit: 50, hasMore: false },
   }),
-  exportAuditLog: vi.fn().mockResolvedValue([])
+  exportAuditLog: vi.fn().mockResolvedValue([]),
 }));
 
 vi.mock('packages/shared/src/services/telegram.js', () => ({
@@ -90,7 +90,7 @@ describe('Group API Endpoints', () => {
 
     it('should return settings for an admin', async () => {
       axios.post.mockResolvedValue({ data: { result: [{ user: { id: 123 } }] } });
-      configService.getGroupSettings.mockResolvedValue({ 
+      configService.getGroupSettings.mockResolvedValue({
         muteLevel: 3,
         alertLevel: 1,
         kickLevel: 5,
@@ -103,7 +103,7 @@ describe('Group API Endpoints', () => {
         warningMessage: 'Warning!',
         warningMessageDeleteSeconds: 30,
         keywordWhitelistBypass: false,
-        whitelistedKeywords: []
+        whitelistedKeywords: [],
       });
 
       const response = await request(app)
@@ -118,7 +118,7 @@ describe('Group API Endpoints', () => {
 
     it('should return 403 if user is not an admin of the group', async () => {
       axios.post.mockResolvedValue({ data: { result: [{ user: { id: 999 } }] } });
-      
+
       // Mock database service to return false for this test
       const dbService = await import('@telegram-moderator/shared/src/services/database.js');
       dbService.isUserGroupAdmin.mockResolvedValueOnce(false);
@@ -162,7 +162,7 @@ describe('Group API Endpoints', () => {
 
     it('should return 403 for non-admin users', async () => {
       axios.post.mockResolvedValue({ data: { result: [{ user: { id: 999 } }] } });
-      
+
       // Mock isUserGroupAdmin to return false for this specific test
       const dbService = await import('@telegram-moderator/shared/src/services/database.js');
       dbService.isUserGroupAdmin.mockResolvedValueOnce(false);
@@ -190,7 +190,7 @@ describe('Group API Endpoints', () => {
   describe('GET /groups', () => {
     it('should return only groups the user is admin of', async () => {
       // Mock getChatAdmins to return user ID 123 for group -1001 only
-      telegramService.getChatAdmins.mockImplementation(async (chatId) => {
+      telegramService.getChatAdmins.mockImplementation(async chatId => {
         console.log('Mock getChatAdmins called with chatId:', chatId);
         if (chatId === '-1001') {
           return [123]; // User IS admin of -1001
@@ -209,12 +209,14 @@ describe('Group API Endpoints', () => {
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('success', true);
       expect(response.body).toHaveProperty('data');
-      expect(response.body.data).toEqual(expect.arrayContaining([
-        expect.objectContaining({ 
-          id: '-1001', 
-          title: 'Group A' 
-        })
-      ]));
+      expect(response.body.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: '-1001',
+            title: 'Group A',
+          }),
+        ])
+      );
     });
   });
 
@@ -230,18 +232,20 @@ describe('Group API Endpoints', () => {
       expect(response.body).toHaveProperty('success', true);
       expect(response.body).toHaveProperty('data');
       // Check the new unified API response structure
-      expect(response.body.data).toEqual(expect.objectContaining({
-        groupId: '-1001',
-        stats: expect.objectContaining({
-          totalMessages: expect.any(Number),
-          flaggedMessages: expect.objectContaining({
-            total: expect.any(Number)
+      expect(response.body.data).toEqual(
+        expect.objectContaining({
+          groupId: '-1001',
+          stats: expect.objectContaining({
+            totalMessages: expect.any(Number),
+            flaggedMessages: expect.objectContaining({
+              total: expect.any(Number),
+            }),
+            penalties: expect.objectContaining({
+              totalUsersActioned: expect.any(Number),
+            }),
           }),
-          penalties: expect.objectContaining({
-            totalUsersActioned: expect.any(Number)
-          })
         })
-      }));
+      );
     });
   });
 });

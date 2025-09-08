@@ -4,12 +4,12 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 3s
       retries: 5
@@ -21,11 +21,11 @@ services:
       POSTGRES_USER: moderator
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U moderator"]
+      test: ['CMD-SHELL', 'pg_isready -U moderator']
       interval: 5s
       timeout: 3s
       retries: 5
@@ -33,8 +33,8 @@ services:
   jaeger:
     image: jaegertracing/all-in-one:latest
     ports:
-      - "16686:16686"  # Jaeger UI
-      - "14268:14268"  # Jaeger collector
+      - '16686:16686' # Jaeger UI
+      - '14268:14268' # Jaeger collector
     environment:
       COLLECTOR_OTLP_ENABLED: true
 

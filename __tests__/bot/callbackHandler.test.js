@@ -18,8 +18,12 @@ vi.mock('packages/shared/src/services/logger', () => ({
 
 // Mock keyboards to prevent UI rendering logic from interfering with tests
 vi.mock('../../src/bot/keyboards/mainMenu.js', () => ({ mainKeyboard: vi.fn(() => ({})) }));
-vi.mock('../../src/bot/keyboards/penaltyLevelsMenu.js', () => ({ penaltyLevelsKeyboard: vi.fn(() => ({})) }));
-vi.mock('../../src/bot/keyboards/aiSensitivityMenu.js', () => ({ aiSensitivityKeyboard: vi.fn(() => ({})) }));
+vi.mock('../../src/bot/keyboards/penaltyLevelsMenu.js', () => ({
+  penaltyLevelsKeyboard: vi.fn(() => ({})),
+}));
+vi.mock('../../src/bot/keyboards/aiSensitivityMenu.js', () => ({
+  aiSensitivityKeyboard: vi.fn(() => ({})),
+}));
 
 describe('callbackHandler', () => {
   const MOCK_USER_ID = 12345;
@@ -27,7 +31,7 @@ describe('callbackHandler', () => {
   const MOCK_GROUP_ID = '-100123';
   const MOCK_MESSAGE_ID = 987;
 
-  const mockCallbackQuery = (data) => ({
+  const mockCallbackQuery = data => ({
     id: 'query-id-1',
     from: { id: MOCK_USER_ID, first_name: 'Tester' },
     message: {
@@ -50,7 +54,7 @@ describe('callbackHandler', () => {
   beforeEach(() => {
     // Reset mocks before each test
     vi.clearAllMocks();
-    
+
     // Default mock implementations
     db.getGroup.mockResolvedValue({ chatId: MOCK_GROUP_ID, chatTitle: 'Test Group' });
     config.getGroupSettings.mockResolvedValue(mockGroupSettings);
@@ -84,15 +88,19 @@ describe('callbackHandler', () => {
     // The bot "restarts", so no in-memory state exists.
     // The user clicks a button with embedded state.
     const query = mockCallbackQuery(`toggle_bypass:${MOCK_GROUP_ID}`);
-    
+
     // Mock the setting update and retrieval
     config.updateSetting.mockResolvedValue(true);
-    
+
     await handleCallback(query);
 
     // The handler should successfully identify the target group and action
-    expect(config.updateSetting).toHaveBeenCalledWith(MOCK_GROUP_ID, 'keywordWhitelistBypass', true);
-    
+    expect(config.updateSetting).toHaveBeenCalledWith(
+      MOCK_GROUP_ID,
+      'keywordWhitelistBypass',
+      true
+    );
+
     // It should answer the query with feedback
     expect(telegram.answerCallbackQuery).toHaveBeenCalledWith(expect.any(String), {
       text: 'Keyword Bypass is now ON',
@@ -100,8 +108,8 @@ describe('callbackHandler', () => {
 
     // And it should refresh the menu correctly
     expect(telegram.editMessageText).toHaveBeenCalledWith(
-        'Configure AI sensitivity settings:',
-        expect.any(Object)
+      'Configure AI sensitivity settings:',
+      expect.any(Object)
     );
   });
 
@@ -132,14 +140,14 @@ describe('callbackHandler', () => {
       expect.any(Object)
     );
     expect(config.getGroupSettings).toHaveBeenCalledWith(GROUP_A_ID);
-    
+
     // Verify User 2's action
     expect(telegram.editMessageText).toHaveBeenCalledWith(
       'Configure penalty level settings:',
       expect.any(Object)
     );
     expect(config.getGroupSettings).toHaveBeenCalledWith(GROUP_B_ID);
-    
+
     // Ensure no cross-contamination of state
     expect(telegram.editMessageText).toHaveBeenCalledTimes(2);
   });
@@ -148,10 +156,9 @@ describe('callbackHandler', () => {
     const malformedQuery = mockCallbackQuery('settings_main'); // Missing :<chatId>
     await handleCallback(malformedQuery);
 
-    expect(telegram.answerCallbackQuery).toHaveBeenCalledWith(
-      expect.any(String),
-      { text: expect.stringContaining('session may have expired') }
-    );
+    expect(telegram.answerCallbackQuery).toHaveBeenCalledWith(expect.any(String), {
+      text: expect.stringContaining('session may have expired'),
+    });
     expect(telegram.editMessageText).not.toHaveBeenCalled();
   });
 });

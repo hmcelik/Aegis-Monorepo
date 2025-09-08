@@ -42,14 +42,17 @@ export class TenantRepository extends BaseRepository {
    */
   async create(input: CreateTenantInput): Promise<Tenant> {
     const { name, status = 'active', planType = 'basic' } = input;
-    
+
     // Generate a UUID for the tenant
     const tenantId = require('crypto').randomUUID();
-    
-    await this.run(`
+
+    await this.run(
+      `
       INSERT INTO tenants (id, name, status, plan_type)
       VALUES (?, ?, ?, ?)
-    `, [tenantId, name, status, planType]);
+    `,
+      [tenantId, name, status, planType]
+    );
 
     const tenant = await this.findById(tenantId);
     if (!tenant) {
@@ -64,11 +67,14 @@ export class TenantRepository extends BaseRepository {
    * Find tenant by ID
    */
   async findById(id: string): Promise<Tenant | null> {
-    const results = await this.query<Tenant>(`
+    const results = await this.query<Tenant>(
+      `
       SELECT id, name, status, plan_type as planType, created_at as createdAt, updated_at as updatedAt
       FROM tenants 
       WHERE id = ?
-    `, [id]);
+    `,
+      [id]
+    );
 
     return results[0] || null;
   }
@@ -77,11 +83,14 @@ export class TenantRepository extends BaseRepository {
    * Find tenant by name
    */
   async findByName(name: string): Promise<Tenant | null> {
-    const results = await this.query<Tenant>(`
+    const results = await this.query<Tenant>(
+      `
       SELECT id, name, status, plan_type as planType, created_at as createdAt, updated_at as updatedAt
       FROM tenants 
       WHERE name = ?
-    `, [name]);
+    `,
+      [name]
+    );
 
     return results[0] || null;
   }
@@ -89,14 +98,16 @@ export class TenantRepository extends BaseRepository {
   /**
    * List all tenants with optional filtering
    */
-  async list(options: {
-    status?: string;
-    planType?: string;
-    limit?: number;
-    offset?: number;
-  } = {}): Promise<Tenant[]> {
+  async list(
+    options: {
+      status?: string;
+      planType?: string;
+      limit?: number;
+      offset?: number;
+    } = {}
+  ): Promise<Tenant[]> {
     const { status, planType, limit = 100, offset = 0 } = options;
-    
+
     let sql = `
       SELECT id, name, status, plan_type as planType, created_at as createdAt, updated_at as updatedAt
       FROM tenants
@@ -153,11 +164,14 @@ export class TenantRepository extends BaseRepository {
     updates.push('updated_at = CURRENT_TIMESTAMP');
     params.push(id);
 
-    await this.run(`
+    await this.run(
+      `
       UPDATE tenants 
       SET ${updates.join(', ')}
       WHERE id = ?
-    `, params);
+    `,
+      params
+    );
 
     const updatedTenant = await this.findById(id);
     if (updatedTenant) {
@@ -171,11 +185,14 @@ export class TenantRepository extends BaseRepository {
    * Delete tenant (soft delete by setting status)
    */
   async delete(id: string): Promise<boolean> {
-    const result = await this.run(`
+    const result = await this.run(
+      `
       UPDATE tenants 
       SET status = 'deleted', updated_at = CURRENT_TIMESTAMP
       WHERE id = ? AND status != 'deleted'
-    `, [id]);
+    `,
+      [id]
+    );
 
     const success = result.changes > 0;
     if (success) {
@@ -189,11 +206,14 @@ export class TenantRepository extends BaseRepository {
    * Get tenant setting
    */
   async getSetting(tenantId: string, key: string): Promise<string | null> {
-    const results = await this.query<{ value: string }>(`
+    const results = await this.query<{ value: string }>(
+      `
       SELECT value 
       FROM tenant_settings 
       WHERE tenant_id = ? AND key = ?
-    `, [tenantId, key]);
+    `,
+      [tenantId, key]
+    );
 
     return results[0]?.value || null;
   }
@@ -202,13 +222,16 @@ export class TenantRepository extends BaseRepository {
    * Set tenant setting
    */
   async setSetting(tenantId: string, key: string, value: string): Promise<void> {
-    await this.run(`
+    await this.run(
+      `
       INSERT INTO tenant_settings (tenant_id, key, value, updated_at)
       VALUES (?, ?, ?, CURRENT_TIMESTAMP)
       ON CONFLICT(tenant_id, key) DO UPDATE SET
         value = excluded.value,
         updated_at = excluded.updated_at
-    `, [tenantId, key, value]);
+    `,
+      [tenantId, key, value]
+    );
 
     this.emit('setting-updated', { tenantId, key, value });
   }
@@ -217,11 +240,14 @@ export class TenantRepository extends BaseRepository {
    * Get all settings for a tenant
    */
   async getSettings(tenantId: string): Promise<Record<string, string>> {
-    const results = await this.query<{ key: string; value: string }>(`
+    const results = await this.query<{ key: string; value: string }>(
+      `
       SELECT key, value 
       FROM tenant_settings 
       WHERE tenant_id = ?
-    `, [tenantId]);
+    `,
+      [tenantId]
+    );
 
     const settings: Record<string, string> = {};
     for (const row of results) {
@@ -235,10 +261,13 @@ export class TenantRepository extends BaseRepository {
    * Delete tenant setting
    */
   async deleteSetting(tenantId: string, key: string): Promise<boolean> {
-    const result = await this.run(`
+    const result = await this.run(
+      `
       DELETE FROM tenant_settings 
       WHERE tenant_id = ? AND key = ?
-    `, [tenantId, key]);
+    `,
+      [tenantId, key]
+    );
 
     const success = result.changes > 0;
     if (success) {
@@ -258,17 +287,26 @@ export class TenantRepository extends BaseRepository {
     activePolicies: number;
   }> {
     const [groups, users, decisions, policies] = await Promise.all([
-      this.query<{ count: number }>('SELECT COUNT(*) as count FROM groups WHERE tenant_id = ?', [tenantId]),
-      this.query<{ count: number }>('SELECT COUNT(*) as count FROM users WHERE tenant_id = ?', [tenantId]),
-      this.query<{ count: number }>('SELECT COUNT(*) as count FROM decisions WHERE tenant_id = ?', [tenantId]),
-      this.query<{ count: number }>('SELECT COUNT(*) as count FROM policies WHERE tenant_id = ? AND is_active = 1', [tenantId])
+      this.query<{ count: number }>('SELECT COUNT(*) as count FROM groups WHERE tenant_id = ?', [
+        tenantId,
+      ]),
+      this.query<{ count: number }>('SELECT COUNT(*) as count FROM users WHERE tenant_id = ?', [
+        tenantId,
+      ]),
+      this.query<{ count: number }>('SELECT COUNT(*) as count FROM decisions WHERE tenant_id = ?', [
+        tenantId,
+      ]),
+      this.query<{ count: number }>(
+        'SELECT COUNT(*) as count FROM policies WHERE tenant_id = ? AND is_active = 1',
+        [tenantId]
+      ),
     ]);
 
     return {
       totalGroups: groups[0]?.count || 0,
       totalUsers: users[0]?.count || 0,
       totalDecisions: decisions[0]?.count || 0,
-      activePolicies: policies[0]?.count || 0
+      activePolicies: policies[0]?.count || 0,
     };
   }
 }

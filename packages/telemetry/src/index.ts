@@ -18,7 +18,7 @@ export class TelemetryService {
     // Initialize OpenTelemetry
     this.sdk = new NodeSDK({
       serviceName: config.serviceName,
-      traceExporter: config.jaegerEndpoint 
+      traceExporter: config.jaegerEndpoint
         ? new JaegerExporter({ endpoint: config.jaegerEndpoint })
         : undefined,
     });
@@ -40,15 +40,15 @@ export class TelemetryService {
             timestamp,
             level,
             message,
-            ...sanitizedMeta
+            ...sanitizedMeta,
           });
         })
       ),
       transports: [
         new winston.transports.Console(),
         new winston.transports.File({ filename: 'error.log', level: 'error' }),
-        new winston.transports.File({ filename: 'combined.log' })
-      ]
+        new winston.transports.File({ filename: 'combined.log' }),
+      ],
     });
   }
 
@@ -58,9 +58,9 @@ export class TelemetryService {
 
     const redactRecursive = (obj: any): any => {
       if (typeof obj !== 'object' || obj === null) return obj;
-      
+
       const result: any = Array.isArray(obj) ? [] : {};
-      
+
       for (const [key, value] of Object.entries(obj)) {
         if (sensitiveKeys.some(sensitive => key.toLowerCase().includes(sensitive))) {
           result[key] = '[REDACTED]';
@@ -70,7 +70,7 @@ export class TelemetryService {
           result[key] = value;
         }
       }
-      
+
       return result;
     };
 
@@ -79,13 +79,13 @@ export class TelemetryService {
 
   createSpan(name: string, attributes?: Record<string, string | number>) {
     const span = this.tracer.startSpan(name, { attributes });
-    
+
     return {
       setAttributes: (attrs: Record<string, string | number>) => span.setAttributes(attrs),
       setStatus: (status: { code: SpanStatusCode; message?: string }) => span.setStatus(status),
       recordException: (error: Error) => span.recordException(error),
       end: () => span.end(),
-      span // For advanced usage
+      span, // For advanced usage
     };
   }
 

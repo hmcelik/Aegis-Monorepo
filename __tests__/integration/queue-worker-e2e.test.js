@@ -18,7 +18,7 @@ describe('Queue-Worker E2E Integration', () => {
 
     // Initialize message queue
     messageQueue = new MessageQueue({
-      redisUrl: 'redis://localhost:6379'
+      redisUrl: 'redis://localhost:6379',
     });
 
     // Clear any existing jobs
@@ -40,16 +40,16 @@ describe('Queue-Worker E2E Integration', () => {
       metadata: {
         username: 'testuser',
         firstName: 'Test',
-        lastName: 'User'
-      }
+        lastName: 'User',
+      },
     };
 
     const jobId = await messageQueue.publishMessage(testMessage);
-    
+
     expect(jobId).toBeDefined();
     expect(typeof jobId).toBe('string');
     expect(jobId).toContain('test-msg-001');
-    
+
     // The job ID should follow our format: chatId:messageId
     expect(jobId).toBe('-1001234567890:test-msg-001');
   });
@@ -62,14 +62,14 @@ describe('Queue-Worker E2E Integration', () => {
       content: 'This message should only be processed once',
       timestamp: new Date(),
       metadata: {
-        username: 'testuser'
-      }
+        username: 'testuser',
+      },
     };
 
     // Publish the same message twice
     const jobId1 = await messageQueue.publishMessage(testMessage);
     const jobId2 = await messageQueue.publishMessage(testMessage);
-    
+
     // Should return the same job ID for idempotent publishing
     expect(jobId1).toBe(jobId2);
   });
@@ -81,7 +81,7 @@ describe('Queue-Worker E2E Integration', () => {
       userId: 123456789,
       content: 'spam spam spam urgent message',
       timestamp: new Date(),
-      metadata: { username: 'spammer' }
+      metadata: { username: 'spammer' },
     };
 
     const normalMessage = {
@@ -90,7 +90,7 @@ describe('Queue-Worker E2E Integration', () => {
       userId: 123456789,
       content: 'Hello everyone, how are you today?',
       timestamp: new Date(),
-      metadata: { username: 'gooduser' }
+      metadata: { username: 'gooduser' },
     };
 
     // Publish both messages
@@ -119,12 +119,12 @@ describe('Queue-Worker E2E Integration', () => {
         userId: 123456789,
         content: 'Test message for partitioning',
         timestamp: new Date(),
-        metadata: { username: 'testuser' }
+        metadata: { username: 'testuser' },
       };
 
       const jobId = await messageQueue.publishMessage(fullMessage);
       jobIds.push(jobId);
-      
+
       // Verify correct job ID format
       expect(jobId).toBe(`${msg.chatId}:${msg.messageId}`);
     }
@@ -141,20 +141,20 @@ describe('Queue-Worker E2E Integration', () => {
       userId: 123456789,
       content: 'Message for metrics testing',
       timestamp: new Date(),
-      metadata: { username: 'metricsuser' }
+      metadata: { username: 'metricsuser' },
     };
 
     await messageQueue.publishMessage(testMessage);
 
     // Get queue statistics
     const stats = await messageQueue.getQueueStats();
-    
+
     expect(stats).toBeDefined();
     expect(typeof stats.waiting).toBe('number');
     expect(typeof stats.active).toBe('number');
     expect(typeof stats.completed).toBe('number');
     expect(typeof stats.failed).toBe('number');
-    
+
     // Since workers are processing jobs immediately, we expect either:
     // - Jobs waiting (if workers are busy)
     // - Jobs completed (if workers processed them quickly)
@@ -166,13 +166,13 @@ describe('Queue-Worker E2E Integration', () => {
   it('should verify queue service is operational', async () => {
     // Test that we can get queue statistics
     const stats = await messageQueue.getQueueStats();
-    
+
     expect(stats).toBeDefined();
     expect(typeof stats.waiting).toBe('number');
     expect(typeof stats.active).toBe('number');
     expect(typeof stats.completed).toBe('number');
     expect(typeof stats.failed).toBe('number');
-    
+
     // Verify we can connect to Redis
     const pingResult = await redis.ping();
     expect(pingResult).toBe('PONG');

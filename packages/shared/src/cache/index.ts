@@ -1,6 +1,6 @@
 /**
  * AEG-302: Verdict cache by normalized content hash
- * 
+ *
  * This module implements a content-based caching system that:
  * 1. Uses SHA-256 of normalized text as cache key
  * 2. Short-circuits AI calls on cache hits
@@ -77,7 +77,7 @@ export class VerdictCache {
       mentions: normalized.mentions.sort(),
       hashtags: normalized.hashtags.sort(),
     });
-    
+
     return createHash('sha256').update(content).digest('hex');
   }
 
@@ -86,7 +86,7 @@ export class VerdictCache {
    */
   private isEntryValid(entry: CacheEntry): boolean {
     const now = Date.now();
-    return (now - entry.timestamp) < entry.ttlMs;
+    return now - entry.timestamp < entry.ttlMs;
   }
 
   /**
@@ -209,7 +209,7 @@ export class VerdictCache {
    */
   private updateMetrics(): void {
     this.metrics.totalEntries = this.cache.size;
-    
+
     // Estimate memory usage (rough calculation)
     let totalSize = 0;
     for (const [key, entry] of this.cache.entries()) {
@@ -217,7 +217,7 @@ export class VerdictCache {
       totalSize += JSON.stringify(entry.verdict).length * 2;
       totalSize += 64; // Estimated overhead per entry
     }
-    
+
     this.metrics.totalMemoryUsageBytes = totalSize;
     this.metrics.averageEntrySize = this.cache.size > 0 ? totalSize / this.cache.size : 0;
   }

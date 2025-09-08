@@ -29,11 +29,11 @@ export class KeywordMatcher {
     this.patterns = Array.from(this.keywords).map(keyword => {
       // Escape special regex characters properly
       const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      
+
       // Check if keyword starts/ends with word characters to decide on word boundaries
       const startsWithWord = /^\w/.test(keyword);
       const endsWithWord = /\w$/.test(keyword);
-      
+
       let pattern = escaped;
       if (startsWithWord) {
         pattern = `\\b${pattern}`;
@@ -41,14 +41,14 @@ export class KeywordMatcher {
       if (endsWithWord) {
         pattern = `${pattern}\\b`;
       }
-      
+
       return new RegExp(pattern, 'gi'); // Case insensitive
     });
   }
 
   findMatches(text: string): KeywordMatch[] {
     const matches: KeywordMatch[] = [];
-    
+
     for (const pattern of this.patterns) {
       // Reset regex to avoid issues with global flag
       pattern.lastIndex = 0;
@@ -57,7 +57,7 @@ export class KeywordMatcher {
         matches.push({
           keyword: match[0].toLowerCase(),
           start: match.index,
-          end: match.index + match[0].length
+          end: match.index + match[0].length,
         });
         // Prevent infinite loop for zero-length matches
         if (match.index === pattern.lastIndex) {

@@ -15,13 +15,13 @@ vi.mock('bullmq', () => ({
     resume: vi.fn().mockResolvedValue(undefined),
     close: vi.fn().mockResolvedValue(undefined),
   })),
-  Worker: vi.fn()
+  Worker: vi.fn(),
 }));
 
 vi.mock('ioredis', () => ({
   Redis: vi.fn().mockImplementation(() => ({
-    quit: vi.fn().mockResolvedValue(undefined)
-  }))
+    quit: vi.fn().mockResolvedValue(undefined),
+  })),
 }));
 
 describe('Queue Utilities (AEG-101)', () => {
@@ -29,10 +29,10 @@ describe('Queue Utilities (AEG-101)', () => {
     it('should consistently map chat IDs to the same shard', () => {
       const chatId = '123456789';
       const shardCount = 4;
-      
+
       const shard1 = getShardForChat(chatId, shardCount);
       const shard2 = getShardForChat(chatId, shardCount);
-      
+
       expect(shard1).toBe(shard2);
       expect(shard1).toBeGreaterThanOrEqual(0);
       expect(shard1).toBeLessThan(shardCount);
@@ -42,11 +42,11 @@ describe('Queue Utilities (AEG-101)', () => {
       const shardCount = 4;
       const chatIds = ['123', '456', '789', '101112', '131415'];
       const shards = chatIds.map(id => getShardForChat(id, shardCount));
-      
+
       // Should have some distribution (not all the same shard)
       const uniqueShards = new Set(shards);
       expect(uniqueShards.size).toBeGreaterThan(1);
-      
+
       // All shards should be valid
       shards.forEach(shard => {
         expect(shard).toBeGreaterThanOrEqual(0);

@@ -3,6 +3,7 @@ import * as nlpController from '../controllers/nlpController.js';
 import { checkJwt } from '../middleware/checkJwt.js';
 import { body } from 'express-validator';
 
+/** @type {import('express').Router} */
 const router = express.Router();
 
 // All NLP routes require a valid JWT
@@ -114,10 +115,11 @@ router.get('/status', nlpController.getNLPStatus);
  *       401:
  *         description: Unauthorized
  */
-router.post('/test/spam',
-    body('text').isString().isLength({ min: 1, max: 4000 }),
-    body('whitelistedKeywords').optional().isArray(),
-    nlpController.testSpamDetection
+router.post(
+  '/test/spam',
+  body('text').isString().isLength({ min: 1, max: 4000 }),
+  body('whitelistedKeywords').optional().isArray(),
+  nlpController.testSpamDetection
 );
 
 /**
@@ -175,9 +177,10 @@ router.post('/test/spam',
  *       401:
  *         description: Unauthorized
  */
-router.post('/test/profanity',
-    body('text').isString().isLength({ min: 1, max: 4000 }),
-    nlpController.testProfanityDetection
+router.post(
+  '/test/profanity',
+  body('text').isString().isLength({ min: 1, max: 4000 }),
+  nlpController.testProfanityDetection
 );
 
 /**
@@ -267,11 +270,12 @@ router.post('/test/profanity',
  *       401:
  *         description: Unauthorized
  */
-router.post('/analyze',
-    body('text').isString().isLength({ min: 1, max: 4000 }),
-    body('whitelistedKeywords').optional().isArray(),
-    body('groupId').optional().isString(),
-    nlpController.analyzeMessageEndpoint
+router.post(
+  '/analyze',
+  body('text').isString().isLength({ min: 1, max: 4000 }),
+  body('whitelistedKeywords').optional().isArray(),
+  body('groupId').optional().isString(),
+  nlpController.analyzeMessageEndpoint
 );
 
 export default router;

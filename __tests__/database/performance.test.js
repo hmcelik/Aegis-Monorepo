@@ -33,18 +33,18 @@ describe('Database Performance and Edge Cases', () => {
   describe('Basic Operations Performance', () => {
     it('should handle rapid strike operations efficiently', async () => {
       const startTime = Date.now();
-      
+
       // Add multiple strikes rapidly
       for (let i = 0; i < 10; i++) {
         await db.addStrikes(testChatId, testUserId, 1);
       }
-      
+
       const endTime = Date.now();
       const duration = endTime - startTime;
-      
+
       // Should complete within reasonable time
       expect(duration).toBeLessThan(5000); // 5 seconds
-      
+
       // Verify strikes were added
       const result = await db.getStrikes(testChatId, testUserId);
       expect(result.count).toBe(10);
@@ -52,26 +52,26 @@ describe('Database Performance and Edge Cases', () => {
 
     it('should handle multiple setting updates efficiently', async () => {
       const startTime = Date.now();
-      
+
       // Update multiple settings rapidly
       const updates = [
         ['spamThreshold', 0.8],
         ['alertLevel', 2],
         ['muteLevel', 1],
         ['kickLevel', 4],
-        ['banLevel', 6]
+        ['banLevel', 6],
       ];
-      
+
       for (const [key, value] of updates) {
         await db.setSetting(testChatId, key, value);
       }
-      
+
       const endTime = Date.now();
       const duration = endTime - startTime;
-      
+
       // Should complete within reasonable time
       expect(duration).toBeLessThan(2000); // 2 seconds
-      
+
       // Verify settings were updated
       const spamThreshold = await db.getSetting(testChatId, 'spamThreshold', 0.85);
       expect(spamThreshold).toBe(0.8);
@@ -79,22 +79,22 @@ describe('Database Performance and Edge Cases', () => {
 
     it('should handle large numbers of audit log entries', async () => {
       const startTime = Date.now();
-      
+
       // Add multiple audit log entries using recordStrike
       for (let i = 0; i < 20; i++) {
         await db.recordStrike(testChatId, `user-${i}`, {
           timestamp: new Date().toISOString(),
           action: 'STRIKE_ADDED',
-          reason: `Automated test entry ${i}`
+          reason: `Automated test entry ${i}`,
         });
       }
-      
+
       const endTime = Date.now();
       const duration = endTime - startTime;
-      
+
       // Should complete within reasonable time
       expect(duration).toBeLessThan(10000); // 10 seconds
-      
+
       // Verify entries were added by checking audit log
       const auditEntries = await db.getAuditLog(testChatId, 25);
       expect(auditEntries.length).toBeGreaterThan(0);
@@ -122,7 +122,7 @@ describe('Database Performance and Edge Cases', () => {
         'https://example.com',
         '🚀🎉💎',
         'Text with "quotes" and \'apostrophes\'',
-        'Line 1\nLine 2\nLine 3'
+        'Line 1\nLine 2\nLine 3',
       ];
 
       for (const value of specialValues) {
@@ -134,10 +134,10 @@ describe('Database Performance and Edge Cases', () => {
 
     it('should handle very long strings', async () => {
       const longString = 'x'.repeat(10000);
-      
+
       await db.setSetting(testChatId, 'longString', longString);
       const retrieved = await db.getSetting(testChatId, 'longString', 'default');
-      
+
       expect(retrieved).toBe(longString);
       expect(retrieved.length).toBe(10000);
     });
@@ -156,7 +156,7 @@ describe('Database Performance and Edge Cases', () => {
     it('should handle concurrent operations without corruption', async () => {
       // Use unique user IDs for this test to avoid conflicts
       const testUserPrefix = `concurrent-test-${Date.now()}`;
-      
+
       // Test concurrent strike additions
       const promises = Array.from({ length: 5 }, (_, i) =>
         db.addStrikes(testChatId, `${testUserPrefix}-${i}`, 1)
@@ -177,11 +177,11 @@ describe('Database Performance and Edge Cases', () => {
       // Use unique user ID for this test
       const maxTestUserId = `max-strikes-test-${Date.now()}`;
       const maxStrikes = 100;
-      
+
       for (let i = 0; i < maxStrikes; i++) {
         await db.addStrikes(testChatId, maxTestUserId, 1);
       }
-      
+
       const finalResult = await db.getStrikes(testChatId, maxTestUserId);
       expect(finalResult.count).toBe(maxStrikes);
     });
@@ -189,13 +189,13 @@ describe('Database Performance and Edge Cases', () => {
     it('should handle strike removal correctly', async () => {
       // Use unique user ID for this test
       const removalTestUserId = `removal-test-${Date.now()}`;
-      
+
       // Add some strikes first
       await db.addStrikes(testChatId, removalTestUserId, 3);
 
       // Remove strikes
       await db.removeStrike(testChatId, removalTestUserId, 1);
-      
+
       const result = await db.getStrikes(testChatId, removalTestUserId);
       expect(result.count).toBe(2);
     });
@@ -206,7 +206,7 @@ describe('Database Performance and Edge Cases', () => {
 
       // Clear all strikes
       await db.resetStrikes(testChatId, testUserId);
-      
+
       const result = await db.getStrikes(testChatId, testUserId);
       expect(result.count).toBe(0);
     });
@@ -221,7 +221,7 @@ describe('Database Performance and Edge Cases', () => {
         muteLevel: 1,
         kickLevel: 4,
         banLevel: 6,
-        warningMessage: 'Custom warning message'
+        warningMessage: 'Custom warning message',
       };
 
       for (const [key, value] of Object.entries(settings)) {

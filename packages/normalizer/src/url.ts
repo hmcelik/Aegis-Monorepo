@@ -3,19 +3,27 @@
 export function normalizeUrl(url: string): string {
   try {
     const urlObj = new URL(url);
-    
+
     // Convert to lowercase
     urlObj.hostname = urlObj.hostname.toLowerCase();
-    
+
     // Remove common tracking parameters
-    const trackingParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid'];
+    const trackingParams = [
+      'utm_source',
+      'utm_medium',
+      'utm_campaign',
+      'utm_content',
+      'utm_term',
+      'fbclid',
+      'gclid',
+    ];
     trackingParams.forEach(param => {
       urlObj.searchParams.delete(param);
     });
-    
+
     // Sort search parameters for consistency
     urlObj.searchParams.sort();
-    
+
     return urlObj.toString();
   } catch {
     return url; // Return original if invalid URL

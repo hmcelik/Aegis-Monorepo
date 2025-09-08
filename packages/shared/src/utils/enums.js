@@ -11,8 +11,8 @@
  * @enum {string}
  */
 export const PenaltyMode = {
-    /** The user is kicked from the chat but can rejoin immediately. */
-    KICK: 'kick',
-    /** The user is permanently banned from the chat. */
-    BAN: 'ban',
+  /** The user is kicked from the chat but can rejoin immediately. */
+  KICK: 'kick',
+  /** The user is permanently banned from the chat. */
+  BAN: 'ban',
 };

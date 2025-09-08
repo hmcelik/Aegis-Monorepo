@@ -9,29 +9,29 @@ export const useDashboard = () => {
       if (process.env.NODE_ENV === 'development') {
         console.log('📊 Loading dashboard data...');
       }
-      
+
       // Check available authentication methods
       const storedToken = localStorage.getItem('telegram_auth_token');
       const storedInitData = localStorage.getItem('telegram_init_data');
       const telegramInitData = window.Telegram?.WebApp?.initData || storedInitData;
-      
+
       if (process.env.NODE_ENV === 'development') {
         console.log('🔑 Authentication check:', {
           hasJwtToken: !!storedToken,
           hasInitData: !!telegramInitData,
           tokenLength: storedToken?.length || 0,
           initDataLength: telegramInitData?.length || 0,
-          authMethod: storedToken ? 'JWT Bearer' : telegramInitData ? 'WebApp InitData' : 'None'
+          authMethod: storedToken ? 'JWT Bearer' : telegramInitData ? 'WebApp InitData' : 'None',
         });
       }
-      
+
       // Set a timeout to prevent hanging requests
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-      
+
       // Try different approaches for loading groups data
       let groupsPromise;
-      
+
       if (storedToken) {
         // Method 1: Use JWT Bearer token with /groups endpoint
         if (process.env.NODE_ENV === 'development') {
@@ -49,10 +49,12 @@ export const useDashboard = () => {
         console.warn('⚠️ No authentication method available for groups endpoint');
         groupsPromise = Promise.reject(new Error('No authentication available'));
       }
-      
+
       const [groupsRes, healthRes] = await Promise.allSettled([
         groupsPromise,
-        apiService.health?.check ? apiService.health.check() : Promise.resolve({ status: 'unknown' })
+        apiService.health?.check
+          ? apiService.health.check()
+          : Promise.resolve({ status: 'unknown' }),
       ]);
 
       clearTimeout(timeoutId);
@@ -69,13 +71,13 @@ export const useDashboard = () => {
         if (process.env.NODE_ENV === 'development') {
           console.log('📋 Raw groups response:', groupsResponse);
         }
-        
+
         // Check if we have axios response with .data property
         if (groupsResponse.data && Array.isArray(groupsResponse.data)) {
           // Direct array in axios response.data (legacy format)
           groups = groupsResponse.data.map(group => ({
             ...group,
-            bot_active: true // Assume bot is active if we can fetch group data
+            bot_active: true, // Assume bot is active if we can fetch group data
           }));
           if (process.env.NODE_ENV === 'development') {
             console.log('✅ Parsed groups from axios response.data (legacy):', groups.length);
@@ -84,7 +86,7 @@ export const useDashboard = () => {
           // Unified API format: axios response with {success, data: [groups]}
           groups = groupsResponse.data.data.map(group => ({
             ...group,
-            bot_active: true // Assume bot is active if we can fetch group data
+            bot_active: true, // Assume bot is active if we can fetch group data
           }));
           if (process.env.NODE_ENV === 'development') {
             console.log('✅ Parsed groups from unified API format:', groups.length);
@@ -92,16 +94,16 @@ export const useDashboard = () => {
         } else if (Array.isArray(groupsResponse)) {
           groups = groupsResponse.map(group => ({
             ...group,
-            bot_active: true // Assume bot is active if we can fetch group data
+            bot_active: true, // Assume bot is active if we can fetch group data
           }));
           if (process.env.NODE_ENV === 'development') {
             console.log('✅ Parsed groups from direct array:', groups.length);
           }
         } else if (groupsResponse.success && groupsResponse.data) {
-          groups = Array.isArray(groupsResponse.data) 
+          groups = Array.isArray(groupsResponse.data)
             ? groupsResponse.data.map(group => ({
                 ...group,
-                bot_active: true // Assume bot is active if we can fetch group data
+                bot_active: true, // Assume bot is active if we can fetch group data
               }))
             : groupsResponse.data;
           if (process.env.NODE_ENV === 'development') {
@@ -123,7 +125,7 @@ export const useDashboard = () => {
         if (process.env.NODE_ENV === 'development') {
           console.log('🏥 Raw health response:', healthResponse);
         }
-        
+
         // Extract health data from axios response
         if (healthResponse.data) {
           health = healthResponse.data;
@@ -135,33 +137,39 @@ export const useDashboard = () => {
       if (process.env.NODE_ENV === 'development') {
         console.log('📝 Parsed groups:', groups);
         console.log('🏥 Parsed health:', health);
-        
+
         // Debug: Show individual group details
         if (groups.length > 0) {
           console.log('🎯 Group details:');
           groups.forEach((group, index) => {
-            console.log(`  ${index + 1}. ${group.title} (${group.id}) - ${group.member_count} members`);
+            console.log(
+              `  ${index + 1}. ${group.title} (${group.id}) - ${group.member_count} members`
+            );
           });
         }
       }
 
       // Calculate total members and active bots from groups
-      const totalMembers = Array.isArray(groups) ? groups.reduce((total, group) => {
-        return total + (group.member_count || group.members || 0);
-      }, 0) : 0;
+      const totalMembers = Array.isArray(groups)
+        ? groups.reduce((total, group) => {
+            return total + (group.member_count || group.members || 0);
+          }, 0)
+        : 0;
 
-      const activeBots = Array.isArray(groups) ? groups.filter(group => group.bot_active).length : 0;
+      const activeBots = Array.isArray(groups)
+        ? groups.filter(group => group.bot_active).length
+        : 0;
 
       const data = {
         groups: Array.isArray(groups) ? groups : [],
         stats: {
           total_groups: Array.isArray(groups) ? groups.length : 0,
           total_members: totalMembers,
-          active_bots: activeBots
+          active_bots: activeBots,
         },
-        recent_activity: []
+        recent_activity: [],
       };
-      
+
       if (process.env.NODE_ENV === 'development') {
         console.log('💾 Setting dashboard data:', data);
       }
@@ -175,16 +183,16 @@ export const useDashboard = () => {
         message: error.message,
         stack: error.stack,
         name: error.name,
-        error: error
+        error: error,
       });
-      
+
       // Always set some data, even if empty
       const fallbackData = {
         groups: [],
         stats: { total_groups: 0, total_members: 0, active_bots: 0 },
-        recent_activity: []
+        recent_activity: [],
       };
-      
+
       console.log('🔄 Setting fallback dashboard data:', fallbackData);
       setDashboardData(fallbackData);
       return fallbackData;
@@ -195,12 +203,12 @@ export const useDashboard = () => {
     const demoData = {
       groups: [
         { id: 1, title: 'Demo Group 1', member_count: 125, bot_active: true },
-        { id: 2, title: 'Demo Group 2', member_count: 89, bot_active: false }
+        { id: 2, title: 'Demo Group 2', member_count: 89, bot_active: false },
       ],
       stats: { total_groups: 2, total_members: 214, active_bots: 1 },
-      recent_activity: []
+      recent_activity: [],
     };
-    
+
     setDashboardData(demoData);
     return demoData;
   };
@@ -209,6 +217,6 @@ export const useDashboard = () => {
     dashboardData,
     loadDashboardData,
     setDemoData,
-    setDashboardData
+    setDashboardData,
   };
 };

@@ -17,8 +17,8 @@ const SubscriptionPage = ({ user }) => {
         'Up to 100 members',
         'Daily reports',
         'Community support',
-        '24/7 basic monitoring'
-      ]
+        '24/7 basic monitoring',
+      ],
     },
     pro: {
       name: 'Professional',
@@ -34,8 +34,8 @@ const SubscriptionPage = ({ user }) => {
         'Analytics dashboard',
         'Priority support',
         'Auto-ban capabilities',
-        'Strike system'
-      ]
+        'Strike system',
+      ],
     },
     enterprise: {
       name: 'Enterprise',
@@ -52,9 +52,9 @@ const SubscriptionPage = ({ user }) => {
         'Dedicated support',
         'White-label options',
         'API access',
-        'Custom AI training'
-      ]
-    }
+        'Custom AI training',
+      ],
+    },
   };
 
   const addons = [
@@ -63,25 +63,25 @@ const SubscriptionPage = ({ user }) => {
       name: 'Additional Groups',
       description: '+10 more groups',
       price: { monthly: 2.99, yearly: 29.99 },
-      icon: <Users className="w-5 h-5" />
+      icon: <Users className="w-5 h-5" />,
     },
     {
       id: 'priority_support',
       name: 'Priority Support',
       description: '24/7 premium support',
       price: { monthly: 4.99, yearly: 49.99 },
-      icon: <Shield className="w-5 h-5" />
+      icon: <Shield className="w-5 h-5" />,
     },
     {
       id: 'advanced_analytics',
       name: 'Advanced Analytics',
       description: 'Detailed insights & reports',
       price: { monthly: 7.99, yearly: 79.99 },
-      icon: <TrendingUp className="w-5 h-5" />
-    }
+      icon: <TrendingUp className="w-5 h-5" />,
+    },
   ];
 
-  const handlePlanSelect = (planId) => {
+  const handlePlanSelect = planId => {
     setSelectedPlan(planId);
   };
 
@@ -95,7 +95,7 @@ const SubscriptionPage = ({ user }) => {
       const monthly = plans[selectedPlan].price.monthly;
       const yearly = plans[selectedPlan].price.yearly;
       if (monthly > 0 && yearly > 0) {
-        return Math.round((1 - (yearly / (monthly * 12))) * 100);
+        return Math.round((1 - yearly / (monthly * 12)) * 100);
       }
     }
     return 0;
@@ -116,7 +116,8 @@ const SubscriptionPage = ({ user }) => {
             </p>
             <div className="mt-4 flex items-center justify-center gap-4">
               <span className="text-lg font-medium text-gray-800">
-                Plan for <span className="font-bold text-purple-600">{user?.first_name || 'User'}</span>
+                Plan for{' '}
+                <span className="font-bold text-purple-600">{user?.first_name || 'User'}</span>
               </span>
               {user?.is_guest && (
                 <span className="px-4 py-2 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-sm rounded-full font-medium shadow-md">
@@ -137,7 +138,7 @@ const SubscriptionPage = ({ user }) => {
                             transition-transform duration-300 ease-out pointer-events-none
                             ${billingCycle === 'monthly' ? 'translate-x-0' : 'translate-x-full'}`}
               />
-              
+
               {/* Monthly Button */}
               <button
                 className={`!relative !z-10 !h-14 !px-8 !rounded-lg !font-bold !text-base !tracking-wide 
@@ -148,7 +149,7 @@ const SubscriptionPage = ({ user }) => {
               >
                 💳 Monthly
               </button>
-              
+
               {/* Yearly Button */}
               <button
                 className={`!relative !z-10 !h-14 !px-8 !rounded-lg !font-bold !text-base !tracking-wide 
@@ -159,7 +160,7 @@ const SubscriptionPage = ({ user }) => {
               >
                 🎯 Yearly
               </button>
-              
+
               {/* Save Badge */}
               {billingCycle === 'yearly' && (
                 <div className="absolute -top-3 -right-4 bg-gradient-to-r from-orange-400 to-red-400 text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg animate-pulse">
@@ -193,7 +194,7 @@ const SubscriptionPage = ({ user }) => {
               <div className="text-center mb-6">
                 <div className="text-4xl mb-4">{plan.icon}</div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                
+
                 <div className="mb-4">
                   <div className="text-4xl font-bold text-gray-900">
                     {plan.price[billingCycle] === 0 ? (
@@ -207,7 +208,7 @@ const SubscriptionPage = ({ user }) => {
                       </span>
                     )}
                   </div>
-                  
+
                   {billingCycle === 'yearly' && plan.price.yearly > 0 && (
                     <div className="text-green-600 font-semibold text-sm mt-2">
                       Save ${(plan.price.monthly * 12 - plan.price.yearly).toFixed(2)}/year
@@ -235,7 +236,7 @@ const SubscriptionPage = ({ user }) => {
                     ? '!bg-gradient-to-r !from-purple-500 !to-blue-500 !text-white !shadow-lg'
                     : '!bg-gray-100 !text-gray-700 hover:!bg-gray-200 !border !border-gray-300'
                 }`}
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   handlePlanSelect(planId);
                 }}
@@ -265,15 +266,13 @@ const SubscriptionPage = ({ user }) => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {addons.map((addon) => (
+            {addons.map(addon => (
               <div
                 key={addon.id}
                 className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 border border-gray-200 hover:border-purple-300 hover:shadow-lg transition-all duration-300"
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-purple-100 rounded-lg text-purple-600">
-                    {addon.icon}
-                  </div>
+                  <div className="p-2 bg-purple-100 rounded-lg text-purple-600">{addon.icon}</div>
                   <div>
                     <h4 className="font-bold text-gray-900">{addon.name}</h4>
                     <p className="text-sm text-gray-600">{addon.description}</p>
@@ -282,9 +281,11 @@ const SubscriptionPage = ({ user }) => {
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold text-gray-900">
                     ${addon.price[billingCycle]}
-                    <span className="text-sm text-gray-600">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
+                    <span className="text-sm text-gray-600">
+                      /{billingCycle === 'monthly' ? 'mo' : 'yr'}
+                    </span>
                   </span>
-                  <button 
+                  <button
                     className="!px-4 !py-2 !bg-purple-100 !text-purple-700 !rounded-lg hover:!bg-purple-200 !transition-colors !duration-200 !font-medium !border-none !outline-none !cursor-pointer"
                     type="button"
                   >
@@ -311,7 +312,7 @@ const SubscriptionPage = ({ user }) => {
               </span>
             )}
           </button>
-          
+
           <p className="mt-4 text-gray-600">
             Cancel anytime • 30-day money-back guarantee • Secure payment
           </p>
@@ -326,12 +327,19 @@ const SubscriptionPage = ({ user }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: '🤖', title: 'AI-Powered', desc: 'Advanced machine learning for spam detection' },
+              {
+                icon: '🤖',
+                title: 'AI-Powered',
+                desc: 'Advanced machine learning for spam detection',
+              },
               { icon: '⚡', title: 'Real-time', desc: 'Instant moderation and alerts' },
               { icon: '📊', title: 'Analytics', desc: 'Detailed insights and reporting' },
-              { icon: '🛡️', title: 'Protection', desc: '24/7 monitoring and security' }
+              { icon: '🛡️', title: 'Protection', desc: '24/7 monitoring and security' },
             ].map((feature, index) => (
-              <div key={index} className="text-center p-6 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200">
+              <div
+                key={index}
+                className="text-center p-6 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200"
+              >
                 <div className="text-3xl mb-3">{feature.icon}</div>
                 <h4 className="font-bold text-gray-900 mb-2">{feature.title}</h4>
                 <p className="text-gray-600 text-sm">{feature.desc}</p>

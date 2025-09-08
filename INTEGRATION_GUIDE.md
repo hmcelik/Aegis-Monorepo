@@ -42,16 +42,16 @@ Add queue publishing to your existing bot service:
 import { MessageQueue } from '@telegram-moderator/shared/src/queue/messageQueue.js';
 
 const queue = new MessageQueue({
-  redisUrl: process.env.REDIS_URL || 'redis://localhost:6379'
+  redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
 });
 
 // In your message handler:
 await queue.publishMessage({
   chatId: msg.chat.id.toString(),
-  messageId: msg.message_id.toString(), 
+  messageId: msg.message_id.toString(),
   userId: msg.from.id.toString(),
   text: msg.text,
-  timestamp: Date.now()
+  timestamp: Date.now(),
 });
 ```
 
@@ -122,11 +122,11 @@ packages/
 ✅ **Package Structure**: All new packages created with basic implementations  
 ✅ **Worker Service**: Basic BullMQ worker with health endpoints  
 ✅ **Queue Implementation**: Message publishing with idempotency  
-✅ **Type Safety**: Shared types across packages  
+✅ **Type Safety**: Shared types across packages
 
 🚧 **Next**: Integration with existing bot and API services  
 🚧 **Testing**: Complete test suite for queue functionality  
-🚧 **Monitoring**: OpenTelemetry integration in all services  
+🚧 **Monitoring**: OpenTelemetry integration in all services
 
 ### Development Commands
 
@@ -134,7 +134,7 @@ packages/
 # Start all services
 pnpm dev
 
-# Start individual services  
+# Start individual services
 pnpm dev:worker    # Worker service on :3001
 pnpm dev:api       # API service on :3000
 pnpm dev:bot       # Bot service

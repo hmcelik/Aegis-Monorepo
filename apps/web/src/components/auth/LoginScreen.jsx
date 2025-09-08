@@ -18,11 +18,31 @@ const LoginScreen = ({ onTelegramLogin, onDemoMode }) => {
   };
 
   const features = [
-    { icon: <Shield className="h-6 w-6" />, title: "AI-Powered Moderation", description: "Advanced spam and content detection using machine learning" },
-    { icon: <Users className="h-6 w-6" />, title: "User Management", description: "Comprehensive strike system with automatic penalties" },
-    { icon: <BarChart3 className="h-6 w-6" />, title: "Detailed Analytics", description: "Real-time statistics and moderation insights" },
-    { icon: <Settings className="h-6 w-6" />, title: "Flexible Configuration", description: "Customize thresholds and moderation rules per group" },
-    { icon: <Zap className="h-6 w-6" />, title: "Real-time Actions", description: "Instant moderation with audit logging" }
+    {
+      icon: <Shield className="h-6 w-6" />,
+      title: 'AI-Powered Moderation',
+      description: 'Advanced spam and content detection using machine learning',
+    },
+    {
+      icon: <Users className="h-6 w-6" />,
+      title: 'User Management',
+      description: 'Comprehensive strike system with automatic penalties',
+    },
+    {
+      icon: <BarChart3 className="h-6 w-6" />,
+      title: 'Detailed Analytics',
+      description: 'Real-time statistics and moderation insights',
+    },
+    {
+      icon: <Settings className="h-6 w-6" />,
+      title: 'Flexible Configuration',
+      description: 'Customize thresholds and moderation rules per group',
+    },
+    {
+      icon: <Zap className="h-6 w-6" />,
+      title: 'Real-time Actions',
+      description: 'Instant moderation with audit logging',
+    },
   ];
 
   return (
@@ -49,8 +69,8 @@ const LoginScreen = ({ onTelegramLogin, onDemoMode }) => {
             </h2>
 
             <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-              Protect your Telegram communities with AI-powered moderation,
-              comprehensive analytics, and flexible rule management.
+              Protect your Telegram communities with AI-powered moderation, comprehensive analytics,
+              and flexible rule management.
             </p>
 
             {/* Features List */}
@@ -58,9 +78,7 @@ const LoginScreen = ({ onTelegramLogin, onDemoMode }) => {
               {features.slice(0, 3).map((feature, index) => (
                 <div key={index} className="flex items-start space-x-3">
                   <div className="flex-shrink-0 mt-1">
-                    <div className="bg-blue-100 rounded-lg p-2 text-blue-600">
-                      {feature.icon}
-                    </div>
+                    <div className="bg-blue-100 rounded-lg p-2 text-blue-600">{feature.icon}</div>
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">{feature.title}</h3>
@@ -141,7 +159,9 @@ const LoginScreen = ({ onTelegramLogin, onDemoMode }) => {
                     <BarChart3 className="h-6 w-6 text-gray-600" />
                   </div>
                   <h4 className="text-gray-900 font-semibold mb-2">Try Demo Mode</h4>
-                  <p className="text-gray-600 text-sm mb-4">Explore all features with sample data</p>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Explore all features with sample data
+                  </p>
                 </div>
 
                 <button
@@ -171,7 +191,8 @@ const LoginScreen = ({ onTelegramLogin, onDemoMode }) => {
                   <div>
                     <h5 className="font-medium text-green-900 mb-1">Secure & Private</h5>
                     <p className="text-sm text-green-700">
-                      We use Telegram's secure authentication. Your credentials are never stored on our servers.
+                      We use Telegram's secure authentication. Your credentials are never stored on
+                      our servers.
                     </p>
                   </div>
                 </div>
@@ -182,7 +203,10 @@ const LoginScreen = ({ onTelegramLogin, onDemoMode }) => {
             <div className="mt-8 pt-6 border-t border-gray-200 text-center">
               <p className="text-sm text-gray-500">
                 Need help? Contact{' '}
-                <a href="https://t.me/AegisModerationBot" className="text-blue-600 hover:text-blue-700 font-medium">
+                <a
+                  href="https://t.me/AegisModerationBot"
+                  className="text-blue-600 hover:text-blue-700 font-medium"
+                >
                   @AegisModerationBot
                 </a>
               </p>

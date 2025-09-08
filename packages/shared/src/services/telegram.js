@@ -3,23 +3,23 @@
  * @param {string|number} chatId - The ID of the chat.
  * @returns {Promise<number>} The number of members in the chat, or 0 on failure.
  */
-export const getChatMemberCount = async (chatId) => {
+export const getChatMemberCount = async chatId => {
+  try {
+    // Try the newer API method first, then fall back to the older one
+    let count;
     try {
-        // Try the newer API method first, then fall back to the older one
-        let count;
-        try {
-            count = await bot.getChatMemberCount(chatId);
-        } catch (e) {
-            // Fall back to the deprecated method if the new one fails
-            count = await bot.getChatMembersCount(chatId);
-        }
-        return count;
-    } catch (error) {
-        // Log more detailed error information
-        const errorMsg = error.response?.body?.description || error.message;
-        logger.warn(`Could not get member count for chat ${chatId}: ${errorMsg}`);
-        return 0;
+      count = await bot.getChatMemberCount(chatId);
+    } catch (e) {
+      // Fall back to the deprecated method if the new one fails
+      count = await bot.getChatMembersCount(chatId);
     }
+    return count;
+  } catch (error) {
+    // Log more detailed error information
+    const errorMsg = error.response?.body?.description || error.message;
+    logger.warn(`Could not get member count for chat ${chatId}: ${errorMsg}`);
+    return 0;
+  }
 };
 /**
  * @fileoverview A wrapper service for the node-telegram-bot-api library.
@@ -53,25 +53,25 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // Cache admin lists for 5 minutes.
  * @param {string|number} chatId - The ID of the target chat.
  * @returns {Promise<number[]>} A promise that resolves to an array of admin user IDs.
  */
-export const getChatAdmins = async (chatId) => {
-    const cachedAdmins = adminCache.get(chatId);
-    // Return cached data if it's recent.
-    if (cachedAdmins && cachedAdmins.timestamp > Date.now() - CACHE_TTL_MS) {
-        return cachedAdmins.ids;
-    }
-    try {
-        // Fetch the list of administrators from the Telegram API.
-        const admins = await bot.getChatAdministrators(chatId);
-        const adminIds = admins.map(admin => admin.user.id);
-        // Store the new list and timestamp in the cache.
-        adminCache.set(chatId, { ids: adminIds, timestamp: Date.now() });
-        logger.info(`Refreshed admin cache for chat ${chatId}. Found ${adminIds.length} admins.`);
-        return adminIds;
-    } catch (error) {
-        logger.error(`Failed to get chat admins for ${chatId}:`, error.response?.body || error.message);
-        // On failure, return the old cached data if available, otherwise an empty array.
-        return cachedAdmins ? cachedAdmins.ids : [];
-    }
+export const getChatAdmins = async chatId => {
+  const cachedAdmins = adminCache.get(chatId);
+  // Return cached data if it's recent.
+  if (cachedAdmins && cachedAdmins.timestamp > Date.now() - CACHE_TTL_MS) {
+    return cachedAdmins.ids;
+  }
+  try {
+    // Fetch the list of administrators from the Telegram API.
+    const admins = await bot.getChatAdministrators(chatId);
+    const adminIds = admins.map(admin => admin.user.id);
+    // Store the new list and timestamp in the cache.
+    adminCache.set(chatId, { ids: adminIds, timestamp: Date.now() });
+    logger.info(`Refreshed admin cache for chat ${chatId}. Found ${adminIds.length} admins.`);
+    return adminIds;
+  } catch (error) {
+    logger.error(`Failed to get chat admins for ${chatId}:`, error.response?.body || error.message);
+    // On failure, return the old cached data if available, otherwise an empty array.
+    return cachedAdmins ? cachedAdmins.ids : [];
+  }
 };
 
 /**
@@ -81,19 +81,21 @@ export const getChatAdmins = async (chatId) => {
  * @returns {Promise<object|null>} A promise that resolves to the chat member object, or null on failure.
  */
 export const getChatMember = async (chatId, userId) => {
-    try {
-        const member = await bot.getChatMember(chatId, userId);
-        return member;
-    } catch (error) {
-        // This error is expected if the user is not in the chat.
-        if (error.response && error.response.body.description.includes("user not found")) {
-            return null;
-        }
-        logger.error(`Failed to get chat member ${userId} in chat ${chatId}:`, error.response?.body || error.message);
-        return null;
+  try {
+    const member = await bot.getChatMember(chatId, userId);
+    return member;
+  } catch (error) {
+    // This error is expected if the user is not in the chat.
+    if (error.response && error.response.body.description.includes('user not found')) {
+      return null;
     }
+    logger.error(
+      `Failed to get chat member ${userId} in chat ${chatId}:`,
+      error.response?.body || error.message
+    );
+    return null;
+  }
 };
-
 
 /**
  * Deletes a message from a chat, ignoring "not found" errors.
@@ -104,12 +106,15 @@ export const getChatMember = async (chatId, userId) => {
 export const deleteMessage = async (chatId, messageId) => {
   try {
     await bot.deleteMessage(chatId, messageId);
-  } catch(error) {
+  } catch (error) {
     // **FIX**: If the message is already deleted, just ignore the error and don't log it.
-    if (error.response && error.response.body.description.includes("message to delete not found")) {
-        return; // Silently fail
+    if (error.response && error.response.body.description.includes('message to delete not found')) {
+      return; // Silently fail
     }
-    logger.error(`Failed to delete message ${messageId} in chat ${chatId}`, error.response?.body || error.message)
+    logger.error(
+      `Failed to delete message ${messageId} in chat ${chatId}`,
+      error.response?.body || error.message
+    );
   }
 };
 
@@ -131,7 +136,10 @@ export const kickUser = async (chatId, userId) => {
     await bot.unbanChatMember(chatId, userId, { only_if_banned: true });
     return true;
   } catch (error) {
-    logger.error(`Failed to kick user ${userId} from chat ${chatId}:`, error.response?.body || error.message);
+    logger.error(
+      `Failed to kick user ${userId} from chat ${chatId}:`,
+      error.response?.body || error.message
+    );
     return false;
   }
 };
@@ -160,7 +168,7 @@ export const muteUser = (chatId, userId, durationMinutes) => {
   const until_date = Math.floor(Date.now() / 1000) + durationMinutes * 60;
   return bot.restrictChatMember(chatId, userId, {
     can_send_messages: false, // Disallow sending messages.
-    until_date: until_date
+    until_date: until_date,
   });
 };
 
@@ -173,7 +181,7 @@ export const muteUser = (chatId, userId, durationMinutes) => {
  * @returns {Promise<object>} A promise that resolves to the sent message object.
  */
 export const sendMessage = (chatId, text, options) => {
-    return bot.sendMessage(chatId, text, options);
+  return bot.sendMessage(chatId, text, options);
 };
 
 /**
@@ -185,7 +193,7 @@ export const sendMessage = (chatId, text, options) => {
  * @returns {Promise<object>} A promise that resolves to the sent message object.
  */
 export const sendDocument = (chatId, fileBuffer, options = {}, fileOptions = {}) => {
-    return bot.sendDocument(chatId, fileBuffer, options, fileOptions);
+  return bot.sendDocument(chatId, fileBuffer, options, fileOptions);
 };
 
 /**
@@ -196,7 +204,7 @@ export const sendDocument = (chatId, fileBuffer, options = {}, fileOptions = {})
  * @returns {Promise<object|boolean>} A promise that resolves to the edited message object or true.
  */
 export const editMessageText = (text, options) => {
-    return bot.editMessageText(text, options);
+  return bot.editMessageText(text, options);
 };
 
 /**
@@ -207,7 +215,7 @@ export const editMessageText = (text, options) => {
  * @returns {Promise<boolean>} A promise that resolves on completion.
  */
 export const answerCallbackQuery = (callbackQueryId, options) => {
-    return bot.answerCallbackQuery(callbackQueryId, options);
+  return bot.answerCallbackQuery(callbackQueryId, options);
 };
 
 // Export the bot instance itself for direct use in other modules if needed.

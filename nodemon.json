@@ -1,11 +1,7 @@
 {
   "watch": ["src/"],
   "ext": "js,json",
-  "ignore": [
-    "*.test.js",
-    "__tests__/*",
-    "*.db"
-  ],
+  "ignore": ["*.test.js", "__tests__/*", "*.db"],
   "verbose": true,
   "delay": "1000"
 }

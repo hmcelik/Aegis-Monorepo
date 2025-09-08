@@ -62,7 +62,7 @@ export class DecisionRepository extends BaseRepository {
    */
   async createDecision(input: CreateDecisionInput): Promise<Decision> {
     this.validateTenantAccess();
-    
+
     const {
       groupId,
       userId,
@@ -74,32 +74,35 @@ export class DecisionRepository extends BaseRepository {
       processingTimeMs,
       aiModel,
       aiCost,
-      cacheHit = false
+      cacheHit = false,
     } = input;
 
     // Generate a UUID for the decision
     const decisionId = require('crypto').randomUUID();
 
-    await this.run(`
+    await this.run(
+      `
       INSERT INTO decisions (
         id, tenant_id, group_id, user_id, message_id, content_hash, verdict,
         confidence, reasoning, processing_time_ms, ai_model, ai_cost, cache_hit
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      decisionId,
-      this.tenantId,
-      groupId || null,
-      userId || null,
-      messageId || null,
-      contentHash,
-      verdict,
-      confidence || null,
-      reasoning ? JSON.stringify(reasoning) : null,
-      processingTimeMs || null,
-      aiModel || null,
-      aiCost || null,
-      cacheHit ? 1 : 0
-    ]);
+    `,
+      [
+        decisionId,
+        this.tenantId,
+        groupId || null,
+        userId || null,
+        messageId || null,
+        contentHash,
+        verdict,
+        confidence || null,
+        reasoning ? JSON.stringify(reasoning) : null,
+        processingTimeMs || null,
+        aiModel || null,
+        aiCost || null,
+        cacheHit ? 1 : 0,
+      ]
+    );
 
     const decision = await this.getDecisionById(decisionId);
     if (!decision) {
@@ -115,8 +118,9 @@ export class DecisionRepository extends BaseRepository {
    */
   async getDecisionById(id: string): Promise<Decision | null> {
     this.validateTenantAccess();
-    
-    const results = await this.query<Decision>(`
+
+    const results = await this.query<Decision>(
+      `
       SELECT 
         id, tenant_id as tenantId, group_id as groupId, user_id as userId,
         message_id as messageId, content_hash as contentHash, verdict,
@@ -125,7 +129,9 @@ export class DecisionRepository extends BaseRepository {
         created_at as createdAt
       FROM decisions 
       WHERE id = ? AND tenant_id = ?
-    `, [id, this.tenantId]);
+    `,
+      [id, this.tenantId]
+    );
 
     const decision = results[0];
     if (decision) {
@@ -148,8 +154,9 @@ export class DecisionRepository extends BaseRepository {
    */
   async findByContentHash(contentHash: string, maxAgeHours: number = 24): Promise<Decision | null> {
     this.validateTenantAccess();
-    
-    const results = await this.query<Decision>(`
+
+    const results = await this.query<Decision>(
+      `
       SELECT 
         id, tenant_id as tenantId, group_id as groupId, user_id as userId,
         message_id as messageId, content_hash as contentHash, verdict,
@@ -161,7 +168,9 @@ export class DecisionRepository extends BaseRepository {
         AND created_at > datetime('now', '-${maxAgeHours} hours')
       ORDER BY created_at DESC
       LIMIT 1
-    `, [contentHash, this.tenantId]);
+    `,
+      [contentHash, this.tenantId]
+    );
 
     const decision = results[0];
     if (decision) {
@@ -181,19 +190,21 @@ export class DecisionRepository extends BaseRepository {
   /**
    * List decisions with filtering
    */
-  async listDecisions(options: {
-    groupId?: string;
-    userId?: string;
-    verdict?: string;
-    limit?: number;
-    offset?: number;
-    startDate?: string;
-    endDate?: string;
-  } = {}): Promise<Decision[]> {
+  async listDecisions(
+    options: {
+      groupId?: string;
+      userId?: string;
+      verdict?: string;
+      limit?: number;
+      offset?: number;
+      startDate?: string;
+      endDate?: string;
+    } = {}
+  ): Promise<Decision[]> {
     this.validateTenantAccess();
-    
+
     const { groupId, userId, verdict, limit = 100, offset = 0, startDate, endDate } = options;
-    
+
     let sql = `
       SELECT 
         id, tenant_id as tenantId, group_id as groupId, user_id as userId,
@@ -235,7 +246,7 @@ export class DecisionRepository extends BaseRepository {
     params.push(limit, offset);
 
     const decisions = await this.query<Decision>(sql, params);
-    
+
     // Parse JSON fields
     return decisions.map(decision => {
       if (decision.reasoning) {
@@ -259,10 +270,20 @@ export class DecisionRepository extends BaseRepository {
     // Generate a UUID for the action
     const actionId = require('crypto').randomUUID();
 
-    await this.run(`
+    await this.run(
+      `
       INSERT INTO actions (id, decision_id, action_type, action_data, success, error_message)
       VALUES (?, ?, ?, ?, ?, ?)
-    `, [actionId, decisionId, actionType, JSON.stringify(actionData), success ? 1 : 0, errorMessage || null]);
+    `,
+      [
+        actionId,
+        decisionId,
+        actionType,
+        JSON.stringify(actionData),
+        success ? 1 : 0,
+        errorMessage || null,
+      ]
+    );
 
     const action = await this.getActionById(actionId);
     if (!action) {
@@ -277,14 +298,17 @@ export class DecisionRepository extends BaseRepository {
    * Get action by ID
    */
   async getActionById(id: string): Promise<Action | null> {
-    const results = await this.query<Action>(`
+    const results = await this.query<Action>(
+      `
       SELECT 
         id, decision_id as decisionId, action_type as actionType,
         action_data as actionData, executed_at as executedAt,
         success, error_message as errorMessage
       FROM actions 
       WHERE id = ?
-    `, [id]);
+    `,
+      [id]
+    );
 
     const action = results[0];
     if (action) {
@@ -303,7 +327,8 @@ export class DecisionRepository extends BaseRepository {
    * Get actions for a decision
    */
   async getActionsByDecisionId(decisionId: string): Promise<Action[]> {
-    const actions = await this.query<Action>(`
+    const actions = await this.query<Action>(
+      `
       SELECT 
         id, decision_id as decisionId, action_type as actionType,
         action_data as actionData, executed_at as executedAt,
@@ -311,7 +336,9 @@ export class DecisionRepository extends BaseRepository {
       FROM actions 
       WHERE decision_id = ?
       ORDER BY executed_at ASC
-    `, [decisionId]);
+    `,
+      [decisionId]
+    );
 
     return actions.map(action => {
       try {
@@ -327,11 +354,13 @@ export class DecisionRepository extends BaseRepository {
   /**
    * Get decision statistics
    */
-  async getDecisionStats(options: {
-    groupId?: string;
-    startDate?: string;
-    endDate?: string;
-  } = {}): Promise<{
+  async getDecisionStats(
+    options: {
+      groupId?: string;
+      startDate?: string;
+      endDate?: string;
+    } = {}
+  ): Promise<{
     total: number;
     byVerdict: Record<string, number>;
     avgProcessingTime: number;
@@ -339,9 +368,9 @@ export class DecisionRepository extends BaseRepository {
     totalCost: number;
   }> {
     this.validateTenantAccess();
-    
+
     const { groupId, startDate, endDate } = options;
-    
+
     let whereClause = 'WHERE tenant_id = ?';
     const params: any[] = [this.tenantId];
 
@@ -362,11 +391,26 @@ export class DecisionRepository extends BaseRepository {
 
     // Get overall stats
     const [totalResult, verdictResult, avgTimeResult, cacheResult, costResult] = await Promise.all([
-      this.query<{ count: number }>(`SELECT COUNT(*) as count FROM decisions ${whereClause}`, params),
-      this.query<{ verdict: string; count: number }>(`SELECT verdict, COUNT(*) as count FROM decisions ${whereClause} GROUP BY verdict`, params),
-      this.query<{ avg_time: number }>(`SELECT AVG(processing_time_ms) as avg_time FROM decisions ${whereClause} AND processing_time_ms IS NOT NULL`, params),
-      this.query<{ cache_hits: number; total: number }>(`SELECT SUM(cache_hit) as cache_hits, COUNT(*) as total FROM decisions ${whereClause}`, params),
-      this.query<{ total_cost: number }>(`SELECT SUM(ai_cost) as total_cost FROM decisions ${whereClause} AND ai_cost IS NOT NULL`, params)
+      this.query<{ count: number }>(
+        `SELECT COUNT(*) as count FROM decisions ${whereClause}`,
+        params
+      ),
+      this.query<{ verdict: string; count: number }>(
+        `SELECT verdict, COUNT(*) as count FROM decisions ${whereClause} GROUP BY verdict`,
+        params
+      ),
+      this.query<{ avg_time: number }>(
+        `SELECT AVG(processing_time_ms) as avg_time FROM decisions ${whereClause} AND processing_time_ms IS NOT NULL`,
+        params
+      ),
+      this.query<{ cache_hits: number; total: number }>(
+        `SELECT SUM(cache_hit) as cache_hits, COUNT(*) as total FROM decisions ${whereClause}`,
+        params
+      ),
+      this.query<{ total_cost: number }>(
+        `SELECT SUM(ai_cost) as total_cost FROM decisions ${whereClause} AND ai_cost IS NOT NULL`,
+        params
+      ),
     ]);
 
     const byVerdict: Record<string, number> = {};
@@ -375,14 +419,15 @@ export class DecisionRepository extends BaseRepository {
     }
 
     const cacheStats = cacheResult[0];
-    const cacheHitRate = cacheStats?.total > 0 ? (cacheStats.cache_hits || 0) / cacheStats.total : 0;
+    const cacheHitRate =
+      cacheStats?.total > 0 ? (cacheStats.cache_hits || 0) / cacheStats.total : 0;
 
     return {
       total: totalResult[0]?.count || 0,
       byVerdict,
       avgProcessingTime: avgTimeResult[0]?.avg_time || 0,
       cacheHitRate,
-      totalCost: costResult[0]?.total_cost || 0
+      totalCost: costResult[0]?.total_cost || 0,
     };
   }
 }

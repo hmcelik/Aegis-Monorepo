@@ -5,26 +5,28 @@ const mockDb = {
   all: vi.fn(),
   get: vi.fn(),
   run: vi.fn(),
-  exec: vi.fn()
+  exec: vi.fn(),
 };
 
 const mockDatabaseManager = vi.fn(() => mockDb);
 
 // Mock the shared modules
 vi.mock('@telegram-moderator/shared/src/db/index', () => ({
-  DatabaseManager: mockDatabaseManager
+  DatabaseManager: mockDatabaseManager,
 }));
 
 vi.mock('@telegram-moderator/shared/src/services/logger', () => ({
   logger: {
     info: vi.fn(),
     error: vi.fn(),
-    debug: vi.fn()
-  }
+    debug: vi.fn(),
+  },
 }));
 
 // Now import the modules after mocking - fix import path
-const { UsageRollupService, createUsageRollupService, runDailyRollup } = await import('../../apps/worker/src/jobs/usageRollup.ts');
+const { UsageRollupService, createUsageRollupService, runDailyRollup } = await import(
+  '../../apps/worker/src/jobs/usageRollup.ts'
+);
 
 describe('UsageRollupService', () => {
   let service;
@@ -40,10 +42,7 @@ describe('UsageRollupService', () => {
 
   describe('performDailyRollup', () => {
     it('should process rollup for all tenants', async () => {
-      const mockTenants = [
-        { id: 'tenant1' },
-        { id: 'tenant2' }
-      ];
+      const mockTenants = [{ id: 'tenant1' }, { id: 'tenant2' }];
 
       const mockUsageData = {
         tenant_id: 'tenant1',
@@ -52,7 +51,7 @@ describe('UsageRollupService', () => {
         ai_cost: 2.5,
         cache_hits: 30,
         cache_misses: 20,
-        avg_processing_time_ms: 150
+        avg_processing_time_ms: 150,
       };
 
       // Mock database responses
@@ -61,7 +60,7 @@ describe('UsageRollupService', () => {
         .mockResolvedValueOnce({ count: 10 }) // Has data for tenant1
         .mockResolvedValueOnce(mockUsageData) // Usage data for tenant1
         .mockResolvedValueOnce({ count: 0 }); // No data for tenant2
-      
+
       mockDb.run.mockResolvedValue({ changes: 1 });
 
       const targetDate = new Date('2025-09-08');
@@ -81,12 +80,14 @@ describe('UsageRollupService', () => {
       mockDb.all.mockRejectedValue(new Error('Database connection failed'));
 
       const targetDate = new Date('2025-09-08');
-      await expect(service.performDailyRollup(targetDate)).rejects.toThrow('Database connection failed');
+      await expect(service.performDailyRollup(targetDate)).rejects.toThrow(
+        'Database connection failed'
+      );
     });
 
     it('should skip tenants with no data', async () => {
       const mockTenants = [{ id: 'tenant1' }];
-      
+
       mockDb.all.mockResolvedValue(mockTenants);
       mockDb.get.mockResolvedValue({ count: 0 }); // No data
 
@@ -112,18 +113,19 @@ describe('UsageRollupService', () => {
           aiCost: 2.5,
           cacheHits: 30,
           cacheMisses: 20,
-          avgProcessingTimeMs: 150
-        }
+          avgProcessingTimeMs: 150,
+        },
       ];
 
       mockDb.all.mockResolvedValue(mockRollups);
 
       const result = await service.getDailyRollups('tenant1', '2025-09-01', '2025-09-07');
 
-      expect(mockDb.all).toHaveBeenCalledWith(
-        expect.stringContaining('FROM daily_usage_rollups'),
-        ['tenant1', '2025-09-01', '2025-09-07']
-      );
+      expect(mockDb.all).toHaveBeenCalledWith(expect.stringContaining('FROM daily_usage_rollups'), [
+        'tenant1',
+        '2025-09-01',
+        '2025-09-07',
+      ]);
       expect(result).toEqual(mockRollups);
     });
   });
@@ -136,7 +138,7 @@ describe('UsageRollupService', () => {
         total_cost: 25.0,
         total_cache_hits: 300,
         total_cache_misses: 200,
-        avg_processing_time: 140
+        avg_processing_time: 140,
       };
 
       mockDb.get.mockResolvedValue(mockAggregatedData);
@@ -148,7 +150,7 @@ describe('UsageRollupService', () => {
         totalAICalls: 500,
         totalCost: 25.0,
         cacheHitRate: 0.6, // 300 / (300 + 200)
-        avgProcessingTime: 140
+        avgProcessingTime: 140,
       });
     });
 
@@ -162,7 +164,7 @@ describe('UsageRollupService', () => {
         totalAICalls: 0,
         totalCost: 0,
         cacheHitRate: 0,
-        avgProcessingTime: 0
+        avgProcessingTime: 0,
       });
     });
 
@@ -173,7 +175,7 @@ describe('UsageRollupService', () => {
         total_cost: 25.0,
         total_cache_hits: 0,
         total_cache_misses: 0,
-        avg_processing_time: 140
+        avg_processing_time: 140,
       };
 
       mockDb.get.mockResolvedValue(mockAggregatedData);
@@ -215,7 +217,7 @@ describe('Edge Cases and Data Validation', () => {
       all: vi.fn(),
       get: vi.fn(),
       run: vi.fn(),
-      exec: vi.fn()
+      exec: vi.fn(),
     };
 
     mockDatabaseManager.mockImplementation(() => mockDb);
@@ -225,7 +227,7 @@ describe('Edge Cases and Data Validation', () => {
   it('should handle date boundary correctly', async () => {
     const targetDate = new Date('2025-09-08T23:59:59');
     const mockTenants = [{ id: 'tenant1' }];
-    
+
     mockDb.all.mockResolvedValue(mockTenants);
     mockDb.get.mockResolvedValue({ count: 0 });
 
@@ -248,7 +250,7 @@ describe('Performance and Concurrency', () => {
       all: vi.fn(),
       get: vi.fn(),
       run: vi.fn(),
-      exec: vi.fn()
+      exec: vi.fn(),
     };
 
     mockDatabaseManager.mockImplementation(() => mockDb);
@@ -257,7 +259,7 @@ describe('Performance and Concurrency', () => {
 
   it('should handle multiple tenants efficiently', async () => {
     const mockTenants = Array.from({ length: 100 }, (_, i) => ({ id: `tenant${i}` }));
-    
+
     mockDb.all.mockResolvedValue(mockTenants);
     mockDb.get.mockResolvedValue({ count: 0 }); // No data for any tenant
 
@@ -270,11 +272,7 @@ describe('Performance and Concurrency', () => {
   });
 
   it('should handle partial failures gracefully', async () => {
-    const mockTenants = [
-      { id: 'tenant1' },
-      { id: 'tenant2' },
-      { id: 'tenant3' }
-    ];
+    const mockTenants = [{ id: 'tenant1' }, { id: 'tenant2' }, { id: 'tenant3' }];
 
     mockDb.all.mockResolvedValue(mockTenants);
     mockDb.get

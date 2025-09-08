@@ -2,11 +2,11 @@ import React from 'react';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 
 // Enhanced Loading Component
-export const LoadingCard = ({ title = "Loading...", subtitle = null, size = "medium" }) => {
+export const LoadingCard = ({ title = 'Loading...', subtitle = null, size = 'medium' }) => {
   const sizeClasses = {
-    small: "p-4",
-    medium: "p-6",
-    large: "p-8"
+    small: 'p-4',
+    medium: 'p-6',
+    large: 'p-8',
   };
 
   return (
@@ -19,22 +19,20 @@ export const LoadingCard = ({ title = "Loading...", subtitle = null, size = "med
 };
 
 // Enhanced Error Component
-export const ErrorCard = ({ 
-  title = "Something went wrong", 
-  message, 
-  onRetry, 
-  retryText = "Try Again",
-  icon = <AlertCircle size={24} />
+export const ErrorCard = ({
+  title = 'Something went wrong',
+  message,
+  onRetry,
+  retryText = 'Try Again',
+  icon = <AlertCircle size={24} />,
 }) => {
   return (
     <div className="bg-white rounded-lg border border-red-200 p-6 text-center">
-      <div className="flex justify-center mb-4 text-red-500">
-        {icon}
-      </div>
+      <div className="flex justify-center mb-4 text-red-500">{icon}</div>
       <h3 className="text-lg font-medium text-red-900 mb-2">{title}</h3>
       {message && <p className="text-sm text-red-700 mb-4">{message}</p>}
       {onRetry && (
-        <button 
+        <button
           onClick={onRetry}
           className="inline-flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
         >
@@ -47,12 +45,12 @@ export const ErrorCard = ({
 };
 
 // Empty State Component
-export const EmptyState = ({ 
-  icon = "📭", 
-  title = "No data found", 
-  description, 
+export const EmptyState = ({
+  icon = '📭',
+  title = 'No data found',
+  description,
   action,
-  actionText = "Get Started"
+  actionText = 'Get Started',
 }) => {
   return (
     <div className="text-center py-12 px-6">
@@ -60,7 +58,7 @@ export const EmptyState = ({
       <h3 className="text-lg font-medium text-gray-900 mb-2">{title}</h3>
       {description && <p className="text-gray-600 mb-6 max-w-md mx-auto">{description}</p>}
       {action && (
-        <button 
+        <button
           onClick={action}
           className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
         >
@@ -95,7 +93,7 @@ export const SkeletonCard = ({ count = 3 }) => {
 };
 
 // Success/Info Toast replacement
-export const StatusBanner = ({ type = "info", message, onClose, autoClose = true }) => {
+export const StatusBanner = ({ type = 'info', message, onClose, autoClose = true }) => {
   React.useEffect(() => {
     if (autoClose) {
       const timer = setTimeout(onClose, 4000);
@@ -104,20 +102,19 @@ export const StatusBanner = ({ type = "info", message, onClose, autoClose = true
   }, [autoClose, onClose]);
 
   const typeClasses = {
-    info: "bg-blue-50 border-blue-200 text-blue-800",
-    success: "bg-green-50 border-green-200 text-green-800",
-    warning: "bg-yellow-50 border-yellow-200 text-yellow-800",
-    error: "bg-red-50 border-red-200 text-red-800"
+    info: 'bg-blue-50 border-blue-200 text-blue-800',
+    success: 'bg-green-50 border-green-200 text-green-800',
+    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+    error: 'bg-red-50 border-red-200 text-red-800',
   };
 
   return (
-    <div className={`fixed top-4 right-4 max-w-sm border rounded-lg p-4 shadow-lg z-50 ${typeClasses[type]}`}>
+    <div
+      className={`fixed top-4 right-4 max-w-sm border rounded-lg p-4 shadow-lg z-50 ${typeClasses[type]}`}
+    >
       <div className="flex items-center justify-between">
         <span className="text-sm">{message}</span>
-        <button 
-          onClick={onClose}
-          className="ml-3 text-lg leading-none hover:opacity-70"
-        >
+        <button onClick={onClose} className="ml-3 text-lg leading-none hover:opacity-70">
           ×
         </button>
       </div>

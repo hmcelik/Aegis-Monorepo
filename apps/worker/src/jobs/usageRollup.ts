@@ -30,7 +30,7 @@ export class UsageRollupService {
 
     logger.info('Starting daily usage rollup', {
       date: dateStr,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     try {
@@ -47,7 +47,7 @@ export class UsageRollupService {
             logger.debug('Processed rollup for tenant', {
               tenantId: tenant.id,
               date: dateStr,
-              metrics
+              metrics,
             });
           } else {
             skippedTenants++;
@@ -56,7 +56,7 @@ export class UsageRollupService {
           logger.error('Failed to process rollup for tenant', {
             tenantId: tenant.id,
             date: dateStr,
-            error: error instanceof Error ? error.message : String(error)
+            error: error instanceof Error ? error.message : String(error),
           });
         }
       }
@@ -65,13 +65,12 @@ export class UsageRollupService {
         date: dateStr,
         processedTenants,
         skippedTenants,
-        totalTenants: tenants.length
+        totalTenants: tenants.length,
       });
-
     } catch (error) {
       logger.error('Daily usage rollup failed', {
         date: dateStr,
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -89,7 +88,10 @@ export class UsageRollupService {
   /**
    * Calculate daily metrics for a specific tenant and date
    */
-  private async calculateDailyMetrics(tenantId: string, date: string): Promise<RollupMetrics | null> {
+  private async calculateDailyMetrics(
+    tenantId: string,
+    date: string
+  ): Promise<RollupMetrics | null> {
     const startOfDay = `${date} 00:00:00`;
     const endOfDay = `${date} 23:59:59`;
 
@@ -101,7 +103,7 @@ export class UsageRollupService {
         AND period_start >= ? 
         AND period_end <= ?
     `;
-    
+
     const hasData = await this.db.get(hasDataQuery, [tenantId, startOfDay, endOfDay]);
     if (!hasData || hasData.count === 0) {
       return null; // No data to rollup
@@ -125,7 +127,7 @@ export class UsageRollupService {
     `;
 
     const result = await this.db.get(metricsQuery, [tenantId, startOfDay, endOfDay]);
-    
+
     if (!result) {
       return null;
     }
@@ -138,7 +140,7 @@ export class UsageRollupService {
       aiCost: result.ai_cost || 0,
       cacheHits: result.cache_hits || 0,
       cacheMisses: result.cache_misses || 0,
-      avgProcessingTimeMs: result.avg_processing_time_ms || 0
+      avgProcessingTimeMs: result.avg_processing_time_ms || 0,
     };
   }
 
@@ -168,7 +170,7 @@ export class UsageRollupService {
       metrics.aiCost,
       metrics.cacheHits,
       metrics.cacheMisses,
-      metrics.avgProcessingTimeMs
+      metrics.avgProcessingTimeMs,
     ]);
 
     logger.debug('Upserted daily rollup', { metrics });
@@ -177,7 +179,11 @@ export class UsageRollupService {
   /**
    * Get daily rollup data for analytics dashboard
    */
-  async getDailyRollups(tenantId: string, startDate: string, endDate: string): Promise<RollupMetrics[]> {
+  async getDailyRollups(
+    tenantId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<RollupMetrics[]> {
     const query = `
       SELECT 
         tenant_id as tenantId,
@@ -202,7 +208,11 @@ export class UsageRollupService {
   /**
    * Get aggregated metrics for a tenant over a period
    */
-  async getAggregatedMetrics(tenantId: string, startDate: string, endDate: string): Promise<{
+  async getAggregatedMetrics(
+    tenantId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<{
     totalMessages: number;
     totalAICalls: number;
     totalCost: number;
@@ -224,26 +234,27 @@ export class UsageRollupService {
     `;
 
     const result = await this.db.get(query, [tenantId, startDate, endDate]);
-    
+
     if (!result) {
       return {
         totalMessages: 0,
         totalAICalls: 0,
         totalCost: 0,
         cacheHitRate: 0,
-        avgProcessingTime: 0
+        avgProcessingTime: 0,
       };
     }
 
     const totalCacheRequests = (result.total_cache_hits || 0) + (result.total_cache_misses || 0);
-    const cacheHitRate = totalCacheRequests > 0 ? (result.total_cache_hits || 0) / totalCacheRequests : 0;
+    const cacheHitRate =
+      totalCacheRequests > 0 ? (result.total_cache_hits || 0) / totalCacheRequests : 0;
 
     return {
       totalMessages: result.total_messages || 0,
       totalAICalls: result.total_ai_calls || 0,
       totalCost: result.total_cost || 0,
       cacheHitRate: Math.round(cacheHitRate * 100) / 100, // Round to 2 decimal places
-      avgProcessingTime: result.avg_processing_time || 0
+      avgProcessingTime: result.avg_processing_time || 0,
     };
   }
 
@@ -266,7 +277,7 @@ export class UsageRollupService {
     logger.info('Cleaned up old usage metrics', {
       retentionDays,
       cutoffDate: cutoffStr,
-      deletedCount
+      deletedCount,
     });
 
     return deletedCount;
@@ -278,7 +289,9 @@ export class UsageRollupService {
  */
 export async function createUsageRollupService(): Promise<UsageRollupService> {
   // Import the database service dynamically to avoid circular dependencies
-  const { initializeDatabase } = await import('@telegram-moderator/shared/src/services/database.js');
+  const { initializeDatabase } = await import(
+    '@telegram-moderator/shared/src/services/database.js'
+  );
   const db = await initializeDatabase();
   return new UsageRollupService(db);
 }

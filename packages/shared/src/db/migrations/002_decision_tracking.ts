@@ -7,7 +7,7 @@ export const migration_002_decision_tracking: Migration = {
   id: '002',
   name: 'decision_tracking',
   dependencies: ['001'],
-  
+
   async up(db: DatabaseConnection): Promise<void> {
     // Decisions table - AI/Rule-based moderation decisions
     await db.exec(`
@@ -56,5 +56,5 @@ export const migration_002_decision_tracking: Migration = {
   async down(db: DatabaseConnection): Promise<void> {
     await db.exec('DROP TABLE IF EXISTS actions');
     await db.exec('DROP TABLE IF EXISTS decisions');
-  }
+  },
 };

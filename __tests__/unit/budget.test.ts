@@ -24,18 +24,18 @@ describe('BudgetEnforcer', () => {
           tenantId: 'tenant-1',
           monthlyLimit: 100.0,
           degradeMode: 'strict_rules',
-          isExhausted: false
+          isExhausted: false,
         },
         usage: {
           totalSpent: 50.0,
           tokenCount: 1000,
-          apiCalls: 25
-        }
+          apiCalls: 25,
+        },
       };
 
       (fetch as any).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockBudgetResponse
+        json: async () => mockBudgetResponse,
       });
 
       const result = await budgetEnforcer.checkBudget('tenant-1');
@@ -51,18 +51,18 @@ describe('BudgetEnforcer', () => {
           tenantId: 'tenant-1',
           monthlyLimit: 100.0,
           degradeMode: 'strict_rules',
-          isExhausted: true
+          isExhausted: true,
         },
         usage: {
           totalSpent: 100.0,
           tokenCount: 2000,
-          apiCalls: 50
-        }
+          apiCalls: 50,
+        },
       };
 
       (fetch as any).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockBudgetResponse
+        json: async () => mockBudgetResponse,
       });
 
       const result = await budgetEnforcer.checkBudget('tenant-1');
@@ -85,7 +85,7 @@ describe('BudgetEnforcer', () => {
     it('should handle 404 response for unknown tenant', async () => {
       (fetch as any).mockResolvedValueOnce({
         ok: false,
-        status: 404
+        status: 404,
       });
 
       const result = await budgetEnforcer.checkBudget('unknown-tenant');
@@ -100,12 +100,12 @@ describe('BudgetEnforcer', () => {
         tokens: 150,
         cost: 0.003,
         model: 'gpt-3.5-turbo',
-        operation: 'moderation'
+        operation: 'moderation',
       };
 
       (fetch as any).mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ success: true })
+        json: async () => ({ success: true }),
       });
 
       await expect(budgetEnforcer.recordUsage('tenant-1', usage)).resolves.not.toThrow();
@@ -115,9 +115,9 @@ describe('BudgetEnforcer', () => {
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
           }),
-          body: JSON.stringify(usage)
+          body: JSON.stringify(usage),
         })
       );
     });
@@ -129,7 +129,7 @@ describe('BudgetEnforcer', () => {
         tokens: 150,
         cost: 0.003,
         model: 'gpt-3.5-turbo',
-        operation: 'moderation'
+        operation: 'moderation',
       };
 
       await expect(budgetEnforcer.recordUsage('tenant-1', usage)).resolves.not.toThrow();
@@ -139,12 +139,12 @@ describe('BudgetEnforcer', () => {
       // First, populate cache
       const mockBudgetResponse = {
         budget: { monthlyLimit: 100.0, degradeMode: 'strict_rules' },
-        usage: { totalSpent: 50.0 }
+        usage: { totalSpent: 50.0 },
       };
 
       (fetch as any).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockBudgetResponse
+        json: async () => mockBudgetResponse,
       });
 
       await budgetEnforcer.checkBudget('tenant-1');
@@ -153,20 +153,20 @@ describe('BudgetEnforcer', () => {
       // Record usage (should invalidate cache)
       (fetch as any).mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ success: true })
+        json: async () => ({ success: true }),
       });
 
       await budgetEnforcer.recordUsage('tenant-1', {
         tokens: 100,
         cost: 0.002,
         model: 'gpt-3.5-turbo',
-        operation: 'moderation'
+        operation: 'moderation',
       });
 
       // Next budget check should call API again (cache invalidated)
       (fetch as any).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockBudgetResponse
+        json: async () => mockBudgetResponse,
       });
 
       await budgetEnforcer.checkBudget('tenant-1');
@@ -179,7 +179,7 @@ describe('BudgetEnforcer', () => {
       const messageContext = {
         hasLinks: true,
         isNewUser: false,
-        messageLength: 100
+        messageLength: 100,
       };
 
       const shouldDegrade = budgetEnforcer.shouldApplyDegradeMode(
@@ -194,7 +194,7 @@ describe('BudgetEnforcer', () => {
       const messageContext = {
         hasLinks: true,
         isNewUser: true,
-        messageLength: 50
+        messageLength: 50,
       };
 
       const shouldDegrade = budgetEnforcer.shouldApplyDegradeMode(
@@ -209,7 +209,7 @@ describe('BudgetEnforcer', () => {
       const messageContext = {
         hasLinks: true,
         isNewUser: false,
-        messageLength: 50
+        messageLength: 50,
       };
 
       const shouldDegrade = budgetEnforcer.shouldApplyDegradeMode(
@@ -224,7 +224,7 @@ describe('BudgetEnforcer', () => {
       const messageContext = {
         hasLinks: false,
         isNewUser: false,
-        messageLength: 20
+        messageLength: 20,
       };
 
       const shouldDegrade = budgetEnforcer.shouldApplyDegradeMode(
@@ -241,22 +241,22 @@ describe('BudgetEnforcer', () => {
       const mockBudgetResponse = {
         budget: {
           monthlyLimit: 100.0,
-          degradeMode: 'strict_rules'
+          degradeMode: 'strict_rules',
         },
         usage: {
-          totalSpent: 30.0
-        }
+          totalSpent: 30.0,
+        },
       };
 
       (fetch as any).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockBudgetResponse
+        json: async () => mockBudgetResponse,
       });
 
       const messageContext = {
         hasLinks: false,
         isNewUser: false,
-        messageLength: 50
+        messageLength: 50,
       };
 
       const strategy = await budgetEnforcer.getProcessingStrategy('tenant-1', messageContext);
@@ -270,22 +270,22 @@ describe('BudgetEnforcer', () => {
       const mockBudgetResponse = {
         budget: {
           monthlyLimit: 100.0,
-          degradeMode: 'strict_rules'
+          degradeMode: 'strict_rules',
         },
         usage: {
-          totalSpent: 100.0
-        }
+          totalSpent: 100.0,
+        },
       };
 
       (fetch as any).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockBudgetResponse
+        json: async () => mockBudgetResponse,
       });
 
       const messageContext = {
         hasLinks: false,
         isNewUser: false,
-        messageLength: 50
+        messageLength: 50,
       };
 
       const strategy = await budgetEnforcer.getProcessingStrategy('tenant-1', messageContext);
@@ -299,22 +299,22 @@ describe('BudgetEnforcer', () => {
       const mockBudgetResponse = {
         budget: {
           monthlyLimit: 100.0,
-          degradeMode: 'link_blocks'
+          degradeMode: 'link_blocks',
         },
         usage: {
-          totalSpent: 100.0
-        }
+          totalSpent: 100.0,
+        },
       };
 
       (fetch as any).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockBudgetResponse
+        json: async () => mockBudgetResponse,
       });
 
       const messageContext = {
         hasLinks: true,
         isNewUser: false, // Established user
-        messageLength: 50
+        messageLength: 50,
       };
 
       const strategy = await budgetEnforcer.getProcessingStrategy('tenant-1', messageContext);
@@ -329,12 +329,12 @@ describe('BudgetEnforcer', () => {
     it('should cache budget information', async () => {
       const mockBudgetResponse = {
         budget: { monthlyLimit: 100.0, degradeMode: 'strict_rules' },
-        usage: { totalSpent: 50.0 }
+        usage: { totalSpent: 50.0 },
       };
 
       (fetch as any).mockResolvedValue({
         ok: true,
-        json: async () => mockBudgetResponse
+        json: async () => mockBudgetResponse,
       });
 
       // First call
@@ -348,7 +348,7 @@ describe('BudgetEnforcer', () => {
 
     it('should provide cache statistics', () => {
       const stats = budgetEnforcer.getCacheStats();
-      
+
       expect(stats).toHaveProperty('size');
       expect(stats).toHaveProperty('hits');
       expect(stats).toHaveProperty('misses');
@@ -358,12 +358,12 @@ describe('BudgetEnforcer', () => {
     it('should clear cache for specific tenant', async () => {
       const mockBudgetResponse = {
         budget: { monthlyLimit: 100.0, degradeMode: 'strict_rules' },
-        usage: { totalSpent: 50.0 }
+        usage: { totalSpent: 50.0 },
       };
 
       (fetch as any).mockResolvedValue({
         ok: true,
-        json: async () => mockBudgetResponse
+        json: async () => mockBudgetResponse,
       });
 
       // Populate cache
@@ -381,10 +381,8 @@ describe('BudgetEnforcer', () => {
 
   describe('Error Handling', () => {
     it('should handle network timeouts gracefully', async () => {
-      (fetch as any).mockImplementationOnce(() => 
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout')), 100)
-        )
+      (fetch as any).mockImplementationOnce(
+        () => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 100))
       );
 
       const result = await budgetEnforcer.checkBudget('tenant-1');
@@ -395,7 +393,7 @@ describe('BudgetEnforcer', () => {
     it('should handle malformed API responses', async () => {
       (fetch as any).mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ invalid: 'response' })
+        json: async () => ({ invalid: 'response' }),
       });
 
       const result = await budgetEnforcer.checkBudget('tenant-1');
@@ -405,7 +403,7 @@ describe('BudgetEnforcer', () => {
     it('should handle API server errors', async () => {
       (fetch as any).mockResolvedValueOnce({
         ok: false,
-        status: 500
+        status: 500,
       });
 
       const result = await budgetEnforcer.checkBudget('tenant-1');

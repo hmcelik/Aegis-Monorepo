@@ -1,10 +1,13 @@
 {
   "name": "@telegram-moderator/shared",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "main": "index.js",
-  "exports": { ".": "./index.js", "./*": "./*" },
+  "exports": {
+    ".": "./index.js",
+    "./*": "./*"
+  },
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
@@ -13,7 +16,7 @@
   "dependencies": {
     "@telegram-moderator/normalizer": "workspace:*",
     "@telegram-moderator/types": "workspace:*",
-    "axios": "^1.10.0",
+    "axios": "^1.11.0",
     "bullmq": "^5.14.0",
     "dotenv": "^17.2.0",
     "ioredis": "^5.4.1",
@@ -31,6 +34,8 @@
     "node-telegram-bot-api": "^0.66.0"
   },
   "peerDependenciesMeta": {
-    "node-telegram-bot-api": { "optional": true }
+    "node-telegram-bot-api": {
+      "optional": true
+    }
   }
 }

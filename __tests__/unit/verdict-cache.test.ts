@@ -30,7 +30,7 @@ describe('AEG-302: Verdict Cache Implementation', () => {
       const text1 = 'Hello World!';
       const text2 = 'hello world!'; // Different case
       const text3 = 'Hello   World!'; // Extra spaces
-      
+
       const verdict: PolicyVerdict = {
         verdict: 'allow',
         reason: 'Clean content',
@@ -39,11 +39,11 @@ describe('AEG-302: Verdict Cache Implementation', () => {
       };
 
       cache.set(text1, verdict);
-      
+
       // Should get cache hit for normalized equivalent text
       const result2 = cache.get(text2);
       const result3 = cache.get(text3);
-      
+
       expect(result2).toBeTruthy();
       expect(result3).toBeTruthy();
       expect(result2?.verdict).toBe('allow');
@@ -53,7 +53,7 @@ describe('AEG-302: Verdict Cache Implementation', () => {
     it('should generate different hashes for different content', () => {
       const text1 = 'Hello World!';
       const text2 = 'Goodbye World!';
-      
+
       const verdict1: PolicyVerdict = {
         verdict: 'allow',
         reason: 'Clean content',
@@ -70,10 +70,10 @@ describe('AEG-302: Verdict Cache Implementation', () => {
 
       cache.set(text1, verdict1);
       cache.set(text2, verdict2);
-      
+
       const result1 = cache.get(text1);
       const result2 = cache.get(text2);
-      
+
       expect(result1?.verdict).toBe('allow');
       expect(result2?.verdict).toBe('block');
     });
@@ -81,7 +81,7 @@ describe('AEG-302: Verdict Cache Implementation', () => {
     it('should handle URL ordering consistently', () => {
       const text1 = 'Check https://example.com and https://test.com';
       const text2 = 'Check https://test.com and https://example.com'; // Different order
-      
+
       const verdict: PolicyVerdict = {
         verdict: 'review',
         reason: 'Contains URLs',
@@ -90,12 +90,12 @@ describe('AEG-302: Verdict Cache Implementation', () => {
       };
 
       cache.set(text1, verdict);
-      
+
       // Currently, URL ordering matters for cache key generation
       // Different URL order = different cache key = cache miss
       const result = cache.get(text2);
       expect(result).toBeNull(); // Should be null since URLs are in different order
-      
+
       // But same URL order should hit cache
       const result2 = cache.get(text1);
       expect(result2).toBeTruthy();
@@ -119,16 +119,16 @@ describe('AEG-302: Verdict Cache Implementation', () => {
       };
 
       shortTtlCache.set('test message', verdict);
-      
+
       // Should be available immediately
       expect(shortTtlCache.get('test message')).toBeTruthy();
-      
+
       // Wait for expiry
       await new Promise(resolve => setTimeout(resolve, 150));
-      
+
       // Should be expired
       expect(shortTtlCache.get('test message')).toBeNull();
-      
+
       shortTtlCache.destroy();
     });
 
@@ -142,7 +142,7 @@ describe('AEG-302: Verdict Cache Implementation', () => {
 
       // Set with custom TTL
       cache.set('test message', verdict, 10000); // 10 seconds
-      
+
       const result = cache.get('test message');
       expect(result).toBeTruthy();
     });
@@ -187,12 +187,12 @@ describe('AEG-302: Verdict Cache Implementation', () => {
       };
 
       cache.set('test', verdict);
-      
+
       // Multiple hits
       cache.get('test');
       cache.get('test');
       cache.get('test');
-      
+
       const metrics = cache.getMetrics();
       expect(metrics.hitCount).toBe(3);
     });
@@ -221,11 +221,11 @@ describe('AEG-302: Verdict Cache Implementation', () => {
       const metrics = smallCache.getMetrics();
       expect(metrics.totalEntries).toBe(3);
       expect(metrics.evictedCount).toBe(1);
-      
+
       // First entry should be evicted
       expect(smallCache.get('test1')).toBeNull();
       expect(smallCache.get('test4')).toBeTruthy();
-      
+
       smallCache.destroy();
     });
 
@@ -238,7 +238,7 @@ describe('AEG-302: Verdict Cache Implementation', () => {
       };
 
       cache.set('test message', verdict);
-      
+
       const metrics = cache.getMetrics();
       expect(metrics.totalMemoryUsageBytes).toBeGreaterThan(0);
       expect(metrics.averageEntrySize).toBeGreaterThan(0);
@@ -262,15 +262,15 @@ describe('AEG-302: Verdict Cache Implementation', () => {
 
       shortTtlCache.set('test1', verdict);
       shortTtlCache.set('test2', verdict);
-      
+
       expect(shortTtlCache.getMetrics().totalEntries).toBe(2);
-      
+
       // Wait for entries to expire and cleanup to run
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       expect(shortTtlCache.getMetrics().totalEntries).toBe(0);
       expect(shortTtlCache.getMetrics().evictedCount).toBeGreaterThan(0);
-      
+
       shortTtlCache.destroy();
     });
 
@@ -284,7 +284,7 @@ describe('AEG-302: Verdict Cache Implementation', () => {
 
       cache.set('test', verdict);
       expect(cache.getMetrics().totalEntries).toBe(1);
-      
+
       cache.clear();
       expect(cache.getMetrics().totalEntries).toBe(0);
     });
@@ -300,7 +300,7 @@ describe('AEG-302: Verdict Cache Implementation', () => {
       };
 
       cache.updateConfig({ ttlMs: 10000, maxEntries: 200 });
-      
+
       // Verify configuration change by setting entry with new TTL
       const verdict: PolicyVerdict = {
         verdict: 'allow',

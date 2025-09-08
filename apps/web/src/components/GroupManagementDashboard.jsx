@@ -43,7 +43,7 @@ const GroupManagementDashboard = ({ user }) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Try to get groups using JWT token first, fallback to WebApp method
       let response;
       try {
@@ -57,7 +57,9 @@ const GroupManagementDashboard = ({ user }) => {
           console.log('✅ WebApp method successful:', response);
         } catch (webAppError) {
           console.log('❌ WebApp method also failed:', webAppError.message);
-          throw new Error(`Both auth methods failed: JWT(${jwtError.message}), WebApp(${webAppError.message})`);
+          throw new Error(
+            `Both auth methods failed: JWT(${jwtError.message}), WebApp(${webAppError.message})`
+          );
         }
       }
 
@@ -72,11 +74,10 @@ const GroupManagementDashboard = ({ user }) => {
           if (response.data.data && Array.isArray(response.data.data)) {
             groupsData = response.data.data;
           }
-          // Check for legacy format: {groups: [array]}  
+          // Check for legacy format: {groups: [array]}
           else if (response.data.groups && Array.isArray(response.data.groups)) {
             groupsData = response.data.groups;
-          }
-          else {
+          } else {
             console.warn('⚠️ Unexpected groups data format:', response.data);
             groupsData = [];
           }
@@ -86,16 +87,15 @@ const GroupManagementDashboard = ({ user }) => {
       console.log('📊 Final groups data:', { length: groupsData.length, groups: groupsData });
       setGroups(groupsData);
       toast.success(`Loaded ${groupsData.length} groups`);
-      
     } catch (err) {
       console.error('💥 Error loading groups:', err);
       console.error('📄 Error details:', {
         message: err.message,
         response: err.response?.data,
         status: err.response?.status,
-        stack: err.stack
+        stack: err.stack,
       });
-      
+
       // Always ensure groups is an empty array, never undefined
       setGroups([]);
       const errorMessage = `Failed to load groups: ${err.message}`;
@@ -106,29 +106,34 @@ const GroupManagementDashboard = ({ user }) => {
     }
   };
 
-  const loadGroupData = async (groupId, period = selectedPeriod, startDate = customStartDate, endDate = customEndDate) => {
+  const loadGroupData = async (
+    groupId,
+    period = selectedPeriod,
+    startDate = customStartDate,
+    endDate = customEndDate
+  ) => {
     console.log('📊 Loading group data for groupId:', groupId);
     console.log('📊 Using period:', period, 'startDate:', startDate, 'endDate:', endDate);
     console.log('📊 GroupId type:', typeof groupId);
     console.log('📊 GroupId value:', JSON.stringify(groupId));
-    
+
     // Validate groupId
     if (!groupId) {
       console.error('❌ No groupId provided to loadGroupData');
       toast.error('No group ID provided');
       return;
     }
-    
+
     try {
       setStatsLoading(true);
       setSettingsLoading(true);
-      
+
       // Try WebApp version first, then fallback to JWT version
       let statsPromise, settingsPromise;
-      
+
       // Check if we're in Telegram WebApp context
       const isWebApp = window.Telegram?.WebApp?.initData;
-      
+
       if (isWebApp) {
         console.log('🌐 Using WebApp API methods...');
         statsPromise = apiService.groups.getStatsWebApp(groupId, period, startDate, endDate);
@@ -138,11 +143,11 @@ const GroupManagementDashboard = ({ user }) => {
         statsPromise = apiService.groups.getStats(groupId, period, startDate, endDate);
         settingsPromise = apiService.groups.getSettings(groupId);
       }
-      
+
       // Load both stats and settings in parallel
       const [statsResponse, settingsResponse] = await Promise.allSettled([
         statsPromise,
-        settingsPromise
+        settingsPromise,
       ]);
 
       console.log('📊 Raw stats response:', statsResponse);
@@ -151,11 +156,11 @@ const GroupManagementDashboard = ({ user }) => {
       // Handle stats response with better error logging
       if (statsResponse.status === 'fulfilled') {
         console.log('📊 Stats response structure:', JSON.stringify(statsResponse.value, null, 2));
-        
+
         // Extract the actual stats data based on API documentation structure
         let statsData = null;
         let actualStats = null;
-        
+
         // Handle Axios response wrapper structure
         if (statsResponse.value?.data) {
           statsData = statsResponse.value.data;
@@ -164,11 +169,11 @@ const GroupManagementDashboard = ({ user }) => {
           statsData = statsResponse.value;
           console.log('✅ Stats using direct response:', statsData);
         }
-        
+
         // Based on API documentation:
         // WebApp endpoint: { success: true, data: { groupId: "...", period: "...", stats: {...} } }
         // JWT endpoint: { totalMessagesProcessed: 1250, violationsDetected: 45, ... }
-        
+
         if (statsData && statsData.success && statsData.data && statsData.data.stats) {
           // WebApp format: Extract from nested structure
           actualStats = statsData.data.stats;
@@ -181,22 +186,24 @@ const GroupManagementDashboard = ({ user }) => {
           // WebApp format: stats directly under response
           actualStats = statsData.stats;
           console.log('✅ Stats loaded successfully (WebApp direct stats):', actualStats);
-        } else if (statsData && (
-          statsData.totalMessages !== undefined || 
-          statsData.flaggedMessages !== undefined ||
-          statsData.deletedMessages !== undefined ||
-          statsData.mutedUsers !== undefined
-        )) {
+        } else if (
+          statsData &&
+          (statsData.totalMessages !== undefined ||
+            statsData.flaggedMessages !== undefined ||
+            statsData.deletedMessages !== undefined ||
+            statsData.mutedUsers !== undefined)
+        ) {
           // WebApp format: Direct stats data (flat structure)
           // WebApp format: Direct stats data (flat structure)
           actualStats = statsData;
           console.log('✅ Stats loaded successfully (WebApp flat structure):', actualStats);
-        } else if (statsData && (
-          statsData.totalMessagesProcessed !== undefined || 
-          statsData.violationsDetected !== undefined ||
-          statsData.actionsTaken !== undefined ||
-          statsData.deletionsToday !== undefined
-        )) {
+        } else if (
+          statsData &&
+          (statsData.totalMessagesProcessed !== undefined ||
+            statsData.violationsDetected !== undefined ||
+            statsData.actionsTaken !== undefined ||
+            statsData.deletionsToday !== undefined)
+        ) {
           // JWT format: Convert to WebApp format for consistency
           actualStats = {
             totalMessages: statsData.totalMessagesProcessed || 0,
@@ -206,7 +213,7 @@ const GroupManagementDashboard = ({ user }) => {
             kickedUsers: 0, // Not provided by JWT endpoint
             bannedUsers: 0, // Not provided by JWT endpoint
             averageSpamScore: 0, // Not provided by JWT endpoint
-            topViolationTypes: [] // Not provided by JWT endpoint
+            topViolationTypes: [], // Not provided by JWT endpoint
           };
           console.log('✅ Stats loaded successfully (JWT format converted):', actualStats);
           console.log('🔄 Original JWT data:', statsData);
@@ -217,11 +224,11 @@ const GroupManagementDashboard = ({ user }) => {
             hasStats: !!statsData?.stats,
             hasDirectWebAppFields: !!(statsData?.totalMessages || statsData?.flaggedMessages),
             hasJWTFields: !!(statsData?.totalMessagesProcessed || statsData?.violationsDetected),
-            rawData: statsData
+            rawData: statsData,
           });
           actualStats = {};
         }
-        
+
         // Set the final stats
         if (actualStats) {
           setGroupStats(actualStats);
@@ -229,13 +236,18 @@ const GroupManagementDashboard = ({ user }) => {
       } else {
         console.error('❌ Failed to load group stats:', statsResponse.reason);
         setGroupStats({});
-        toast.error(`Failed to load group statistics: ${statsResponse.reason?.message || 'Unknown error'}`);
+        toast.error(
+          `Failed to load group statistics: ${statsResponse.reason?.message || 'Unknown error'}`
+        );
       }
 
       // Handle settings response with better error logging
       if (settingsResponse.status === 'fulfilled') {
-        console.log('⚙️ Settings response structure:', JSON.stringify(settingsResponse.value, null, 2));
-        
+        console.log(
+          '⚙️ Settings response structure:',
+          JSON.stringify(settingsResponse.value, null, 2)
+        );
+
         // Extract the actual settings data from the nested structure
         let settingsData = null;
         if (settingsResponse.value?.data?.data?.settings) {
@@ -251,7 +263,7 @@ const GroupManagementDashboard = ({ user }) => {
           settingsData = settingsResponse.value.data;
           console.log('✅ Settings using entire data object:', settingsData);
         }
-        
+
         if (settingsData) {
           setGroupSettings(settingsData);
           console.log('✅ Settings loaded successfully:', settingsData);
@@ -262,9 +274,10 @@ const GroupManagementDashboard = ({ user }) => {
       } else {
         console.error('❌ Failed to load group settings:', settingsResponse.reason);
         setGroupSettings({});
-        toast.error(`Failed to load group settings: ${settingsResponse.reason?.message || 'Unknown error'}`);
+        toast.error(
+          `Failed to load group settings: ${settingsResponse.reason?.message || 'Unknown error'}`
+        );
       }
-
     } catch (err) {
       console.error('💥 Error loading group data:', err);
       toast.error('Failed to load group data');
@@ -274,16 +287,16 @@ const GroupManagementDashboard = ({ user }) => {
     }
   };
 
-  const handleGroupSelect = (group) => {
+  const handleGroupSelect = group => {
     console.log('🎯 Group selected:', group);
-    
+
     // Validate group object
     if (!group || typeof group !== 'object' || !group.id) {
       console.error('❌ Invalid group object:', group);
       toast.error('Invalid group selection');
       return;
     }
-    
+
     try {
       setSelectedGroup(group);
       setGroupStats({}); // Use empty object instead of null to prevent Object.keys errors
@@ -294,18 +307,18 @@ const GroupManagementDashboard = ({ user }) => {
       console.error('Error details:', {
         message: error.message,
         stack: error.stack,
-        group: group
+        group: group,
       });
       toast.error('Failed to select group');
     }
   };
 
-  const handleSettingsUpdate = async (newSettings) => {
+  const handleSettingsUpdate = async newSettings => {
     if (!selectedGroup) return;
 
     try {
       const response = await apiService.groups.updateSettings(selectedGroup.id, newSettings);
-      
+
       if (response?.data?.settings) {
         setGroupSettings(response.data.settings);
         toast.success('Settings updated successfully!');
@@ -331,11 +344,11 @@ const GroupManagementDashboard = ({ user }) => {
 
   const handlePeriodChange = (period, startDate = null, endDate = null) => {
     console.log('📅 Period changed to:', period, 'dates:', startDate, endDate);
-    
+
     setSelectedPeriod(period);
     setCustomStartDate(startDate);
     setCustomEndDate(endDate);
-    
+
     if (selectedGroup) {
       loadGroupData(selectedGroup.id, period, startDate, endDate);
     }
@@ -351,26 +364,31 @@ const GroupManagementDashboard = ({ user }) => {
     console.log('\n🔍 COMPREHENSIVE API DEBUG TEST');
     console.log('===============================');
     console.log('Selected Group ID:', selectedGroup.id);
-    console.log('API Base URL:', import.meta.env.VITE_API_URL || 'https://minnow-good-mostly.ngrok-free.app/api/v1');
-    
+    console.log(
+      'API Base URL:',
+      import.meta.env.VITE_API_URL || 'https://minnow-good-mostly.ngrok-free.app/api/v1'
+    );
+
     toast.info('Running API endpoint verification - check console for detailed results');
 
     try {
       // Test 1: Direct API calls bypassing service layer
       console.log('\n🧪 TEST 1: Direct API endpoint calls');
-      
-      const baseUrl = import.meta.env.VITE_API_URL || 'https://minnow-good-mostly.ngrok-free.app/api/v1';
+
+      const baseUrl =
+        import.meta.env.VITE_API_URL || 'https://minnow-good-mostly.ngrok-free.app/api/v1';
       const groupId = selectedGroup.id;
-      
+
       // Get auth headers for both types
       const telegramInitData = window.Telegram?.WebApp?.initData;
-      const jwtToken = localStorage.getItem('telegram_auth_token') || localStorage.getItem('authToken');
-      
+      const jwtToken =
+        localStorage.getItem('telegram_auth_token') || localStorage.getItem('authToken');
+
       console.log('Auth Status:', {
         hasInitData: !!telegramInitData,
         hasJWTToken: !!jwtToken,
         initDataLength: telegramInitData?.length || 0,
-        jwtTokenLength: jwtToken?.length || 0
+        jwtTokenLength: jwtToken?.length || 0,
       });
 
       // Direct WebApp endpoint call
@@ -379,20 +397,20 @@ const GroupManagementDashboard = ({ user }) => {
         try {
           const webappUrl = `${baseUrl}/webapp/group/${groupId}/stats?period=week`;
           console.log('WebApp URL:', webappUrl);
-          
+
           const webappResponse = await fetch(webappUrl, {
             headers: {
               'Content-Type': 'application/json',
               'X-Telegram-Init-Data': telegramInitData,
-              'ngrok-skip-browser-warning': 'true'
-            }
+              'ngrok-skip-browser-warning': 'true',
+            },
           });
-          
+
           const webappData = await webappResponse.json();
           console.log('WebApp Response Status:', webappResponse.status);
           console.log('WebApp Response Headers:', Object.fromEntries(webappResponse.headers));
           console.log('WebApp Full Response:', webappData);
-          
+
           // Navigate to stats data
           if (webappData?.success && webappData?.data?.stats) {
             console.log('✅ WebApp Stats Found:', webappData.data.stats);
@@ -405,27 +423,27 @@ const GroupManagementDashboard = ({ user }) => {
           console.error('❌ Direct WebApp call failed:', err);
         }
       }
-      
+
       // Direct JWT endpoint call
       if (jwtToken) {
         console.log('\n🔐 Direct JWT Stats Call:');
         try {
           const jwtUrl = `${baseUrl}/groups/${groupId}/stats`;
           console.log('JWT URL:', jwtUrl);
-          
+
           const jwtResponse = await fetch(jwtUrl, {
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${jwtToken}`,
-              'ngrok-skip-browser-warning': 'true'
-            }
+              Authorization: `Bearer ${jwtToken}`,
+              'ngrok-skip-browser-warning': 'true',
+            },
           });
-          
+
           const jwtData = await jwtResponse.json();
           console.log('JWT Response Status:', jwtResponse.status);
           console.log('JWT Response Headers:', Object.fromEntries(jwtResponse.headers));
           console.log('JWT Full Response:', jwtData);
-          
+
           // Check for JWT format
           if (jwtData?.totalMessagesProcessed !== undefined) {
             console.log('✅ JWT Stats Found (legacy format):', jwtData);
@@ -439,11 +457,11 @@ const GroupManagementDashboard = ({ user }) => {
 
       // Test 2: Service layer calls
       console.log('\n🔧 TEST 2: Service layer calls');
-      
+
       const periods = ['day', 'week', 'month'];
       for (const period of periods) {
         console.log(`\n� Testing period: ${period}`);
-        
+
         try {
           const webAppResponse = await apiService.groups.getStatsWebApp(selectedGroup.id, period);
           console.log(`WebApp ${period} full response:`, webAppResponse);
@@ -468,10 +486,10 @@ const GroupManagementDashboard = ({ user }) => {
         const auditCount = auditResponse?.data?.length || 0;
         console.log('Audit logs response:', auditResponse);
         console.log('Audit logs count:', auditCount);
-        
+
         if (auditCount > 0) {
           console.log('Sample audit entries:', auditResponse.data.slice(0, 5));
-          console.log('❗ If audit logs exist but stats are zero, there\'s a data extraction issue');
+          console.log("❗ If audit logs exist but stats are zero, there's a data extraction issue");
         } else {
           console.log('No audit logs found - this might explain zero stats');
         }
@@ -489,8 +507,8 @@ const GroupManagementDashboard = ({ user }) => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingCard 
-          title="Loading your groups..." 
+        <LoadingCard
+          title="Loading your groups..."
           subtitle="Please wait while we fetch your administration data"
           size="large"
         />
@@ -524,7 +542,8 @@ const GroupManagementDashboard = ({ user }) => {
               <span>Group Management</span>
             </h1>
             <p className="mt-3 text-gray-700 text-lg">
-              Managing groups for <span className="font-semibold text-green-600">{user.first_name}</span>
+              Managing groups for{' '}
+              <span className="font-semibold text-green-600">{user.first_name}</span>
               {user.is_guest && (
                 <span className="ml-3 px-3 py-1 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-sm rounded-full font-medium shadow-md">
                   Demo Mode
@@ -572,10 +591,14 @@ const GroupManagementDashboard = ({ user }) => {
                     <div className="mt-3 flex items-center space-x-4">
                       <div className="flex items-center space-x-2 bg-green-50 px-3 py-1 rounded-full">
                         <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-                        <span className="text-sm font-medium text-green-700">{selectedGroup.member_count} members</span>
+                        <span className="text-sm font-medium text-green-700">
+                          {selectedGroup.member_count} members
+                        </span>
                       </div>
                       <div className="flex items-center space-x-2 bg-blue-50 px-3 py-1 rounded-full">
-                        <span className="text-sm font-medium text-blue-700 capitalize">{selectedGroup.type}</span>
+                        <span className="text-sm font-medium text-blue-700 capitalize">
+                          {selectedGroup.type}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -674,10 +697,7 @@ const GroupManagementDashboard = ({ user }) => {
 
                   {activeTab === 'audit' && (
                     <div className="p-8">
-                      <AuditLog
-                        groupId={selectedGroup.id}
-                        groupTitle={selectedGroup.title}
-                      />
+                      <AuditLog groupId={selectedGroup.id} groupTitle={selectedGroup.title} />
                     </div>
                   )}
                 </div>
@@ -693,11 +713,13 @@ const GroupManagementDashboard = ({ user }) => {
                   Select a Group to Manage
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  Choose a group from the sidebar to view its statistics, configure settings, and manage moderation.
+                  Choose a group from the sidebar to view its statistics, configure settings, and
+                  manage moderation.
                 </p>
                 <div className="bg-blue-50 rounded-xl p-4">
                   <p className="text-sm text-blue-700">
-                    💡 <strong>Tip:</strong> If you don't see any groups, make sure the bot is added to your Telegram groups with admin permissions.
+                    💡 <strong>Tip:</strong> If you don't see any groups, make sure the bot is added
+                    to your Telegram groups with admin permissions.
                   </p>
                 </div>
               </div>
@@ -705,7 +727,7 @@ const GroupManagementDashboard = ({ user }) => {
           )}
         </div>
       </div>
-      
+
       {/* Debug Tools */}
     </div>
   );

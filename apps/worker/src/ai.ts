@@ -1,7 +1,7 @@
 /**
  * AEG-302: AI verdict processing with content-based caching
  * AEG-303: Rate limiting & throttling for AI services
- * 
+ *
  * This module integrates:
  * 1. Verdict cache to check before making AI calls
  * 2. Rate limiting and circuit breaker for AI service protection
@@ -75,12 +75,10 @@ export class AIProcessor {
       name: 'Profanity Detection',
       description: 'Detects obvious profane language',
       weight: 60,
-      matcher: (content) => {
+      matcher: content => {
         const profanityWords = ['spam', 'scam', 'fuck', 'shit', 'damn'];
-        return profanityWords.some(word => 
-          content.normalizedText.toLowerCase().includes(word)
-        );
-      }
+        return profanityWords.some(word => content.normalizedText.toLowerCase().includes(word));
+      },
     });
 
     this.policyEngine.addRule({
@@ -88,11 +86,11 @@ export class AIProcessor {
       name: 'Excessive Capitals',
       description: 'Detects messages with excessive capital letters',
       weight: 30,
-      matcher: (content) => {
+      matcher: content => {
         const capsCount = (content.originalText.match(/[A-Z]/g) || []).length;
         const totalChars = content.originalText.length;
-        return totalChars > 10 && (capsCount / totalChars) > 0.6;
-      }
+        return totalChars > 10 && capsCount / totalChars > 0.6;
+      },
     });
 
     this.policyEngine.addRule({
@@ -100,14 +98,15 @@ export class AIProcessor {
       name: 'Suspicious URLs',
       description: 'Detects potentially malicious URLs',
       weight: 70,
-      matcher: (content) => {
-        return content.urls.some(url => 
-          url.includes('bit.ly') || 
-          url.includes('tinyurl') ||
-          url.includes('t.co') ||
-          url.match(/\d+\.\d+\.\d+\.\d+/) // IP addresses
+      matcher: content => {
+        return content.urls.some(
+          url =>
+            url.includes('bit.ly') ||
+            url.includes('tinyurl') ||
+            url.includes('t.co') ||
+            url.match(/\d+\.\d+\.\d+\.\d+/) // IP addresses
         );
-      }
+      },
     });
   }
 
@@ -122,7 +121,7 @@ export class AIProcessor {
       const cachedVerdict = this.cache.get(text);
       if (cachedVerdict) {
         this.cacheHitCount++;
-        
+
         logger.info('Cache hit - AI call avoided', {
           tenantId,
           cacheHitRate: this.getCacheHitRate(),
@@ -141,19 +140,19 @@ export class AIProcessor {
     // Step 2: Check rate limiting if enabled
     let rateLimited = false;
     let circuitOpen = false;
-    
+
     if (this.config.enableRateLimiting) {
       const rateLimitMetrics = this.rateLimiter.getMetrics();
       circuitOpen = rateLimitMetrics.circuitState === 'open';
-      
+
       if (circuitOpen) {
         this.circuitOpenCount++;
         logger.warn('Circuit breaker open - AI service unavailable', {
           tenantId,
           failureCount: rateLimitMetrics.failureCount,
-          lastFailureTime: rateLimitMetrics.lastFailureTime
+          lastFailureTime: rateLimitMetrics.lastFailureTime,
         });
-        
+
         if (this.config.degradeOnRateLimit && this.config.fallbackToPolicy) {
           const verdict = this.policyEngine.evaluate(text);
           return {
@@ -166,17 +165,17 @@ export class AIProcessor {
       } else {
         // Try to acquire rate limit permission
         const permitted = await this.rateLimiter.acquire();
-        
+
         if (!permitted) {
           this.rateLimitedCount++;
           rateLimited = true;
-          
+
           logger.warn('Request rate limited', {
             tenantId,
             queueLength: rateLimitMetrics.queueLength,
-            currentTokens: rateLimitMetrics.currentTokens
+            currentTokens: rateLimitMetrics.currentTokens,
           });
-          
+
           if (this.config.degradeOnRateLimit && this.config.fallbackToPolicy) {
             const verdict = this.policyEngine.evaluate(text);
             return {
@@ -201,7 +200,7 @@ export class AIProcessor {
         this.aiCallCount++;
         source = 'ai';
         aiSuccess = true;
-        
+
         // Report success to rate limiter for circuit breaker
         if (this.config.enableRateLimiting) {
           this.rateLimiter.reportResult(true);
@@ -211,7 +210,7 @@ export class AIProcessor {
         if (this.config.enableRateLimiting) {
           this.rateLimiter.reportResult(false);
         }
-        
+
         logger.warn('AI call failed, falling back to policy engine', {
           error: error instanceof Error ? error.message : 'Unknown error',
           tenantId,
@@ -268,7 +267,8 @@ export class AIProcessor {
     await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 200));
 
     // Simulate occasional AI failures for testing
-    if (Math.random() < 0.05) { // 5% failure rate
+    if (Math.random() < 0.05) {
+      // 5% failure rate
       throw new Error('AI service temporarily unavailable');
     }
 
@@ -300,7 +300,7 @@ export class AIProcessor {
         'ai.url_risk': hasUrls ? 0.7 : 0.1,
         'ai.caps_ratio': hasExcessiveCaps ? 0.9 : 0.1,
       },
-      rulesMatched: [] // AI doesn't match explicit rules
+      rulesMatched: [], // AI doesn't match explicit rules
     };
   }
 
@@ -317,7 +317,7 @@ export class AIProcessor {
    */
   getRateLimitStats(): Record<string, number> {
     const rateLimitMetrics = this.rateLimiter.getMetrics();
-    
+
     return {
       'rate_limit.requests.accepted': rateLimitMetrics.requestsAccepted,
       'rate_limit.requests.rejected': rateLimitMetrics.requestsRejected,
@@ -339,7 +339,7 @@ export class AIProcessor {
     const cacheStats = this.cache.getStats();
     const rateLimitStats = this.getRateLimitStats();
     const hitRate = this.getCacheHitRate();
-    
+
     return {
       ...cacheStats,
       ...rateLimitStats,
@@ -367,11 +367,11 @@ export class AIProcessor {
    */
   updateConfig(newConfig: Partial<AIProcessingConfig>): void {
     this.config = { ...this.config, ...newConfig };
-    
+
     if (newConfig.cacheTtlMs) {
       this.cache.updateConfig({ ttlMs: newConfig.cacheTtlMs });
     }
-    
+
     logger.info('AI processor configuration updated', this.config);
   }
 
@@ -386,7 +386,7 @@ export class AIProcessor {
     cacheEfficiency: number;
   }> {
     const results: AIProcessingResult[] = [];
-    
+
     for (const message of messages) {
       const result = await this.processContent(message);
       results.push(result);
@@ -394,7 +394,8 @@ export class AIProcessor {
 
     const cacheHits = results.filter(r => r.source === 'cache').length;
     const aiCalls = results.filter(r => r.source === 'ai').length;
-    const avgProcessingTime = results.reduce((sum, r) => sum + r.processingTimeMs, 0) / results.length;
+    const avgProcessingTime =
+      results.reduce((sum, r) => sum + r.processingTimeMs, 0) / results.length;
     const efficiency = cacheHits / results.length;
 
     return {

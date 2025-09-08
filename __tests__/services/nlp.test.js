@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { isPromotional, hasProfanity, analyzeMessage } from '@telegram-moderator/shared/src/services/nlp.js';
+import {
+  isPromotional,
+  hasProfanity,
+  analyzeMessage,
+} from '@telegram-moderator/shared/src/services/nlp.js';
 
 // Mock the logger to prevent console noise during tests
 vi.mock('@telegram-moderator/shared/src/services/logger.js', () => ({
@@ -17,11 +21,11 @@ vi.mock('openai', () => ({
     constructor() {
       this.chat = {
         completions: {
-          create: vi.fn().mockRejectedValue(new Error('API not available in tests'))
-        }
+          create: vi.fn().mockRejectedValue(new Error('API not available in tests')),
+        },
       };
     }
-  }
+  },
 }));
 
 describe('NLP Service', () => {
@@ -31,14 +35,14 @@ describe('NLP Service', () => {
 
   // Note: These tests expect the service to return safe defaults when OpenAI API is unavailable
   // In production with a valid API key, the service would return actual classification results
-  
+
   describe('Spam Detection (isPromotional)', () => {
     it('should return valid response structure for any input', async () => {
       const testMessages = [
         'Buy now! Limited time offer! 50% off!',
         'Hello everyone! How are you doing today?',
         '',
-        '🚀🚀🚀'
+        '🚀🚀🚀',
       ];
 
       for (const message of testMessages) {
@@ -55,9 +59,9 @@ describe('NLP Service', () => {
     it('should handle concurrent requests correctly', async () => {
       const message = 'Test message for concurrent processing';
       const promises = Array.from({ length: 5 }, () => isPromotional(message));
-      
+
       const results = await Promise.all(promises);
-      
+
       // All results should be valid and consistent
       results.forEach(result => {
         expect(typeof result.score).toBe('number');
@@ -69,9 +73,9 @@ describe('NLP Service', () => {
     it('should handle whitelist keywords parameter', async () => {
       const message = 'Check out this amazing crypto project!';
       const whitelistKeywords = ['crypto', 'project', 'amazing'];
-      
+
       const result = await isPromotional(message, whitelistKeywords);
-      
+
       expect(typeof result.score).toBe('number');
       expect(typeof result.isSpam).toBe('boolean');
       // Service accepts whitelist parameter without error
@@ -85,7 +89,7 @@ describe('NLP Service', () => {
         'This is a clean message',
         'What the hell is going on?',
         'F*** this stupid thing',
-        ''
+        '',
       ];
 
       for (const message of testMessages) {
@@ -100,9 +104,9 @@ describe('NLP Service', () => {
 
     it('should detect obvious profanity patterns locally', async () => {
       const profaneMessage = 'This is fucking ridiculous';
-      
+
       const result = await hasProfanity(profaneMessage);
-      
+
       // Should detect profanity via local patterns
       expect(result.hasProfanity).toBe(true);
       expect(result.severity).toBeGreaterThan(0);
@@ -111,9 +115,9 @@ describe('NLP Service', () => {
 
     it('should handle clean messages appropriately', async () => {
       const cleanMessage = 'Hello everyone, how are you today?';
-      
+
       const result = await hasProfanity(cleanMessage);
-      
+
       expect(typeof result.hasProfanity).toBe('boolean');
       expect(typeof result.severity).toBe('number');
       expect(result.severity >= 0 && result.severity <= 1).toBe(true);
@@ -124,14 +128,14 @@ describe('NLP Service', () => {
     it('should return results for both spam and profanity analysis', async () => {
       const message = 'Check out this fucking amazing crypto project!';
       const whitelistKeywords = ['crypto', 'project'];
-      
+
       const result = await analyzeMessage(message, whitelistKeywords);
-      
+
       // Check spam results
       expect(typeof result.spam.score).toBe('number');
       expect(typeof result.spam.isSpam).toBe('boolean');
       expect(result.spam.score >= 0 && result.spam.score <= 1).toBe(true);
-      
+
       // Check profanity results
       expect(typeof result.profanity.hasProfanity).toBe('boolean');
       expect(typeof result.profanity.severity).toBe('number');
@@ -142,9 +146,9 @@ describe('NLP Service', () => {
     it('should handle concurrent combined analysis', async () => {
       const message = 'Test message for concurrent combined processing';
       const promises = Array.from({ length: 3 }, () => analyzeMessage(message));
-      
+
       const results = await Promise.all(promises);
-      
+
       results.forEach(result => {
         expect(typeof result.spam.score).toBe('number');
         expect(typeof result.spam.isSpam).toBe('boolean');
@@ -193,7 +197,7 @@ describe('NLP Service', () => {
 
     it('should handle extremely long messages', async () => {
       const longMessage = 'This is a very long message. '.repeat(200);
-      
+
       const spamResult = await isPromotional(longMessage);
       expect(typeof spamResult.score).toBe('number');
       expect(spamResult.score).toBeGreaterThanOrEqual(0);
@@ -209,7 +213,7 @@ describe('NLP Service', () => {
 
     it('should handle empty and whitespace-only messages', async () => {
       const emptyInputs = ['', '   ', '\n\t  ', '   \n   '];
-      
+
       for (const input of emptyInputs) {
         const spamResult = await isPromotional(input);
         expect(spamResult.isSpam).toBe(false);

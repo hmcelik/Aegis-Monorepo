@@ -4,9 +4,9 @@ import logger from '../../../packages/shared/src/services/logger';
  * Budget enforcement modes when tenant budget is exhausted
  */
 export enum DegradeMode {
-  STRICT_RULES = 'strict_rules',    // Use only fast-path rules, no AI
-  LINK_BLOCKS = 'link_blocks',      // Block new user links only, allow AI for established users
-  DISABLE_AI = 'disable_ai'         // Completely disable AI, allow all other actions
+  STRICT_RULES = 'strict_rules', // Use only fast-path rules, no AI
+  LINK_BLOCKS = 'link_blocks', // Block new user links only, allow AI for established users
+  DISABLE_AI = 'disable_ai', // Completely disable AI, allow all other actions
 }
 
 /**
@@ -32,7 +32,7 @@ export interface UsageRecord {
 
 /**
  * BudgetEnforcer handles budget checking and enforcement in worker processes
- * 
+ *
  * Features:
  * - Pre-processing budget checks
  * - Post-processing usage recording
@@ -54,7 +54,7 @@ export class BudgetEnforcer {
   async checkBudget(tenantId: string): Promise<BudgetCheckResult> {
     try {
       const budgetInfo = await this.getBudgetInfo(tenantId);
-      
+
       if (!budgetInfo) {
         logger.warn('BudgetEnforcer: No budget info found', { tenantId });
         return { allowed: true }; // Default to allow if no budget info
@@ -69,19 +69,19 @@ export class BudgetEnforcer {
           allowed: false,
           reason: 'Budget exhausted',
           degradeMode: budget.degradeMode as DegradeMode,
-          remainingBudget: 0
+          remainingBudget: 0,
         };
       }
 
       // Budget available
       return {
         allowed: true,
-        remainingBudget: remaining
+        remainingBudget: remaining,
       };
     } catch (error) {
-      logger.error('BudgetEnforcer: Budget check failed', { 
-        tenantId, 
-        error: error instanceof Error ? error.message : String(error) 
+      logger.error('BudgetEnforcer: Budget check failed', {
+        tenantId,
+        error: error instanceof Error ? error.message : String(error),
       });
       // Default to allow on error to prevent blocking legitimate traffic
       return { allowed: true, reason: 'Budget check failed, defaulting to allow' };
@@ -97,9 +97,9 @@ export class BudgetEnforcer {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.INTERNAL_API_TOKEN}`
+          Authorization: `Bearer ${process.env.INTERNAL_API_TOKEN}`,
         },
-        body: JSON.stringify(usage)
+        body: JSON.stringify(usage),
       });
 
       if (!response.ok) {
@@ -111,9 +111,9 @@ export class BudgetEnforcer {
 
       logger.debug('BudgetEnforcer: Usage recorded', { tenantId, ...usage });
     } catch (error) {
-      logger.error('BudgetEnforcer: Failed to record usage', { 
-        tenantId, 
-        error: error instanceof Error ? error.message : String(error) 
+      logger.error('BudgetEnforcer: Failed to record usage', {
+        tenantId,
+        error: error instanceof Error ? error.message : String(error),
       });
       // Don't throw - recording failures shouldn't block processing
     }
@@ -144,7 +144,10 @@ export class BudgetEnforcer {
   /**
    * Get processing strategy based on budget status
    */
-  async getProcessingStrategy(tenantId: string, messageContext: any): Promise<{
+  async getProcessingStrategy(
+    tenantId: string,
+    messageContext: any
+  ): Promise<{
     useAI: boolean;
     useFastPath: boolean;
     reason: string;
@@ -155,21 +158,18 @@ export class BudgetEnforcer {
       return {
         useAI: true,
         useFastPath: true,
-        reason: 'Budget available'
+        reason: 'Budget available',
       };
     }
 
     // Budget exhausted - apply degrade mode
-    const shouldDegrade = this.shouldApplyDegradeMode(
-      budgetCheck.degradeMode!,
-      messageContext
-    );
+    const shouldDegrade = this.shouldApplyDegradeMode(budgetCheck.degradeMode!, messageContext);
 
     if (shouldDegrade) {
       return {
         useAI: false,
         useFastPath: true,
-        reason: `Budget exhausted, degrade mode: ${budgetCheck.degradeMode}`
+        reason: `Budget exhausted, degrade mode: ${budgetCheck.degradeMode}`,
       };
     }
 
@@ -177,7 +177,7 @@ export class BudgetEnforcer {
     return {
       useAI: true,
       useFastPath: true,
-      reason: 'Budget exhausted but user is established'
+      reason: 'Budget exhausted but user is established',
     };
   }
 
@@ -189,15 +189,15 @@ export class BudgetEnforcer {
     const now = Date.now();
 
     // Return cached data if still valid
-    if (cached && (now - cached.lastCheck) < this.cacheTimeout) {
+    if (cached && now - cached.lastCheck < this.cacheTimeout) {
       return cached;
     }
 
     try {
       const response = await fetch(`${this.apiBaseUrl}/api/billing/budget/${tenantId}`, {
         headers: {
-          'Authorization': `Bearer ${process.env.INTERNAL_API_TOKEN}`
-        }
+          Authorization: `Bearer ${process.env.INTERNAL_API_TOKEN}`,
+        },
       });
 
       if (!response.ok) {
@@ -208,21 +208,21 @@ export class BudgetEnforcer {
       }
 
       const data = await response.json();
-      
+
       // Cache the result
       const budgetInfo = {
         budget: data.budget,
         usage: data.usage,
-        lastCheck: now
+        lastCheck: now,
       };
-      
+
       this.budgetCache.set(tenantId, budgetInfo);
-      
+
       return budgetInfo;
     } catch (error) {
-      logger.error('BudgetEnforcer: Failed to fetch budget info', { 
-        tenantId, 
-        error: error instanceof Error ? error.message : String(error) 
+      logger.error('BudgetEnforcer: Failed to fetch budget info', {
+        tenantId,
+        error: error instanceof Error ? error.message : String(error),
       });
       return null;
     }
@@ -246,7 +246,7 @@ export class BudgetEnforcer {
     return {
       size: this.budgetCache.size,
       hits: 0, // TODO: Implement hit/miss tracking if needed
-      misses: 0
+      misses: 0,
     };
   }
 }

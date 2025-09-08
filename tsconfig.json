@@ -13,12 +13,10 @@
       "@telegram-moderator/policy": ["./packages/policy/src"],
       "@telegram-moderator/policy/*": ["./packages/policy/src/*"],
       "@telegram-moderator/telemetry": ["./packages/telemetry/src"],
-      "@telegram-moderator/telemetry/*": ["./packages/telemetry/src/*"]
+      "@telegram-moderator/telemetry/*": ["./packages/telemetry/src/*"],
+      "@telegram-moderator/config": ["./packages/config/src"],
+      "@telegram-moderator/config/*": ["./packages/config/src/*"]
     }
   },
-  "include": [
-    "packages/*/src/**/*",
-    "apps/*/src/**/*",
-    "__tests__/**/*"
-  ]
+  "include": ["packages/*/src/**/*", "apps/*/src/**/*", "__tests__/**/*"]
 }

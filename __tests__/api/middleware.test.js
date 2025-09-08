@@ -142,9 +142,7 @@ describe('API Middleware', () => {
         });
       });
 
-      const response = await request(app)
-        .get('/protected')
-        .set('Authorization', 'InvalidFormat');
+      const response = await request(app).get('/protected').set('Authorization', 'InvalidFormat');
 
       expect(response.status).toBe(401);
       expect(response.body).toHaveProperty('statusCode', 401);
@@ -177,10 +175,9 @@ describe('API Middleware', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(axios.post).toHaveBeenCalledWith(
-        expect.stringContaining('/getChatAdministrators'),
-        { chat_id: '-1001' }
-      );
+      expect(axios.post).toHaveBeenCalledWith(expect.stringContaining('/getChatAdministrators'), {
+        chat_id: '-1001',
+      });
     });
 
     it('should reject non-administrators', async () => {
@@ -261,10 +258,9 @@ describe('API Middleware', () => {
 
       const response = await request(app).get('/groups/invalid-group-id/test');
 
-      expect(axios.post).toHaveBeenCalledWith(
-        expect.stringContaining('/getChatAdministrators'),
-        { chat_id: 'invalid-group-id' }
-      );
+      expect(axios.post).toHaveBeenCalledWith(expect.stringContaining('/getChatAdministrators'), {
+        chat_id: 'invalid-group-id',
+      });
       expect(response.status).toBe(200); // Should still work if user is admin
     });
   });
@@ -283,18 +279,13 @@ describe('API Middleware', () => {
         },
       });
 
-      app.get(
-        '/groups/:groupId/admin-only',
-        checkJwt,
-        checkGroupAdmin,
-        (req, res) => {
-          res.json({
-            success: true,
-            userId: req.user.id,
-            groupId: req.params.groupId,
-          });
-        }
-      );
+      app.get('/groups/:groupId/admin-only', checkJwt, checkGroupAdmin, (req, res) => {
+        res.json({
+          success: true,
+          userId: req.user.id,
+          groupId: req.params.groupId,
+        });
+      });
 
       app.use((error, req, res, next) => {
         res.status(error.statusCode || 500).json({
@@ -319,14 +310,9 @@ describe('API Middleware', () => {
         throw new Error('Invalid token');
       });
 
-      app.get(
-        '/groups/:groupId/admin-only',
-        checkJwt,
-        checkGroupAdmin,
-        (req, res) => {
-          res.json({ success: true });
-        }
-      );
+      app.get('/groups/:groupId/admin-only', checkJwt, checkGroupAdmin, (req, res) => {
+        res.json({ success: true });
+      });
 
       const response = await request(app)
         .get('/groups/-1001/admin-only')
@@ -350,14 +336,9 @@ describe('API Middleware', () => {
         },
       });
 
-      app.get(
-        '/groups/:groupId/admin-only',
-        checkJwt,
-        checkGroupAdmin,
-        (req, res) => {
-          res.json({ success: true });
-        }
-      );
+      app.get('/groups/:groupId/admin-only', checkJwt, checkGroupAdmin, (req, res) => {
+        res.json({ success: true });
+      });
 
       const response = await request(app)
         .get('/groups/-1001/admin-only')

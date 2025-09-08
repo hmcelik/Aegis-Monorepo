@@ -7,7 +7,7 @@ export const migration_003_policy_management: Migration = {
   id: '003',
   name: 'policy_management',
   dependencies: ['001'],
-  
+
   async up(db: DatabaseConnection): Promise<void> {
     // Policies table - Moderation policies and rules
     await db.exec(`
@@ -62,5 +62,5 @@ export const migration_003_policy_management: Migration = {
     await db.exec('DROP TABLE IF EXISTS keyword_whitelist');
     await db.exec('DROP TABLE IF EXISTS group_policies');
     await db.exec('DROP TABLE IF EXISTS policies');
-  }
+  },
 };

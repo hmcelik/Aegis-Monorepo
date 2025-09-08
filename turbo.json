@@ -1,14 +1,52 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["package.json", "pnpm-workspace.yaml", "turbo.json", "tsconfig.base.json"],
   "tasks": {
-    "dev": { "cache": false },
-    "ngrok": { "cache": false },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "build/**", ".next/**"]
+      "inputs": ["src/**", "package.json", "tsconfig.json", "vite.config.*", "rollup.config.*"],
+      "outputs": ["dist/**", "build/**", ".next/**"],
+      "outputLogs": "new-only"
     },
-    "start": { "cache": false },
-    "test": { "dependsOn": ["^build"], "outputs": [] },
-    "lint": { "outputs": [] }
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "inputs": ["src/**", "package.json", "tsconfig.json", ".env*"]
+    },
+    "ngrok": {
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "__tests__/**", "*.config.*", "test-setup.*"],
+      "outputs": ["coverage/**"],
+      "outputLogs": "new-only"
+    },
+    "lint": {
+      "inputs": ["src/**", "*.config.*", ".eslintrc.*", "package.json"],
+      "outputs": [],
+      "outputLogs": "new-only"
+    },
+    "lint:fix": {
+      "inputs": ["src/**", "*.config.*", ".eslintrc.*", "package.json"],
+      "outputs": [],
+      "cache": false
+    },
+    "type-check": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "tsconfig.json", "package.json"],
+      "outputs": [],
+      "outputLogs": "new-only"
+    },
+    "clean": {
+      "cache": false,
+      "outputs": []
+    }
   }
 }

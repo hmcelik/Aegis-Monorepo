@@ -16,7 +16,7 @@ describe('Telegram API Client (AEG-103)', () => {
       baseDelay: 100,
       maxDelay: 5000,
       circuitBreakerThreshold: 3,
-      circuitBreakerResetTime: 1000
+      circuitBreakerResetTime: 1000,
     });
 
     // Mock setTimeout to make tests faster
@@ -34,17 +34,17 @@ describe('Telegram API Client (AEG-103)', () => {
     it('should make successful API call', async () => {
       const mockResponse = {
         ok: true,
-        result: { message_id: 123 }
+        result: { message_id: 123 },
       };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockResponse)
+        json: () => Promise.resolve(mockResponse),
       });
 
       const result = await telegramClient.apiCall('sendMessage', {
         chat_id: 12345,
-        text: 'test message'
+        text: 'test message',
       });
 
       expect(result).toEqual(mockResponse);
@@ -53,7 +53,7 @@ describe('Telegram API Client (AEG-103)', () => {
         expect.objectContaining({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: 12345, text: 'test message' })
+          body: JSON.stringify({ chat_id: 12345, text: 'test message' }),
         })
       );
     });
@@ -62,7 +62,7 @@ describe('Telegram API Client (AEG-103)', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 400,
-        statusText: 'Bad Request'
+        statusText: 'Bad Request',
       });
 
       await expect(
@@ -74,7 +74,7 @@ describe('Telegram API Client (AEG-103)', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
-        statusText: 'Unauthorized'
+        statusText: 'Unauthorized',
       });
 
       await expect(
@@ -92,18 +92,18 @@ describe('Telegram API Client (AEG-103)', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 429,
-        statusText: 'Too Many Requests'
+        statusText: 'Too Many Requests',
       });
 
       // Second call succeeds
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ ok: true, result: { message_id: 123 } })
+        json: () => Promise.resolve({ ok: true, result: { message_id: 123 } }),
       });
 
       const callPromise = telegramClient.apiCall('sendMessage', {
         chat_id: 12345,
-        text: 'test'
+        text: 'test',
       });
 
       // Fast forward time to simulate delay
@@ -148,7 +148,7 @@ describe('Telegram API Client (AEG-103)', () => {
     beforeEach(() => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve({ ok: true, result: { message_id: 123 } })
+        json: () => Promise.resolve({ ok: true, result: { message_id: 123 } }),
       });
     });
 
@@ -161,8 +161,8 @@ describe('Telegram API Client (AEG-103)', () => {
           body: JSON.stringify({
             chat_id: 12345,
             text: 'Hello, world!',
-            parse_mode: 'HTML'
-          })
+            parse_mode: 'HTML',
+          }),
         })
       );
     });
@@ -175,8 +175,8 @@ describe('Telegram API Client (AEG-103)', () => {
         expect.objectContaining({
           body: JSON.stringify({
             chat_id: 12345,
-            message_id: 456
-          })
+            message_id: 456,
+          }),
         })
       );
     });
@@ -190,8 +190,8 @@ describe('Telegram API Client (AEG-103)', () => {
           body: JSON.stringify({
             chat_id: 12345,
             user_id: 789,
-            until_date: 1234567890
-          })
+            until_date: 1234567890,
+          }),
         })
       );
     });
@@ -207,8 +207,8 @@ describe('Telegram API Client (AEG-103)', () => {
             chat_id: 12345,
             user_id: 789,
             permissions,
-            until_date: 1234567890
-          })
+            until_date: 1234567890,
+          }),
         })
       );
     });
@@ -222,8 +222,8 @@ describe('Telegram API Client (AEG-103)', () => {
           body: JSON.stringify({
             chat_id: 12345,
             user_id: 789,
-            only_if_banned: true
-          })
+            only_if_banned: true,
+          }),
         })
       );
     });
@@ -233,7 +233,7 @@ describe('Telegram API Client (AEG-103)', () => {
     it('should track call metrics', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ ok: true })
+        json: () => Promise.resolve({ ok: true }),
       });
 
       await telegramClient.apiCall('sendMessage', { chat_id: 12345, text: 'test' });
@@ -254,7 +254,7 @@ describe('Telegram API Client (AEG-103)', () => {
     it('should reset metrics properly', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ ok: true })
+        json: () => Promise.resolve({ ok: true }),
       });
 
       await telegramClient.apiCall('sendMessage', { chat_id: 12345, text: 'test' });
@@ -284,12 +284,12 @@ describe('Telegram API Client (AEG-103)', () => {
     it('should use custom API URL', async () => {
       const customClient = new TelegramClient({
         botToken: 'test-token',
-        apiUrl: 'https://custom-api.example.com'
+        apiUrl: 'https://custom-api.example.com',
       });
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ ok: true })
+        json: () => Promise.resolve({ ok: true }),
       });
 
       await customClient.apiCall('sendMessage', { chat_id: 12345, text: 'test' });
@@ -303,7 +303,7 @@ describe('Telegram API Client (AEG-103)', () => {
     it('should use default configuration values', () => {
       const defaultClient = new TelegramClient({ botToken: 'test-token' });
       const metrics = defaultClient.getMetrics();
-      
+
       expect(metrics.circuitBreaker.state).toBe('closed');
     });
   });

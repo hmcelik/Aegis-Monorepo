@@ -39,9 +39,9 @@ function DebugConsole({ visible = true, onClose }) {
     const add = (type, ...args) => {
       const ts = new Date().toLocaleTimeString();
       const msg = args
-        .map((a) => (typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)))
+        .map(a => (typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)))
         .join(' ');
-      setLogs((prev) => [...prev.slice(-199), { id: ts + Math.random(), type, ts, msg }]);
+      setLogs(prev => [...prev.slice(-199), { id: ts + Math.random(), type, ts, msg }]);
       // also forward to original
       original.current[type](...args);
     };
@@ -66,8 +66,16 @@ function DebugConsole({ visible = true, onClose }) {
 
   if (!visible || !portalNode) return null;
 
-  const color = (t) =>
-    t === 'error' ? '#ff6b6b' : t === 'warn' ? '#ffb020' : t === 'info' ? '#66b3ff' : t === 'debug' ? '#aaaaaa' : '#6aff9f';
+  const color = t =>
+    t === 'error'
+      ? '#ff6b6b'
+      : t === 'warn'
+        ? '#ffb020'
+        : t === 'info'
+          ? '#66b3ff'
+          : t === 'debug'
+            ? '#aaaaaa'
+            : '#6aff9f';
 
   const ui = (
     <div
@@ -105,11 +113,15 @@ function DebugConsole({ visible = true, onClose }) {
       >
         <strong>🔍 Debug Console</strong>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => setMinimized((m) => !m)} style={btn('#9aff9a')}>
+          <button onClick={() => setMinimized(m => !m)} style={btn('#9aff9a')}>
             {minimized ? '⬆️' : '⬇️'}
           </button>
-          <button onClick={() => setLogs([])} style={btn('#9aff9a')}>🗑️</button>
-          <button onClick={onClose} style={btn('#ff6b6b')}>✖️</button>
+          <button onClick={() => setLogs([])} style={btn('#9aff9a')}>
+            🗑️
+          </button>
+          <button onClick={onClose} style={btn('#ff6b6b')}>
+            ✖️
+          </button>
         </div>
       </div>
 
@@ -120,21 +132,39 @@ function DebugConsole({ visible = true, onClose }) {
               Console output will appear here.
             </div>
           ) : (
-            logs.map((l) => (
+            logs.map(l => (
               <div
                 key={l.id}
                 style={{
                   marginBottom: 6,
                   padding: '6px 8px',
-                  background: l.type === 'error' ? '#2a1515' : l.type === 'warn' ? '#2a2415' : l.type === 'info' ? '#152028' : '#101010',
+                  background:
+                    l.type === 'error'
+                      ? '#2a1515'
+                      : l.type === 'warn'
+                        ? '#2a2415'
+                        : l.type === 'info'
+                          ? '#152028'
+                          : '#101010',
                   borderLeft: `3px solid ${color(l.type)}`,
                   borderRadius: 6,
                 }}
               >
                 <div style={{ display: 'flex', gap: 8 }}>
                   <span style={{ color: color(l.type), flexShrink: 0 }}>{icon(l.type)}</span>
-                  <span style={{ color: '#808080', fontSize: 10, width: 64, flexShrink: 0 }}>{l.ts}</span>
-                  <pre style={{ margin: 0, whiteSpace: 'pre-wrap', color: color(l.type), lineHeight: 1.35 }}>{l.msg}</pre>
+                  <span style={{ color: '#808080', fontSize: 10, width: 64, flexShrink: 0 }}>
+                    {l.ts}
+                  </span>
+                  <pre
+                    style={{
+                      margin: 0,
+                      whiteSpace: 'pre-wrap',
+                      color: color(l.type),
+                      lineHeight: 1.35,
+                    }}
+                  >
+                    {l.msg}
+                  </pre>
                 </div>
               </div>
             ))
@@ -148,7 +178,7 @@ function DebugConsole({ visible = true, onClose }) {
   return createPortal(ui, portalNode);
 }
 
-const btn = (c) => ({
+const btn = c => ({
   background: 'none',
   border: '1px solid #333',
   color: c,
@@ -157,7 +187,7 @@ const btn = (c) => ({
   cursor: 'pointer',
 });
 
-const icon = (t) =>
+const icon = t =>
   t === 'error' ? '❌' : t === 'warn' ? '⚠️' : t === 'info' ? 'ℹ️' : t === 'debug' ? '🐞' : '📝';
 
 /** --------------------------- Page UI --------------------------- **/
@@ -225,7 +255,9 @@ export default function ErrorScreen({
       </div>
 
       <div style={{ marginTop: 4, fontSize: 13, color: '#444' }}>
-        <div>API URL: <code>{API_BASE_URL || '—'}</code></div>
+        <div>
+          API URL: <code>{API_BASE_URL || '—'}</code>
+        </div>
         <div>🔧 For API testing, access the Super Admin Dashboard after login</div>
       </div>
 

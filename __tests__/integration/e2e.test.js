@@ -33,17 +33,17 @@ vi.mock('@telegram-moderator/shared/src/services/database.js', () => {
     resetStrikes: vi.fn(),
     logManualAction: vi.fn(), // Add missing mock for the new logging functionality
     isUserGroupAdmin: vi.fn().mockResolvedValue(true),
-    getGroup: vi.fn().mockResolvedValue({ 
-      chatId: '-1001', 
+    getGroup: vi.fn().mockResolvedValue({
+      chatId: '-1001',
       title: 'Test Group',
       type: 'supergroup',
-      memberCount: 100
+      memberCount: 100,
     }),
   };
 
   return {
-    ...mockDb,        // named exports
-    default: mockDb,  // default import
+    ...mockDb, // named exports
+    default: mockDb, // default import
   };
 });
 describe('End-to-End API and Bot Integration Test', () => {
@@ -71,13 +71,13 @@ describe('End-to-End API and Bot Integration Test', () => {
   it('should mute a user on first strike after an admin sets muteLevel=1 via API', async () => {
     // --- Phase 1: API call to change group setting ---
     // Mock axios for the admin check in checkGroupAdmin middleware
-    axios.post.mockResolvedValue({ 
-      data: { 
+    axios.post.mockResolvedValue({
+      data: {
         ok: true,
-        result: [{ user: { id: 123 } }] // User 123 is admin
-      } 
+        result: [{ user: { id: 123 } }], // User 123 is admin
+      },
     });
-    
+
     configService.updateSetting.mockResolvedValue({ success: true });
 
     const adminToken = tokenService.generateToken({ id: 123 });

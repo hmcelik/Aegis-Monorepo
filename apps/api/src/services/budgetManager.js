@@ -3,7 +3,7 @@ import logger from '@telegram-moderator/shared/src/services/logger.js';
 
 /**
  * BudgetManager handles tenant AI budget caps and spend tracking
- * 
+ *
  * Features:
  * - Monthly budget limits per tenant
  * - Real-time spend tracking
@@ -65,9 +65,12 @@ class BudgetManager {
    */
   async getBudget(tenantId) {
     try {
-      let budget = await this.db.get(`
+      let budget = await this.db.get(
+        `
         SELECT * FROM tenant_budgets WHERE tenant_id = ?
-      `, [tenantId]);
+      `,
+        [tenantId]
+      );
 
       // Create default budget if none exists
       if (!budget) {
@@ -77,7 +80,7 @@ class BudgetManager {
       // Check if we need to reset for new month
       const resetDate = new Date(budget.reset_date);
       const now = new Date();
-      
+
       if (now >= resetDate) {
         budget = await this.resetMonthlyBudget(tenantId);
       }
@@ -88,7 +91,7 @@ class BudgetManager {
         degradeMode: budget.degrade_mode,
         resetDate: budget.reset_date,
         createdAt: budget.created_at,
-        updatedAt: budget.updated_at
+        updatedAt: budget.updated_at,
       };
     } catch (error) {
       logger.error('BudgetManager: Failed to get budget', { tenantId, error: error.message });
@@ -102,19 +105,22 @@ class BudgetManager {
   async updateBudget(tenantId, updates) {
     try {
       const { monthlyLimit, degradeMode } = updates;
-      
-      await this.db.run(`
+
+      await this.db.run(
+        `
         UPDATE tenant_budgets 
         SET monthly_limit = ?, 
             degrade_mode = ?,
             updated_at = CURRENT_TIMESTAMP
         WHERE tenant_id = ?
-      `, [monthlyLimit, degradeMode, tenantId]);
+      `,
+        [monthlyLimit, degradeMode, tenantId]
+      );
 
-      logger.info('BudgetManager: Budget updated', { 
-        tenantId, 
-        monthlyLimit, 
-        degradeMode 
+      logger.info('BudgetManager: Budget updated', {
+        tenantId,
+        monthlyLimit,
+        degradeMode,
       });
 
       return await this.getBudget(tenantId);
@@ -130,18 +136,21 @@ class BudgetManager {
   async recordUsage(tenantId, usage) {
     try {
       const { tokens, cost, model, operation, timestamp } = usage;
-      
-      const result = await this.db.run(`
+
+      const result = await this.db.run(
+        `
         INSERT INTO ai_usage (tenant_id, tokens, cost, model, operation, timestamp)
         VALUES (?, ?, ?, ?, ?, ?)
-      `, [tenantId, tokens, cost, model, operation, timestamp || new Date()]);
+      `,
+        [tenantId, tokens, cost, model, operation, timestamp || new Date()]
+      );
 
-      logger.debug('BudgetManager: Usage recorded', { 
-        tenantId, 
-        tokens, 
-        cost, 
-        model, 
-        operation 
+      logger.debug('BudgetManager: Usage recorded', {
+        tenantId,
+        tokens,
+        cost,
+        model,
+        operation,
       });
 
       return {
@@ -151,7 +160,7 @@ class BudgetManager {
         cost,
         model,
         operation,
-        timestamp
+        timestamp,
       };
     } catch (error) {
       logger.error('BudgetManager: Failed to record usage', { tenantId, error: error.message });
@@ -168,7 +177,8 @@ class BudgetManager {
       startOfMonth.setDate(1);
       startOfMonth.setHours(0, 0, 0, 0);
 
-      const usage = await this.db.get(`
+      const usage = await this.db.get(
+        `
         SELECT 
           COUNT(*) as api_calls,
           SUM(tokens) as total_tokens,
@@ -177,16 +187,21 @@ class BudgetManager {
         FROM ai_usage 
         WHERE tenant_id = ? 
         AND timestamp >= ?
-      `, [tenantId, startOfMonth.toISOString()]);
+      `,
+        [tenantId, startOfMonth.toISOString()]
+      );
 
       return {
         apiCalls: usage.api_calls || 0,
         tokenCount: usage.total_tokens || 0,
         totalSpent: usage.total_spent || 0,
-        avgCostPerCall: usage.avg_cost_per_call || 0
+        avgCostPerCall: usage.avg_cost_per_call || 0,
       };
     } catch (error) {
-      logger.error('BudgetManager: Failed to get current usage', { tenantId, error: error.message });
+      logger.error('BudgetManager: Failed to get current usage', {
+        tenantId,
+        error: error.message,
+      });
       throw error;
     }
   }
@@ -198,10 +213,13 @@ class BudgetManager {
     try {
       const budget = await this.getBudget(tenantId);
       const usage = await this.getCurrentUsage(tenantId);
-      
+
       return usage.totalSpent >= budget.monthlyLimit;
     } catch (error) {
-      logger.error('BudgetManager: Failed to check budget status', { tenantId, error: error.message });
+      logger.error('BudgetManager: Failed to check budget status', {
+        tenantId,
+        error: error.message,
+      });
       return false; // Default to allowing operations on error
     }
   }
@@ -212,20 +230,18 @@ class BudgetManager {
   async getUsageHistory(tenantId, options = {}) {
     try {
       const { startDate, endDate, limit = 100 } = options;
-      
-      const history = await this.db.all(`
+
+      const history = await this.db.all(
+        `
         SELECT * FROM ai_usage 
         WHERE tenant_id = ? 
         AND timestamp >= ? 
         AND timestamp <= ?
         ORDER BY timestamp DESC
         LIMIT ?
-      `, [
-        tenantId, 
-        startDate.toISOString(), 
-        endDate.toISOString(), 
-        limit
-      ]);
+      `,
+        [tenantId, startDate.toISOString(), endDate.toISOString(), limit]
+      );
 
       return history.map(record => ({
         id: record.id,
@@ -234,10 +250,13 @@ class BudgetManager {
         cost: record.cost,
         model: record.model,
         operation: record.operation,
-        timestamp: record.timestamp
+        timestamp: record.timestamp,
       }));
     } catch (error) {
-      logger.error('BudgetManager: Failed to get usage history', { tenantId, error: error.message });
+      logger.error('BudgetManager: Failed to get usage history', {
+        tenantId,
+        error: error.message,
+      });
       throw error;
     }
   }
@@ -251,7 +270,8 @@ class BudgetManager {
       const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
       // Daily usage breakdown
-      const dailyUsage = await this.db.all(`
+      const dailyUsage = await this.db.all(
+        `
         SELECT 
           DATE(timestamp) as date,
           SUM(cost) as daily_spent,
@@ -262,10 +282,13 @@ class BudgetManager {
         AND timestamp >= ?
         GROUP BY DATE(timestamp)
         ORDER BY date
-      `, [tenantId, startDate.toISOString()]);
+      `,
+        [tenantId, startDate.toISOString()]
+      );
 
       // Model usage breakdown
-      const modelUsage = await this.db.all(`
+      const modelUsage = await this.db.all(
+        `
         SELECT 
           model,
           SUM(cost) as total_cost,
@@ -276,10 +299,13 @@ class BudgetManager {
         AND timestamp >= ?
         GROUP BY model
         ORDER BY total_cost DESC
-      `, [tenantId, startDate.toISOString()]);
+      `,
+        [tenantId, startDate.toISOString()]
+      );
 
       // Operation type breakdown
-      const operationUsage = await this.db.all(`
+      const operationUsage = await this.db.all(
+        `
         SELECT 
           operation,
           SUM(cost) as total_cost,
@@ -290,7 +316,9 @@ class BudgetManager {
         AND timestamp >= ?
         GROUP BY operation
         ORDER BY total_cost DESC
-      `, [tenantId, startDate.toISOString()]);
+      `,
+        [tenantId, startDate.toISOString()]
+      );
 
       return {
         period,
@@ -298,20 +326,20 @@ class BudgetManager {
           date: day.date,
           spent: day.daily_spent || 0,
           tokens: day.daily_tokens || 0,
-          calls: day.daily_calls || 0
+          calls: day.daily_calls || 0,
         })),
         modelBreakdown: modelUsage.map(model => ({
           model: model.model,
           cost: model.total_cost || 0,
           tokens: model.total_tokens || 0,
-          calls: model.call_count || 0
+          calls: model.call_count || 0,
         })),
         operationBreakdown: operationUsage.map(op => ({
           operation: op.operation,
           cost: op.total_cost || 0,
           tokens: op.total_tokens || 0,
-          calls: op.call_count || 0
-        }))
+          calls: op.call_count || 0,
+        })),
       };
     } catch (error) {
       logger.error('BudgetManager: Failed to get analytics', { tenantId, error: error.message });
@@ -329,16 +357,22 @@ class BudgetManager {
       nextMonth.setDate(1);
       nextMonth.setHours(0, 0, 0, 0);
 
-      await this.db.run(`
+      await this.db.run(
+        `
         INSERT INTO tenant_budgets (tenant_id, monthly_limit, degrade_mode, reset_date)
         VALUES (?, ?, ?, ?)
-      `, [tenantId, 100.0, 'strict_rules', nextMonth.toISOString()]);
+      `,
+        [tenantId, 100.0, 'strict_rules', nextMonth.toISOString()]
+      );
 
       logger.info('BudgetManager: Created default budget', { tenantId });
-      
+
       return await this.getBudget(tenantId);
     } catch (error) {
-      logger.error('BudgetManager: Failed to create default budget', { tenantId, error: error.message });
+      logger.error('BudgetManager: Failed to create default budget', {
+        tenantId,
+        error: error.message,
+      });
       throw error;
     }
   }
@@ -353,17 +387,23 @@ class BudgetManager {
       nextMonth.setDate(1);
       nextMonth.setHours(0, 0, 0, 0);
 
-      await this.db.run(`
+      await this.db.run(
+        `
         UPDATE tenant_budgets 
         SET reset_date = ?, updated_at = CURRENT_TIMESTAMP
         WHERE tenant_id = ?
-      `, [nextMonth.toISOString(), tenantId]);
+      `,
+        [nextMonth.toISOString(), tenantId]
+      );
 
       logger.info('BudgetManager: Reset monthly budget', { tenantId, nextResetDate: nextMonth });
-      
+
       return await this.getBudget(tenantId);
     } catch (error) {
-      logger.error('BudgetManager: Failed to reset monthly budget', { tenantId, error: error.message });
+      logger.error('BudgetManager: Failed to reset monthly budget', {
+        tenantId,
+        error: error.message,
+      });
       throw error;
     }
   }

@@ -9,26 +9,50 @@
     "dev": "turbo run dev --parallel",
     "dev:api": "turbo run dev --filter=@telegram-moderator/api",
     "dev:bot": "turbo run dev --filter=@telegram-moderator/bot",
-    "dev:web": "turbo run dev --filter=mini-app-dashboard",
+    "dev:web": "turbo run dev --filter=@telegram-moderator/web",
     "dev:worker": "turbo run dev --filter=@telegram-moderator/worker",
     "dev:ngrok": "turbo run ngrok --filter=@telegram-moderator/bot",
     "dev:api-with-ngrok": "concurrently \"turbo run dev --filter=@telegram-moderator/api\" \"turbo run ngrok --filter=@telegram-moderator/bot\"",
     "build": "turbo run build",
+    "build:api": "turbo run build --filter=@telegram-moderator/api",
+    "build:bot": "turbo run build --filter=@telegram-moderator/bot",
+    "build:web": "turbo run build --filter=@telegram-moderator/web",
+    "build:worker": "turbo run build --filter=@telegram-moderator/worker",
+    "build:packages": "turbo run build --filter='./packages/*'",
     "start": "turbo run start",
+    "start:api": "turbo run start --filter=@telegram-moderator/api",
+    "start:bot": "turbo run start --filter=@telegram-moderator/bot",
+    "start:web": "turbo run start --filter=@telegram-moderator/web",
+    "start:worker": "turbo run start --filter=@telegram-moderator/worker",
     "test": "turbo run test",
     "test:api": "turbo run test --filter=@telegram-moderator/api",
     "test:bot": "turbo run test --filter=@telegram-moderator/bot",
-    "test:web": "turbo run test --filter=mini-app-dashboard",
+    "test:web": "turbo run test --filter=@telegram-moderator/web",
     "test:worker": "turbo run test --filter=@telegram-moderator/worker",
     "test:unit": "vitest run __tests__/unit",
     "test:e2e": "vitest run __tests__/e2e",
-    "lint": "turbo run lint"
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "type-check": "turbo run type-check",
+    "format": "prettier --write \"**/*.{js,ts,jsx,tsx,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{js,ts,jsx,tsx,json,md,yml,yaml}\"",
+    "clean": "turbo run clean",
+    "clean:deps": "pnpm -r exec rm -rf node_modules && rm -rf node_modules",
+    "clean:dist": "pnpm -r exec rm -rf dist && pnpm -r exec rm -rf build",
+    "clean:cache": "turbo clean && rm -rf .turbo",
+    "clean:logs": "find . -name '*.log' -not -path './node_modules/*' -delete",
+    "reset": "pnpm clean:deps && pnpm clean:dist && pnpm clean:cache && pnpm install"
   },
   "devDependencies": {
     "@types/node": "^22.5.5",
     "concurrently": "^8.2.2",
     "express": "^5.1.0",
+    "husky": "^8.0.3",
     "ioredis": "^5.7.0",
+    "lint-staged": "^13.2.3",
+    "prettier": "^3.3.3",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
     "supertest": "^7.1.4",
@@ -41,5 +65,14 @@
     "@types/jsonwebtoken": "^9.0.10",
     "axios": "^1.11.0",
     "jsonwebtoken": "^9.0.2"
+  },
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }

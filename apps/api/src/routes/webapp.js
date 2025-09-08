@@ -3,6 +3,7 @@ import * as webAppController from '../controllers/webAppController.js';
 import { verifyTelegramWebApp } from '../middleware/verifyTelegramWebApp.js';
 import { checkJwt } from '../middleware/checkJwt.js';
 
+/** @type {import('express').Router} */
 const router = express.Router();
 
 /**
@@ -229,8 +230,16 @@ router.get('/user/groups', verifyTelegramWebApp, webAppController.getUserGroups)
  *       200:
  *         description: Settings updated successfully
  */
-router.get('/group/:groupId/settings', verifyTelegramWebApp, webAppController.getGroupSettingsWebApp);
-router.put('/group/:groupId/settings', verifyTelegramWebApp, webAppController.updateGroupSettingsWebApp);
+router.get(
+  '/group/:groupId/settings',
+  verifyTelegramWebApp,
+  webAppController.getGroupSettingsWebApp
+);
+router.put(
+  '/group/:groupId/settings',
+  verifyTelegramWebApp,
+  webAppController.updateGroupSettingsWebApp
+);
 
 /**
  * @swagger
@@ -263,7 +272,11 @@ router.get('/group/:groupId/stats', verifyTelegramWebApp, webAppController.getGr
 // New analytics endpoints
 router.get('/group/:groupId/users', verifyTelegramWebApp, webAppController.getUserActivityStats);
 router.get('/group/:groupId/patterns', verifyTelegramWebApp, webAppController.getActivityPatterns);
-router.get('/group/:groupId/effectiveness', verifyTelegramWebApp, webAppController.getModerationEffectiveness);
+router.get(
+  '/group/:groupId/effectiveness',
+  verifyTelegramWebApp,
+  webAppController.getModerationEffectiveness
+);
 
 /**
  * @swagger

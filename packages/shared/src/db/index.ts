@@ -4,15 +4,12 @@ import winston from 'winston';
 // Create a simple logger for the database module
 const logger = winston.createLogger({
   level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
   transports: [
     new winston.transports.Console({
-      format: winston.format.simple()
-    })
-  ]
+      format: winston.format.simple(),
+    }),
+  ],
 });
 
 /**
@@ -86,7 +83,10 @@ export abstract class BaseRepository extends EventEmitter {
   /**
    * Execute a command (INSERT, UPDATE, DELETE)
    */
-  protected async run(sql: string, params: any[] = []): Promise<{ changes: number; lastInsertRowid?: number | bigint }> {
+  protected async run(
+    sql: string,
+    params: any[] = []
+  ): Promise<{ changes: number; lastInsertRowid?: number | bigint }> {
     try {
       const result = await this.db.run(sql, params);
       this.emit('command', { sql, params, changes: result.changes });
@@ -160,15 +160,15 @@ export abstract class BaseRepository extends EventEmitter {
     }
 
     const tenantFilter = `tenant_id = '${this.tenantId}'`;
-    
+
     if (!baseWhere.trim()) {
       return `WHERE ${tenantFilter}`;
     }
-    
+
     if (baseWhere.trim().toUpperCase().startsWith('WHERE')) {
       return `${baseWhere} AND ${tenantFilter}`;
     }
-    
+
     return `WHERE ${tenantFilter} AND (${baseWhere})`;
   }
 
@@ -204,7 +204,7 @@ export class DatabaseManager extends EventEmitter {
       this.connections.set(name, connection);
       this.emit('connection-created', { name, type: this.config.type });
     }
-    
+
     return this.connections.get(name)!;
   }
 
@@ -213,10 +213,10 @@ export class DatabaseManager extends EventEmitter {
    */
   registerMigration(migration: Migration): void {
     this.migrations.set(migration.id, migration);
-    logger.info('Migration registered', { 
-      id: migration.id, 
+    logger.info('Migration registered', {
+      id: migration.id,
       name: migration.name,
-      dependencies: migration.dependencies 
+      dependencies: migration.dependencies,
     });
   }
 
@@ -225,30 +225,30 @@ export class DatabaseManager extends EventEmitter {
    */
   async runMigrations(): Promise<void> {
     const connection = await this.getConnection();
-    
+
     // Ensure migrations table exists
     await this.ensureMigrationsTable(connection);
-    
+
     // Get completed migrations
     const completed = await this.getCompletedMigrations(connection);
     const completedIds = new Set(completed.map(m => m.id));
-    
+
     // Find pending migrations
     const pending = Array.from(this.migrations.values())
       .filter(m => !completedIds.has(m.id))
       .sort((a, b) => a.id.localeCompare(b.id)); // Sort by ID for deterministic order
-    
+
     if (pending.length === 0) {
       logger.info('No pending migrations');
       return;
     }
-    
+
     logger.info('Running migrations', { count: pending.length });
-    
+
     for (const migration of pending) {
       await this.runSingleMigration(connection, migration);
     }
-    
+
     this.emit('migrations-completed', { count: pending.length });
   }
 
@@ -271,10 +271,10 @@ export class DatabaseManager extends EventEmitter {
   private async createSQLiteConnection(): Promise<DatabaseConnection> {
     const sqlite3 = await import('sqlite3');
     const { open } = await import('sqlite');
-    
+
     const db = await open({
       filename: this.config.database || ':memory:',
-      driver: sqlite3.Database
+      driver: sqlite3.Database,
     });
 
     // Enable WAL mode for better concurrency
@@ -285,34 +285,37 @@ export class DatabaseManager extends EventEmitter {
       async query(sql: string, params: any[] = []): Promise<any[]> {
         return db.all(sql, params);
       },
-      
-      async run(sql: string, params: any[] = []): Promise<{ changes: number; lastInsertRowid?: number | bigint }> {
+
+      async run(
+        sql: string,
+        params: any[] = []
+      ): Promise<{ changes: number; lastInsertRowid?: number | bigint }> {
         const result = await db.run(sql, params);
         return {
           changes: result.changes || 0,
-          lastInsertRowid: result.lastID
+          lastInsertRowid: result.lastID,
         };
       },
-      
+
       async exec(sql: string): Promise<void> {
         await db.exec(sql);
       },
-      
+
       async close(): Promise<void> {
         await db.close();
       },
-      
+
       async begin(): Promise<void> {
         await db.exec('BEGIN TRANSACTION;');
       },
-      
+
       async commit(): Promise<void> {
         await db.exec('COMMIT;');
       },
-      
+
       async rollback(): Promise<void> {
         await db.exec('ROLLBACK;');
-      }
+      },
     };
   }
 
@@ -321,7 +324,7 @@ export class DatabaseManager extends EventEmitter {
    */
   private async createPostgresConnection(): Promise<DatabaseConnection> {
     const { Pool } = await import('pg');
-    
+
     const pool = new Pool({
       connectionString: this.config.connectionString,
       host: this.config.host,
@@ -331,7 +334,7 @@ export class DatabaseManager extends EventEmitter {
       password: this.config.password,
       ssl: this.config.ssl,
       max: this.config.poolSize || 10,
-      connectionTimeoutMillis: this.config.timeoutMs || 30000
+      connectionTimeoutMillis: this.config.timeoutMs || 30000,
     });
 
     let currentClient: any = null;
@@ -342,32 +345,35 @@ export class DatabaseManager extends EventEmitter {
         const result = await client.query(sql, params);
         return result.rows;
       },
-      
-      async run(sql: string, params: any[] = []): Promise<{ changes: number; lastInsertRowid?: number | bigint }> {
+
+      async run(
+        sql: string,
+        params: any[] = []
+      ): Promise<{ changes: number; lastInsertRowid?: number | bigint }> {
         const client = currentClient || pool;
         const result = await client.query(sql, params);
         return {
           changes: result.rowCount || 0,
-          lastInsertRowid: result.rows[0]?.id
+          lastInsertRowid: result.rows[0]?.id,
         };
       },
-      
+
       async exec(sql: string): Promise<void> {
         const client = currentClient || pool;
         await client.query(sql);
       },
-      
+
       async close(): Promise<void> {
         await pool.end();
       },
-      
+
       async begin(): Promise<void> {
         if (!currentClient) {
           currentClient = await pool.connect();
         }
         await currentClient.query('BEGIN');
       },
-      
+
       async commit(): Promise<void> {
         if (currentClient) {
           await currentClient.query('COMMIT');
@@ -375,14 +381,14 @@ export class DatabaseManager extends EventEmitter {
           currentClient = null;
         }
       },
-      
+
       async rollback(): Promise<void> {
         if (currentClient) {
           await currentClient.query('ROLLBACK');
           currentClient.release();
           currentClient = null;
         }
-      }
+      },
     };
   }
 
@@ -390,27 +396,32 @@ export class DatabaseManager extends EventEmitter {
    * Ensure migrations tracking table exists
    */
   private async ensureMigrationsTable(connection: DatabaseConnection): Promise<void> {
-    const sql = this.config.type === 'postgres' 
-      ? `CREATE TABLE IF NOT EXISTS schema_migrations (
+    const sql =
+      this.config.type === 'postgres'
+        ? `CREATE TABLE IF NOT EXISTS schema_migrations (
           id VARCHAR(255) PRIMARY KEY,
           name VARCHAR(255) NOT NULL,
           applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )`
-      : `CREATE TABLE IF NOT EXISTS schema_migrations (
+        : `CREATE TABLE IF NOT EXISTS schema_migrations (
           id TEXT PRIMARY KEY,
           name TEXT NOT NULL,
           applied_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`;
-    
+
     await connection.exec(sql);
   }
 
   /**
    * Get list of completed migrations
    */
-  private async getCompletedMigrations(connection: DatabaseConnection): Promise<{ id: string; name: string; applied_at: string }[]> {
+  private async getCompletedMigrations(
+    connection: DatabaseConnection
+  ): Promise<{ id: string; name: string; applied_at: string }[]> {
     try {
-      return await connection.query('SELECT id, name, applied_at FROM schema_migrations ORDER BY applied_at');
+      return await connection.query(
+        'SELECT id, name, applied_at FROM schema_migrations ORDER BY applied_at'
+      );
     } catch (error) {
       // Table might not exist yet
       return [];
@@ -420,22 +431,25 @@ export class DatabaseManager extends EventEmitter {
   /**
    * Run a single migration
    */
-  private async runSingleMigration(connection: DatabaseConnection, migration: Migration): Promise<void> {
+  private async runSingleMigration(
+    connection: DatabaseConnection,
+    migration: Migration
+  ): Promise<void> {
     logger.info('Running migration', { id: migration.id, name: migration.name });
-    
+
     await connection.begin();
     try {
       // Run the migration
       await migration.up(connection);
-      
+
       // Record completion
-      await connection.run(
-        'INSERT INTO schema_migrations (id, name) VALUES (?, ?)',
-        [migration.id, migration.name]
-      );
-      
+      await connection.run('INSERT INTO schema_migrations (id, name) VALUES (?, ?)', [
+        migration.id,
+        migration.name,
+      ]);
+
       await connection.commit();
-      
+
       logger.info('Migration completed', { id: migration.id, name: migration.name });
       this.emit('migration-completed', { id: migration.id, name: migration.name });
     } catch (error) {

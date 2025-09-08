@@ -1,6 +1,7 @@
 import express from 'express';
 import * as systemController from '../controllers/systemController.js';
 
+/** @type {import('express').Router} */
 const router = express.Router();
 
 /**

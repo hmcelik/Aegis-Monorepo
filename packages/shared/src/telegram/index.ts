@@ -54,14 +54,14 @@ export class TelegramClient {
       baseDelay: config.baseDelay || 1000,
       maxDelay: config.maxDelay || 30000,
       circuitBreakerThreshold: config.circuitBreakerThreshold || 5,
-      circuitBreakerResetTime: config.circuitBreakerResetTime || 60000
+      circuitBreakerResetTime: config.circuitBreakerResetTime || 60000,
     };
 
     this.circuitBreaker = {
       state: 'closed',
       failures: 0,
       lastFailureTime: 0,
-      nextRetryTime: 0
+      nextRetryTime: 0,
     };
   }
 
@@ -81,44 +81,43 @@ export class TelegramClient {
       logger.warn('Circuit breaker is open, rejecting API call', {
         method,
         circuitBreakerState: this.circuitBreaker.state,
-        nextRetryTime: new Date(this.circuitBreaker.nextRetryTime).toISOString()
+        nextRetryTime: new Date(this.circuitBreaker.nextRetryTime).toISOString(),
       });
       throw new Error('Circuit breaker is open');
     }
 
     let lastError: Error | null = null;
-    
+
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
         // Add jitter to prevent thundering herd
         if (attempt > 0) {
           const delay = this.calculateBackoffDelay(attempt);
-          logger.debug('Retrying API call after delay', { 
-            method, 
-            attempt, 
-            delay 
+          logger.debug('Retrying API call after delay', {
+            method,
+            attempt,
+            delay,
           });
           await this.sleep(delay);
         }
 
         const response = await this.makeHttpRequest<T>(method, params, timeout);
-        
+
         // Handle successful response
         this.recordSuccess();
         const duration = Date.now() - startTime;
-        
+
         logger.debug('Telegram API call successful', {
           method,
           attempt,
           duration,
-          ok: response.ok
+          ok: response.ok,
         });
 
         return response;
-
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        
+
         // Check if this is a rate limit error
         if (this.isRateLimitError(lastError)) {
           const retryAfter = this.extractRetryAfter(lastError);
@@ -127,7 +126,7 @@ export class TelegramClient {
               method,
               attempt,
               retryAfter,
-              willRetry: true
+              willRetry: true,
             });
             await this.sleep(retryAfter * 1000);
             continue;
@@ -142,7 +141,7 @@ export class TelegramClient {
           logger.error('Non-retryable error from Telegram API', {
             method,
             error: lastError.message,
-            attempt
+            attempt,
           });
           break;
         }
@@ -151,7 +150,7 @@ export class TelegramClient {
           method,
           attempt,
           error: lastError.message,
-          willRetry: attempt < retries
+          willRetry: attempt < retries,
         });
       }
     }
@@ -162,7 +161,7 @@ export class TelegramClient {
       method,
       retries,
       duration,
-      lastError: lastError?.message
+      lastError: lastError?.message,
     });
 
     throw lastError || new Error('Unknown error occurred');
@@ -177,7 +176,7 @@ export class TelegramClient {
     timeout: number
   ): Promise<TelegramResponse<T>> {
     const url = `${this.config.apiUrl}/bot${this.config.botToken}/${method}`;
-    
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -188,7 +187,7 @@ export class TelegramClient {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(params),
-        signal: controller.signal
+        signal: controller.signal,
       });
 
       clearTimeout(timeoutId);
@@ -199,7 +198,6 @@ export class TelegramClient {
 
       const data = await response.json();
       return data as TelegramResponse<T>;
-
     } catch (error) {
       clearTimeout(timeoutId);
       throw error;
@@ -214,11 +212,11 @@ export class TelegramClient {
       this.config.baseDelay * Math.pow(2, attempt - 1),
       this.config.maxDelay
     );
-    
+
     // Add jitter (±25% of the delay)
     const jitter = exponentialDelay * 0.25 * (Math.random() * 2 - 1);
     const delay = Math.round(exponentialDelay + jitter);
-    
+
     return Math.max(delay, 100); // Minimum 100ms delay
   }
 
@@ -226,9 +224,11 @@ export class TelegramClient {
    * Check if error is rate limiting related
    */
   private isRateLimitError(error: Error): boolean {
-    return error.message.includes('429') || 
-           error.message.includes('Too Many Requests') ||
-           error.message.includes('retry_after');
+    return (
+      error.message.includes('429') ||
+      error.message.includes('Too Many Requests') ||
+      error.message.includes('retry_after')
+    );
   }
 
   /**
@@ -244,12 +244,14 @@ export class TelegramClient {
    */
   private isNonRetryableError(error: Error): boolean {
     const message = error.message.toLowerCase();
-    return message.includes('401') || // Unauthorized
-           message.includes('403') || // Forbidden
-           message.includes('400') || // Bad Request
-           message.includes('chat not found') ||
-           message.includes('user not found') ||
-           message.includes('message not found');
+    return (
+      message.includes('401') || // Unauthorized
+      message.includes('403') || // Forbidden
+      message.includes('400') || // Bad Request
+      message.includes('chat not found') ||
+      message.includes('user not found') ||
+      message.includes('message not found')
+    );
   }
 
   /**
@@ -261,7 +263,7 @@ export class TelegramClient {
     switch (this.circuitBreaker.state) {
       case 'closed':
         return true;
-      
+
       case 'open':
         if (now >= this.circuitBreaker.nextRetryTime) {
           this.circuitBreaker.state = 'half-open';
@@ -269,10 +271,10 @@ export class TelegramClient {
           return true;
         }
         return false;
-      
+
       case 'half-open':
         return true;
-      
+
       default:
         return true;
     }
@@ -283,7 +285,7 @@ export class TelegramClient {
    */
   private recordSuccess(): void {
     this.callCount++;
-    
+
     if (this.circuitBreaker.state === 'half-open') {
       this.circuitBreaker.state = 'closed';
       this.circuitBreaker.failures = 0;
@@ -303,11 +305,11 @@ export class TelegramClient {
     if (this.circuitBreaker.failures >= this.config.circuitBreakerThreshold) {
       this.circuitBreaker.state = 'open';
       this.circuitBreaker.nextRetryTime = Date.now() + this.config.circuitBreakerResetTime;
-      
+
       logger.warn('Circuit breaker opened due to high failure rate', {
         failures: this.circuitBreaker.failures,
         threshold: this.config.circuitBreakerThreshold,
-        nextRetryTime: new Date(this.circuitBreaker.nextRetryTime).toISOString()
+        nextRetryTime: new Date(this.circuitBreaker.nextRetryTime).toISOString(),
       });
     }
   }
@@ -325,19 +327,20 @@ export class TelegramClient {
   getMetrics() {
     const now = Date.now();
     const uptimeMs = now - this.lastResetTime;
-    
+
     return {
       totalCalls: this.callCount,
       errorCount: this.errorCount,
-      successRate: this.callCount > 0 ? ((this.callCount - this.errorCount) / this.callCount) : 1,
+      successRate: this.callCount > 0 ? (this.callCount - this.errorCount) / this.callCount : 1,
       circuitBreaker: {
         state: this.circuitBreaker.state,
         failures: this.circuitBreaker.failures,
-        nextRetryTime: this.circuitBreaker.nextRetryTime > now 
-          ? new Date(this.circuitBreaker.nextRetryTime).toISOString() 
-          : null
+        nextRetryTime:
+          this.circuitBreaker.nextRetryTime > now
+            ? new Date(this.circuitBreaker.nextRetryTime).toISOString()
+            : null,
       },
-      uptimeMs
+      uptimeMs,
     };
   }
 
@@ -352,41 +355,54 @@ export class TelegramClient {
       state: 'closed',
       failures: 0,
       lastFailureTime: 0,
-      nextRetryTime: 0
+      nextRetryTime: 0,
     };
   }
 
   // Convenience methods for common Telegram API calls
-  
-  async sendMessage(chatId: number | string, text: string, options: any = {}): Promise<TelegramResponse> {
+
+  async sendMessage(
+    chatId: number | string,
+    text: string,
+    options: any = {}
+  ): Promise<TelegramResponse> {
     return this.apiCall('sendMessage', {
       chat_id: chatId,
       text,
-      ...options
+      ...options,
     });
   }
 
   async deleteMessage(chatId: number | string, messageId: number): Promise<TelegramResponse> {
     return this.apiCall('deleteMessage', {
       chat_id: chatId,
-      message_id: messageId
+      message_id: messageId,
     });
   }
 
-  async banChatMember(chatId: number | string, userId: number, options: any = {}): Promise<TelegramResponse> {
+  async banChatMember(
+    chatId: number | string,
+    userId: number,
+    options: any = {}
+  ): Promise<TelegramResponse> {
     return this.apiCall('banChatMember', {
       chat_id: chatId,
       user_id: userId,
-      ...options
+      ...options,
     });
   }
 
-  async restrictChatMember(chatId: number | string, userId: number, permissions: any, options: any = {}): Promise<TelegramResponse> {
+  async restrictChatMember(
+    chatId: number | string,
+    userId: number,
+    permissions: any,
+    options: any = {}
+  ): Promise<TelegramResponse> {
     return this.apiCall('restrictChatMember', {
       chat_id: chatId,
       user_id: userId,
       permissions,
-      ...options
+      ...options,
     });
   }
 
@@ -394,7 +410,7 @@ export class TelegramClient {
     return this.apiCall('unbanChatMember', {
       chat_id: chatId,
       user_id: userId,
-      only_if_banned: true
+      only_if_banned: true,
     });
   }
 }

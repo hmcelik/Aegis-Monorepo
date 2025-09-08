@@ -10,22 +10,17 @@ const AuditLog = ({ groupId, groupTitle }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [exportLoading, setExportLoading] = useState(false);
-  
+
   // Filter states
   const [filters, setFilters] = useState({
     userId: '',
     type: '', // Changed from actionType to type
     startDate: '',
-    endDate: ''
+    endDate: '',
   });
   const [appliedFilters, setAppliedFilters] = useState({});
 
-  const actionTypes = [
-    'AUTO',
-    'MANUAL-STRIKE-ADD',
-    'MANUAL-STRIKE-REMOVE',
-    'MANUAL-STRIKE-SET'
-  ];
+  const actionTypes = ['AUTO', 'MANUAL-STRIKE-ADD', 'MANUAL-STRIKE-REMOVE', 'MANUAL-STRIKE-SET'];
 
   const loadAuditLogs = useCallback(async () => {
     setLoading(true);
@@ -33,19 +28,19 @@ const AuditLog = ({ groupId, groupTitle }) => {
       const options = {
         page: currentPage,
         limit: pageSize,
-        ...appliedFilters
+        ...appliedFilters,
       };
 
       const response = await apiService.audit.getLogs(groupId, options);
-      
+
       console.log('Audit logs response:', response); // Debug log
-      
+
       if (response?.data) {
         // Handle different response formats:
         // Backend format: { data: { success: true, data: [...], pagination: {} } }
         let logsData = [];
         let paginationData = null;
-        
+
         if (response.data.data && Array.isArray(response.data.data)) {
           // Backend format: response.data.data contains the logs array
           logsData = response.data.data;
@@ -65,13 +60,13 @@ const AuditLog = ({ groupId, groupTitle }) => {
           console.warn('⚠️ Unexpected response format:', response);
           logsData = [];
         }
-        
+
         console.log('Processed logs data:', logsData); // Debug log
         console.log('Processed pagination:', paginationData); // Debug log
-        
+
         setLogs(logsData);
         setPagination(paginationData);
-        
+
         const filterCount = Object.keys(appliedFilters).filter(key => appliedFilters[key]).length;
         if (filterCount > 0) {
           toast.success(`Loaded ${logsData.length} audit entries with ${filterCount} filter(s)`);
@@ -84,17 +79,24 @@ const AuditLog = ({ groupId, groupTitle }) => {
       }
     } catch (error) {
       console.error('Error loading audit logs:', error);
-      
+
       // Check for specific backend database errors
-      if (error.response?.status === 500 && error.response?.data?.error?.code === 'DATABASE_ERROR') {
-        console.warn('📊 Backend database issue detected, audit logs may be temporarily unavailable');
-        toast.error('Audit logs are temporarily unavailable due to a database issue. Please try again later.');
+      if (
+        error.response?.status === 500 &&
+        error.response?.data?.error?.code === 'DATABASE_ERROR'
+      ) {
+        console.warn(
+          '📊 Backend database issue detected, audit logs may be temporarily unavailable'
+        );
+        toast.error(
+          'Audit logs are temporarily unavailable due to a database issue. Please try again later.'
+        );
         setError('Database temporarily unavailable. The backend team has been notified.');
       } else {
         toast.error(`Failed to load audit logs: ${error.message}`);
         setError(error.message);
       }
-      
+
       setLogs([]);
     } finally {
       setLoading(false);
@@ -108,7 +110,7 @@ const AuditLog = ({ groupId, groupTitle }) => {
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
   };
 
@@ -123,7 +125,7 @@ const AuditLog = ({ groupId, groupTitle }) => {
 
     setAppliedFilters(cleanFilters);
     setCurrentPage(1); // Reset to first page when applying filters
-    
+
     const filterCount = Object.keys(cleanFilters).length;
     toast.info(`Applied ${filterCount} filter(s)`);
   };
@@ -133,38 +135,40 @@ const AuditLog = ({ groupId, groupTitle }) => {
       userId: '',
       type: '',
       startDate: '',
-      endDate: ''
+      endDate: '',
     });
     setAppliedFilters({});
     setCurrentPage(1);
     toast.info('Filters cleared');
   };
 
-  const handlePageChange = (newPage) => {
+  const handlePageChange = newPage => {
     if (newPage >= 1 && newPage <= (pagination?.totalPages || 1)) {
       setCurrentPage(newPage);
     }
   };
 
-  const exportLogs = async (format) => {
+  const exportLogs = async format => {
     setExportLoading(true);
     try {
       const response = await apiService.audit.export(groupId, format, appliedFilters);
-      
+
       // Check if we're in Telegram WebApp context
       const isWebApp = window.Telegram?.WebApp?.initData;
-      
+
       if (format === 'csv' && response?.data instanceof Blob) {
         // Handle CSV download
-        const filename = response.headers?.['content-disposition']
-          ?.match(/filename="([^"]+)"/)?.[1] || 
+        const filename =
+          response.headers?.['content-disposition']?.match(/filename="([^"]+)"/)?.[1] ||
           `audit_log_${groupId}_${new Date().toISOString().split('T')[0]}.csv`;
-        
+
         if (isWebApp) {
           // For Telegram WebApp, convert blob to text and copy to clipboard
           const text = await response.data.text();
           await navigator.clipboard.writeText(text);
-          toast.success('� CSV data copied to clipboard! You can paste it into a spreadsheet application.');
+          toast.success(
+            '� CSV data copied to clipboard! You can paste it into a spreadsheet application.'
+          );
         } else {
           // Regular web browser download
           const url = window.URL.createObjectURL(response.data);
@@ -177,12 +181,11 @@ const AuditLog = ({ groupId, groupTitle }) => {
           window.URL.revokeObjectURL(url);
           toast.success('📁 CSV export downloaded successfully');
         }
-        
       } else if (format === 'json' && response?.data) {
         // Handle JSON download
         const jsonData = JSON.stringify(response.data, null, 2);
         const filename = `audit_log_${groupId}_${new Date().toISOString().split('T')[0]}.json`;
-        
+
         if (isWebApp) {
           // For Telegram WebApp, copy JSON data to clipboard
           await navigator.clipboard.writeText(jsonData);
@@ -209,36 +212,36 @@ const AuditLog = ({ groupId, groupTitle }) => {
     }
   };
 
-  const formatTimestamp = (timestamp) => {
+  const formatTimestamp = timestamp => {
     return new Date(timestamp).toLocaleString();
   };
 
-  const getActionIcon = (action) => {
+  const getActionIcon = action => {
     const iconMap = {
-      'AUTO': '🤖',
+      AUTO: '🤖',
       'MANUAL-STRIKE-ADD': '➕',
       'MANUAL-STRIKE-REMOVE': '➖',
-      'MANUAL-STRIKE-SET': '📝'
+      'MANUAL-STRIKE-SET': '📝',
     };
     return iconMap[action] || '📋';
   };
 
-  const getActionColor = (action) => {
+  const getActionColor = action => {
     const colorMap = {
-      'AUTO': '#17a2b8',
+      AUTO: '#17a2b8',
       'MANUAL-STRIKE-ADD': '#dc3545',
       'MANUAL-STRIKE-REMOVE': '#28a745',
-      'MANUAL-STRIKE-SET': '#007bff'
+      'MANUAL-STRIKE-SET': '#007bff',
     };
     return colorMap[action] || '#6c757d';
   };
 
-  const formatActionName = (action) => {
+  const formatActionName = action => {
     const nameMap = {
-      'AUTO': 'Automatic Action',
+      AUTO: 'Automatic Action',
       'MANUAL-STRIKE-ADD': 'Manual Strike Added',
       'MANUAL-STRIKE-REMOVE': 'Manual Strike Removed',
-      'MANUAL-STRIKE-SET': 'Manual Strike Set'
+      'MANUAL-STRIKE-SET': 'Manual Strike Set',
     };
     return nameMap[action] || action;
   };
@@ -251,7 +254,8 @@ const AuditLog = ({ groupId, groupTitle }) => {
           📋 <span>Audit Log</span>
         </h3>
         <p className="text-slate-600 text-lg">
-          View moderation actions and system events for <strong className="text-slate-900">{groupTitle}</strong>
+          View moderation actions and system events for{' '}
+          <strong className="text-slate-900">{groupTitle}</strong>
         </p>
       </div>
 
@@ -260,15 +264,17 @@ const AuditLog = ({ groupId, groupTitle }) => {
         <h4 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
           🔍 <span>Filters</span>
         </h4>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="space-y-3">
-            <label htmlFor="userId" className="block text-sm font-semibold text-slate-700">User ID:</label>
+            <label htmlFor="userId" className="block text-sm font-semibold text-slate-700">
+              User ID:
+            </label>
             <input
               type="text"
               id="userId"
               value={filters.userId}
-              onChange={(e) => handleFilterChange('userId', e.target.value)}
+              onChange={e => handleFilterChange('userId', e.target.value)}
               placeholder="Filter by user ID"
               disabled={loading}
               className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
@@ -276,15 +282,19 @@ const AuditLog = ({ groupId, groupTitle }) => {
           </div>
 
           <div className="space-y-3">
-            <label htmlFor="type" className="block text-sm font-semibold text-slate-700">Action Type:</label>
+            <label htmlFor="type" className="block text-sm font-semibold text-slate-700">
+              Action Type:
+            </label>
             <select
               id="type"
               value={filters.type}
-              onChange={(e) => handleFilterChange('type', e.target.value)}
+              onChange={e => handleFilterChange('type', e.target.value)}
               disabled={loading}
               className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
             >
-              <option value="" className="bg-white">All Actions</option>
+              <option value="" className="bg-white">
+                All Actions
+              </option>
               {actionTypes.map(action => (
                 <option key={action} value={action} className="bg-white">
                   {getActionIcon(action)} {formatActionName(action)}
@@ -294,24 +304,28 @@ const AuditLog = ({ groupId, groupTitle }) => {
           </div>
 
           <div className="space-y-3">
-            <label htmlFor="startDate" className="block text-sm font-semibold text-slate-700">Start Date:</label>
+            <label htmlFor="startDate" className="block text-sm font-semibold text-slate-700">
+              Start Date:
+            </label>
             <input
               type="datetime-local"
               id="startDate"
               value={filters.startDate}
-              onChange={(e) => handleFilterChange('startDate', e.target.value)}
+              onChange={e => handleFilterChange('startDate', e.target.value)}
               disabled={loading}
               className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
             />
           </div>
 
           <div className="space-y-3">
-            <label htmlFor="endDate" className="block text-sm font-semibold text-slate-700">End Date:</label>
+            <label htmlFor="endDate" className="block text-sm font-semibold text-slate-700">
+              End Date:
+            </label>
             <input
               type="datetime-local"
               id="endDate"
               value={filters.endDate}
-              onChange={(e) => handleFilterChange('endDate', e.target.value)}
+              onChange={e => handleFilterChange('endDate', e.target.value)}
               disabled={loading}
               className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
             />
@@ -327,7 +341,7 @@ const AuditLog = ({ groupId, groupTitle }) => {
             >
               🔍 Apply Filters
             </button>
-            
+
             <button
               onClick={clearFilters}
               disabled={loading}
@@ -338,19 +352,31 @@ const AuditLog = ({ groupId, groupTitle }) => {
           </div>
 
           <div className="flex items-center gap-3 ml-auto">
-            <label htmlFor="pageSize" className="text-sm font-semibold text-slate-700">Per page:</label>
+            <label htmlFor="pageSize" className="text-sm font-semibold text-slate-700">
+              Per page:
+            </label>
             <select
               id="pageSize"
               value={pageSize}
-              onChange={(e) => setPageSize(parseInt(e.target.value))}
+              onChange={e => setPageSize(parseInt(e.target.value))}
               disabled={loading}
               className="px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
             >
-              <option value={10} className="bg-white">10</option>
-              <option value={20} className="bg-white">20</option>
-              <option value={50} className="bg-white">50</option>
-              <option value={100} className="bg-white">100</option>
-              <option value={200} className="bg-white">200</option>
+              <option value={10} className="bg-white">
+                10
+              </option>
+              <option value={20} className="bg-white">
+                20
+              </option>
+              <option value={50} className="bg-white">
+                50
+              </option>
+              <option value={100} className="bg-white">
+                100
+              </option>
+              <option value={200} className="bg-white">
+                200
+              </option>
             </select>
           </div>
         </div>
@@ -367,24 +393,29 @@ const AuditLog = ({ groupId, groupTitle }) => {
             disabled={exportLoading || loading}
             className="px-8 py-3.5 bg-blue-600 text-white font-semibold rounded-xl shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
-            {exportLoading ? '⏳ Exporting...' : 
-             (window.Telegram?.WebApp?.initData ? '📋 Copy CSV' : '📊 Export CSV')}
+            {exportLoading
+              ? '⏳ Exporting...'
+              : window.Telegram?.WebApp?.initData
+                ? '📋 Copy CSV'
+                : '📊 Export CSV'}
           </button>
-          
+
           <button
             onClick={() => exportLogs('json')}
             disabled={exportLoading || loading}
             className="px-8 py-3.5 bg-green-600 text-white font-semibold rounded-xl shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
-            {exportLoading ? '⏳ Exporting...' : 
-             (window.Telegram?.WebApp?.initData ? '📋 Copy JSON' : '📋 Export JSON')}
+            {exportLoading
+              ? '⏳ Exporting...'
+              : window.Telegram?.WebApp?.initData
+                ? '📋 Copy JSON'
+                : '📋 Export JSON'}
           </button>
         </div>
         <p className="text-sm text-slate-600">
-          {window.Telegram?.WebApp?.initData 
+          {window.Telegram?.WebApp?.initData
             ? 'Export data will be copied to clipboard for pasting into apps.'
-            : 'Export includes current filters. Max 10,000 entries per export.'
-          }
+            : 'Export includes current filters. Max 10,000 entries per export.'}
         </p>
       </div>
 
@@ -401,7 +432,8 @@ const AuditLog = ({ groupId, groupTitle }) => {
                 <h4 className="text-lg font-bold text-slate-900">Audit Entries</h4>
                 {pagination && (
                   <span className="text-sm text-slate-600">
-                    Showing {((currentPage - 1) * pageSize) + 1}-{Math.min(currentPage * pageSize, pagination.total)} 
+                    Showing {(currentPage - 1) * pageSize + 1}-
+                    {Math.min(currentPage * pageSize, pagination.total)}
                     of {pagination.total} entries
                   </span>
                 )}
@@ -409,18 +441,28 @@ const AuditLog = ({ groupId, groupTitle }) => {
             </div>
 
             <div className="divide-y divide-slate-200">
-              {logs.map((log) => (
+              {logs.map(log => (
                 <div key={log.id} className="p-8 hover:bg-slate-50 transition-colors duration-200">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
-                    <span 
+                    <span
                       className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold shadow-sm w-fit"
-                      style={{ 
-                        backgroundColor: getActionColor(log.type) === '#ef4444' ? '#fee2e2' : 
-                                      getActionColor(log.type) === '#f59e0b' ? '#fef3c7' : 
-                                      getActionColor(log.type) === '#10b981' ? '#d1fae5' : '#dbeafe',
-                        color: getActionColor(log.type) === '#ef4444' ? '#dc2626' : 
-                               getActionColor(log.type) === '#f59e0b' ? '#d97706' : 
-                               getActionColor(log.type) === '#10b981' ? '#059669' : '#2563eb'
+                      style={{
+                        backgroundColor:
+                          getActionColor(log.type) === '#ef4444'
+                            ? '#fee2e2'
+                            : getActionColor(log.type) === '#f59e0b'
+                              ? '#fef3c7'
+                              : getActionColor(log.type) === '#10b981'
+                                ? '#d1fae5'
+                                : '#dbeafe',
+                        color:
+                          getActionColor(log.type) === '#ef4444'
+                            ? '#dc2626'
+                            : getActionColor(log.type) === '#f59e0b'
+                              ? '#d97706'
+                              : getActionColor(log.type) === '#10b981'
+                                ? '#059669'
+                                : '#2563eb',
                       }}
                     >
                       {getActionIcon(log.type)} {formatActionName(log.type)}
@@ -437,7 +479,7 @@ const AuditLog = ({ groupId, groupTitle }) => {
                         <div className="font-semibold text-slate-900">ID {log.userId}</div>
                         <div className="text-xs text-slate-500">({log.type})</div>
                       </div>
-                      
+
                       {log.chatId && (
                         <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
                           <div className="text-sm font-medium text-slate-600 mb-1">Chat</div>
@@ -448,7 +490,9 @@ const AuditLog = ({ groupId, groupTitle }) => {
                       {log.details?.adminId && (
                         <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
                           <div className="text-sm font-medium text-slate-600 mb-1">Admin</div>
-                          <div className="font-semibold text-slate-900">{log.details.adminName || 'Unknown'}</div>
+                          <div className="font-semibold text-slate-900">
+                            {log.details.adminName || 'Unknown'}
+                          </div>
                           <div className="text-xs text-slate-500">({log.details.adminId})</div>
                         </div>
                       )}
@@ -470,25 +514,40 @@ const AuditLog = ({ groupId, groupTitle }) => {
 
                     {log.details?.classificationScore && (
                       <div className="bg-green-50 rounded-lg p-4 border border-green-200">
-                        <div className="text-sm font-medium text-green-700 mb-1">Classification Score</div>
-                        <div className="text-slate-900 font-mono">{(log.details.classificationScore * 100).toFixed(1)}%</div>
+                        <div className="text-sm font-medium text-green-700 mb-1">
+                          Classification Score
+                        </div>
+                        <div className="text-slate-900 font-mono">
+                          {(log.details.classificationScore * 100).toFixed(1)}%
+                        </div>
                       </div>
                     )}
 
                     {log.details && Object.keys(log.details).length > 0 && (
                       <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                        <div className="text-sm font-medium text-slate-700 mb-2">Additional Details</div>
+                        <div className="text-sm font-medium text-slate-700 mb-2">
+                          Additional Details
+                        </div>
                         <div className="space-y-1">
                           {Object.entries(log.details)
-                            .filter(([key]) => !['reason', 'violationType', 'classificationScore', 'adminId', 'adminName'].includes(key))
+                            .filter(
+                              ([key]) =>
+                                ![
+                                  'reason',
+                                  'violationType',
+                                  'classificationScore',
+                                  'adminId',
+                                  'adminName',
+                                ].includes(key)
+                            )
                             .map(([key, value]) => (
-                            <div key={key} className="flex items-center gap-2 text-sm">
-                              <span className="text-slate-600 capitalize">{key}:</span>
-                              <span className="text-slate-900 font-mono">
-                                {typeof value === 'object' ? JSON.stringify(value) : value}
-                              </span>
-                            </div>
-                          ))}
+                              <div key={key} className="flex items-center gap-2 text-sm">
+                                <span className="text-slate-600 capitalize">{key}:</span>
+                                <span className="text-slate-900 font-mono">
+                                  {typeof value === 'object' ? JSON.stringify(value) : value}
+                                </span>
+                              </div>
+                            ))}
                         </div>
                       </div>
                     )}
@@ -508,14 +567,12 @@ const AuditLog = ({ groupId, groupTitle }) => {
                   >
                     ← Previous
                   </button>
-                  
+
                   <div className="flex items-center gap-1">
                     {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                      const pageNum = Math.max(1, Math.min(
-                        pagination.totalPages - 4,
-                        currentPage - 2
-                      )) + i;
-                      
+                      const pageNum =
+                        Math.max(1, Math.min(pagination.totalPages - 4, currentPage - 2)) + i;
+
                       if (pageNum <= pagination.totalPages) {
                         return (
                           <button
@@ -534,7 +591,7 @@ const AuditLog = ({ groupId, groupTitle }) => {
                       return null;
                     })}
                   </div>
-                  
+
                   <button
                     disabled={currentPage >= pagination.totalPages}
                     onClick={() => handlePageChange(currentPage + 1)}
@@ -551,7 +608,9 @@ const AuditLog = ({ groupId, groupTitle }) => {
             <div className="text-4xl mb-4">📭</div>
             <p className="text-lg text-gray-300 mb-2">No audit entries found</p>
             {Object.keys(appliedFilters).length > 0 && (
-              <p className="text-sm text-gray-400">Try adjusting your filters or clearing them to see more results.</p>
+              <p className="text-sm text-gray-400">
+                Try adjusting your filters or clearing them to see more results.
+              </p>
             )}
           </div>
         )}

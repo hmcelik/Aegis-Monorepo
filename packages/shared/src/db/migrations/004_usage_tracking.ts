@@ -7,7 +7,7 @@ export const migration_004_usage_tracking: Migration = {
   id: '004',
   name: 'usage_tracking',
   dependencies: ['001'],
-  
+
   async up(db: DatabaseConnection): Promise<void> {
     // Usage metrics - Detailed usage tracking
     await db.exec(`
@@ -89,5 +89,5 @@ export const migration_004_usage_tracking: Migration = {
     await db.exec('DROP TABLE IF EXISTS daily_usage_rollups');
     await db.exec('DROP TABLE IF EXISTS budget_limits');
     await db.exec('DROP TABLE IF EXISTS usage_metrics');
-  }
+  },
 };

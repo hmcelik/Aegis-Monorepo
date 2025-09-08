@@ -2,6 +2,7 @@ import express from 'express';
 import * as authController from '../controllers/authController.js';
 import { verifyTelegramAuth } from '../middleware/verifyTelegramAuth.js';
 
+/** @type {import('express').Router} */
 const router = express.Router();
 
 /**

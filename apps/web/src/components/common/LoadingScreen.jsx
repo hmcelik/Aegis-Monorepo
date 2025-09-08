@@ -3,7 +3,7 @@ import { API_BASE_URL } from '../../services/api';
 
 const LoadingScreen = () => {
   console.log('🔄 Rendering loading screen...');
-  
+
   return (
     <div className="app-loading">
       <div className="loading-spinner"></div>

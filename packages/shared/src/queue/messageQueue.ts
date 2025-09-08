@@ -5,13 +5,8 @@ import winston from 'winston';
 // Create a simple logger for the queue
 const logger = winston.createLogger({
   level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.Console()
-  ]
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
+  transports: [new winston.transports.Console()],
 });
 
 export interface MessageJob {
@@ -57,9 +52,9 @@ export class MessageQueue {
       enableReadyCheck: false,
       lazyConnect: true,
     };
-    
+
     this.redis = new Redis(redisConfig);
-    
+
     this.queue = new Queue<MessageJob>('message-processing', {
       connection: redisConfig,
       defaultJobOptions: {
@@ -86,25 +81,25 @@ export class MessageQueue {
 
   async publishMessage(messageData: MessageJob): Promise<string> {
     const jobId = `${messageData.chatId}:${messageData.messageId}`;
-    
+
     try {
       const job = await this.queue.add('process-message', messageData, {
         jobId, // This ensures idempotency - duplicate jobIds are ignored
         priority: this.calculatePriority(messageData),
       });
 
-      logger.info('Message published to queue', { 
-        jobId: job.id, 
-        chatId: messageData.chatId, 
-        messageId: messageData.messageId 
+      logger.info('Message published to queue', {
+        jobId: job.id,
+        chatId: messageData.chatId,
+        messageId: messageData.messageId,
       });
 
       return job.id!;
     } catch (error) {
-      logger.error('Failed to publish message', { 
-        chatId: messageData.chatId, 
-        messageId: messageData.messageId, 
-        error: error instanceof Error ? error.message : String(error) 
+      logger.error('Failed to publish message', {
+        chatId: messageData.chatId,
+        messageId: messageData.messageId,
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -113,15 +108,15 @@ export class MessageQueue {
   private calculatePriority(messageData: MessageJob): number {
     // Higher priority for messages with media or from new users
     let priority = 0;
-    
+
     if (messageData.media) {
       priority += 10;
     }
-    
+
     // Add time-based priority (more recent = higher priority)
     const minutesOld = (Date.now() - messageData.timestamp) / (1000 * 60);
     priority += Math.max(0, 100 - minutesOld);
-    
+
     return Math.floor(priority);
   }
 
@@ -175,12 +170,9 @@ export class MessageQueue {
   }
 }
 
-export function createShardedQueue(
-  shardCount: number, 
-  config: QueueConfig
-): MessageQueue[] {
+export function createShardedQueue(shardCount: number, config: QueueConfig): MessageQueue[] {
   const shards: MessageQueue[] = [];
-  
+
   for (let i = 0; i < shardCount; i++) {
     const shardConfig = {
       ...config,
@@ -188,7 +180,7 @@ export function createShardedQueue(
     };
     shards.push(new MessageQueue(shardConfig));
   }
-  
+
   return shards;
 }
 
@@ -197,7 +189,7 @@ export function getShardForChat(chatId: string, shardCount: number): number {
   let hash = 0;
   for (let i = 0; i < chatId.length; i++) {
     const char = chatId.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32bit integer
   }
   return Math.abs(hash) % shardCount;

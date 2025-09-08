@@ -111,15 +111,29 @@ describe('Database Service', () => {
       await db.setSetting('chat1', 'strikeExpirationDays', 0);
 
       const initialTimestamp = new Date('2023-01-01T12:00:00.000Z').toISOString();
-      await db.getDb().run('INSERT INTO strikes (chatId, userId, count, timestamp) VALUES (?, ?, ?, ?)', 'chat1', 'user1', 1, initialTimestamp);
+      await db
+        .getDb()
+        .run(
+          'INSERT INTO strikes (chatId, userId, count, timestamp) VALUES (?, ?, ?, ?)',
+          'chat1',
+          'user1',
+          1,
+          initialTimestamp
+        );
       await db.addStrikes('chat1', 'user1', 1);
       const { timestamp } = await db.getStrikes('chat1', 'user1');
       expect(timestamp).toBe(initialTimestamp);
     });
 
     it('getStrikeHistory should retrieve only logs for the specified user', async () => {
-      await db.recordStrike('chat1', 'user1', { timestamp: new Date().toISOString(), reason: 'user1 reason'});
-      await db.recordStrike('chat1', 'user2', { timestamp: new Date().toISOString(), reason: 'user2 reason'});
+      await db.recordStrike('chat1', 'user1', {
+        timestamp: new Date().toISOString(),
+        reason: 'user1 reason',
+      });
+      await db.recordStrike('chat1', 'user2', {
+        timestamp: new Date().toISOString(),
+        reason: 'user2 reason',
+      });
       const history = await db.getStrikeHistory('chat1', 'user1', 5);
       expect(history.length).toBe(1);
       expect(history[0].logData).toContain('user1 reason');
@@ -128,31 +142,47 @@ describe('Database Service', () => {
 
   describe('Strike Expiration', () => {
     it('recalculateStrikes should remove expired strikes', async () => {
-        // Set strike expiration to 30 days
-        await db.setSetting('chat1', 'strikeExpirationDays', 30);
+      // Set strike expiration to 30 days
+      await db.setSetting('chat1', 'strikeExpirationDays', 30);
 
-        // Record a strike that is 40 days old
-        const oldTimestamp = new Date();
-        oldTimestamp.setDate(oldTimestamp.getDate() - 40);
-        await db.getDb().run('INSERT INTO strikes (chatId, userId, count, timestamp) VALUES (?, ?, ?, ?)', 'chat1', 'user1', 1, oldTimestamp.toISOString());
+      // Record a strike that is 40 days old
+      const oldTimestamp = new Date();
+      oldTimestamp.setDate(oldTimestamp.getDate() - 40);
+      await db
+        .getDb()
+        .run(
+          'INSERT INTO strikes (chatId, userId, count, timestamp) VALUES (?, ?, ?, ?)',
+          'chat1',
+          'user1',
+          1,
+          oldTimestamp.toISOString()
+        );
 
-        // Recalculate and check strikes
-        const { count } = await db.getStrikes('chat1', 'user1');
-        expect(count).toBe(0);
+      // Recalculate and check strikes
+      const { count } = await db.getStrikes('chat1', 'user1');
+      expect(count).toBe(0);
     });
 
     it('recalculateStrikes should not remove recent strikes', async () => {
-        // Set strike expiration to 30 days
-        await db.setSetting('chat1', 'strikeExpirationDays', 30);
+      // Set strike expiration to 30 days
+      await db.setSetting('chat1', 'strikeExpirationDays', 30);
 
-        // Record a strike that is 10 days old
-        const recentTimestamp = new Date();
-        recentTimestamp.setDate(recentTimestamp.getDate() - 10);
-        await db.getDb().run('INSERT INTO strikes (chatId, userId, count, timestamp) VALUES (?, ?, ?, ?)', 'chat1', 'user1', 1, recentTimestamp.toISOString());
+      // Record a strike that is 10 days old
+      const recentTimestamp = new Date();
+      recentTimestamp.setDate(recentTimestamp.getDate() - 10);
+      await db
+        .getDb()
+        .run(
+          'INSERT INTO strikes (chatId, userId, count, timestamp) VALUES (?, ?, ?, ?)',
+          'chat1',
+          'user1',
+          1,
+          recentTimestamp.toISOString()
+        );
 
-        // Recalculate and check strikes
-        const { count } = await db.getStrikes('chat1', 'user1');
-        expect(count).toBe(1);
+      // Recalculate and check strikes
+      const { count } = await db.getStrikes('chat1', 'user1');
+      expect(count).toBe(1);
     });
   });
 });
