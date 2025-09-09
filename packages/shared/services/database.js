@@ -7,6 +7,13 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import logger from './logger.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get the monorepo root directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const MONOREPO_ROOT = path.resolve(__dirname, '..', '..', '..');
 
 // The database connection object. It will be initialized once.
 let db;
@@ -22,7 +29,23 @@ export const initializeDatabase = async (isTest = false) => {
     }
 
     try {
-        const dbPath = isTest ? ':memory:' : (process.env.DATABASE_PATH || './moderator.db');
+        let dbPath;
+        if (isTest) {
+            dbPath = ':memory:';
+        } else {
+            // Resolve database path relative to monorepo root, not current working directory
+            const configuredPath = process.env.DATABASE_PATH || './data/moderator.db';
+            dbPath = path.isAbsolute(configuredPath) 
+                ? configuredPath 
+                : path.resolve(MONOREPO_ROOT, configuredPath);
+        }
+        
+        // Ensure the directory exists
+        if (dbPath !== ':memory:') {
+            const dbDir = path.dirname(dbPath);
+            await import('fs/promises').then(fs => fs.mkdir(dbDir, { recursive: true }));
+        }
+        
         db = await open({
             filename: dbPath,
             driver: sqlite3.Database,
